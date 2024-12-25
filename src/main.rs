@@ -1,17 +1,43 @@
-use rodio::source::{SineWave, Source};
-use rodio::{Decoder, OutputStream, Sink};
+use gstreamer as gst;
 use std::error::Error;
-use std::fs::File;
-use std::io::BufReader;
-use std::time::Duration;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-    let sink = Sink::try_new(&stream_handle).unwrap();
+    // Initialize GStreamer
+    gst::init()?;
 
-    let source = rodio::Decoder::new(BufReader::new(std::fs::File::open("assets/music.mp3")?))?;
-    sink.append(source);
+    // Create a new playbin element
+    let playbin = gst::ElementFactory::make("playbin", Some("player"))
+        .expect("Failed to create playbin element");
 
-    sink.sleep_until_end();
+    // Set the file URI (use `file://` for local files)
+    let filepath = "assets/music.mp3";
+    playbin.set_property("uri", format!("file://{}", std::fs::canonicalize(filepath)?.display()));
+
+    // Start playback
+    playbin.set_state(gst::State::Playing)?;
+
+    println!("Playing: {}", filepath);
+
+    // Wait until playback is finished
+    let bus = playbin.bus().unwrap();
+    for msg in bus.iter_timed(gst::ClockTime::NONE) {
+        use gst::MessageView;
+
+        match msg.view() {
+            MessageView::Eos(..) => {
+                println!("End of stream");
+                break;
+            }
+            MessageView::Error(err) => {
+                eprintln!("Error: {}", err.error());
+                break;
+            }
+            _ => (),
+        }
+    }
+
+    // Shut down
+    playbin.set_state(gst::State::Null)?;
+
     Ok(())
 }
