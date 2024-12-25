@@ -1,43 +1,29 @@
-use gstreamer as gst;
-use std::error::Error;
+use anyhow::Error;
+use glib::MainLoop;
+use gstreamer::{ElementFactory, Pipeline, State, prelude::*};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    // Initialize GStreamer
-    gst::init()?;
+fn main() -> Result<(), Error> {
+    // Initialize gstreamerreamer
+    gstreamer::init()?;
 
-    // Create a new playbin element
-    let playbin = gst::ElementFactory::make("playbin", Some("player"))
-        .expect("Failed to create playbin element");
+    let uri = "file:///assets/music.mp3"; // File located in the root directory of the repo
 
-    // Set the file URI (use `file://` for local files)
-    let filepath = "assets/music.mp3";
-    playbin.set_property("uri", format!("file://{}", std::fs::canonicalize(filepath)?.display()));
+    // Create PlayBin element
+    let playbin = gstreamer::ElementFactory::make("playbin")
+        .name("playbin")
+        // Set URI to play
+        .property("uri", uri)
+        .build()?;
 
-    // Start playback
-    playbin.set_state(gst::State::Playing)?;
+    // Set the playbin to PLAYING
+    playbin.set_state(gstreamer::State::Playing)?;
 
-    println!("Playing: {}", filepath);
+    // Set up the main loop
+    let main_loop = MainLoop::new(None, false);
+    main_loop.run();
 
-    // Wait until playback is finished
-    let bus = playbin.bus().unwrap();
-    for msg in bus.iter_timed(gst::ClockTime::NONE) {
-        use gst::MessageView;
-
-        match msg.view() {
-            MessageView::Eos(..) => {
-                println!("End of stream");
-                break;
-            }
-            MessageView::Error(err) => {
-                eprintln!("Error: {}", err.error());
-                break;
-            }
-            _ => (),
-        }
-    }
-
-    // Shut down
-    playbin.set_state(gst::State::Null)?;
+    // Cleanup
+    playbin.set_state(gstreamer::State::Null)?;
 
     Ok(())
 }
