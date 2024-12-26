@@ -1,5 +1,4 @@
 use anyhow::Error;
-use glib::MainLoop;
 use gstreamer::prelude::*;
 use freya::prelude::*;
 use std::sync::{Arc, Mutex};
@@ -15,15 +14,18 @@ fn main() -> Result<(), Error> {
 fn setup_gstreamer() -> Arc<Mutex<gstreamer::Element>> {
     let uri = "file:///D:/repos/reyvr/assets/music.mp3";
 
-    Arc::new(Mutex::new(gstreamer::ElementFactory::make("playbin")
-        .name("playbin")
-        .property("uri", uri)
-        .build()
-        .expect("Could not initialize playbin.")))
+    Arc::new(Mutex::new(
+        gstreamer::ElementFactory::make("playbin")
+            .name("playbin")
+            .property("uri", uri)
+            .build()
+            .expect("Could not initialize playbin."),
+    ))
 }
 
 fn app() -> Element {
     let playbin = setup_gstreamer();
+
     rsx!(
         Body {
             rect {
@@ -31,11 +33,33 @@ fn app() -> Element {
                 height: "fill",
                 main_align: "center",
                 cross_align: "center",
+
                 Button {
-                    onclick: move |_| {
-                        playbin.lock().expect("Couldn't lock playbin.").set_state(gstreamer::State::Playing).expect("Couldn't set playbin state.");
+                    onclick: {
+                        let playbin = Arc::clone(&playbin);
+                        move |_| {
+                            playbin
+                                .lock()
+                                .expect("Couldn't lock playbin.")
+                                .set_state(gstreamer::State::Playing)
+                                .expect("Couldn't set playbin state to playing.");
+                        }
                     },
-                    label { "Button A" }
+                    label { "Play" }
+                }
+
+                Button {
+                    onclick: {
+                        let playbin = Arc::clone(&playbin);
+                        move |_| {
+                            playbin
+                                .lock()
+                                .expect("Couldn't lock playbin.")
+                                .set_state(gstreamer::State::Paused)
+                                .expect("Couldn't set playbin state to paused.");
+                        }
+                    },
+                    label { "Pause" }
                 }
             }
         }

@@ -6,5 +6,4 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.95"
 freya = "0.2.2"
-glib = "0.20.7"
 gstreamer = "0.20"
