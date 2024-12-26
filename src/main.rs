@@ -1,12 +1,12 @@
 use anyhow::Error;
-use gstreamer::prelude::*;
 use freya::prelude::*;
+use gstreamer::prelude::*;
 use std::sync::{Arc, Mutex};
 
 fn main() -> Result<(), Error> {
     gstreamer::init()?;
 
-    launch_with_props(app, "Button", (400.0, 350.0));
+    launch_with_props(app, "Media Player", (400.0, 350.0));
 
     Ok(())
 }
@@ -39,10 +39,8 @@ fn app() -> Element {
                     onclick: {
                         let playbin = Arc::clone(&playbin);
                         move |_| {
-                            playbin
-                                .lock()
-                                .expect("Couldn't lock playbin.")
-                                .set_state(gstreamer::State::Playing)
+                            playbin.lock().expect("Couldn't lock playbin.").set_property("volume", 0.5);
+                            playbin.lock().expect("Couldn't lock playbin.").set_state(gstreamer::State::Playing)
                                 .expect("Couldn't set playbin state to playing.");
                         }
                     },
@@ -62,16 +60,18 @@ fn app() -> Element {
                     },
                     label { "Pause" }
                 }
-                
+
                 Slider {
                     value: *volume.read(),
-                    onmoved: move |v| {
-                        volume.set(v);
+                    onmoved: move |p| {
+                        volume.set(p);
                         let playbin = Arc::clone(&playbin);
-                        playbin
-                            .lock()
-                            .expect("Couldn't lock playbin.")
-                            .set_property("volume", v/100.0);
+                        if let Ok(playbin) = playbin.lock() {
+                            playbin.set_property("volume", p / 100.0);
+                            println!("volume set to {}", p);
+                        } else {
+                            eprintln!("Failed to lock playbin for volume update.");
+                        }
                     }
                 }
             }
