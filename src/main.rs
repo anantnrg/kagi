@@ -25,6 +25,7 @@ fn setup_gstreamer() -> Arc<Mutex<gstreamer::Element>> {
 
 fn app() -> Element {
     let playbin = setup_gstreamer();
+    let mut volume = use_signal(|| 100.0);
 
     rsx!(
         Body {
@@ -60,6 +61,18 @@ fn app() -> Element {
                         }
                     },
                     label { "Pause" }
+                }
+                
+                Slider {
+                    value: *volume.read(),
+                    onmoved: move |v| {
+                        volume.set(v);
+                        let playbin = Arc::clone(&playbin);
+                        playbin
+                            .lock()
+                            .expect("Couldn't lock playbin.")
+                            .set_property("volume", v/100.0);
+                    }
                 }
             }
         }
