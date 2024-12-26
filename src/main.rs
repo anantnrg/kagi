@@ -2,27 +2,28 @@ use anyhow::Error;
 use glib::MainLoop;
 use gstreamer::prelude::*;
 use freya::prelude::*;
+use std::sync::{Arc, Mutex};
 
 fn main() -> Result<(), Error> {
     gstreamer::init()?;
 
-    let uri = "file:///D:/repos/reyvr/assets/music.mp3";
+    launch_with_props(app, "Button", (400.0, 350.0));
 
-    let playbin = gstreamer::ElementFactory::make("playbin")
-        .name("playbin")
-        .property("uri", uri)
-        .build()?;
-
-    playbin.set_state(gstreamer::State::Playing)?;
-
-    let main_loop = MainLoop::new(None, false);
-    main_loop.run();
-
-    playbin.set_state(gstreamer::State::Null)?;
     Ok(())
 }
 
+fn setup_gstreamer() -> Arc<Mutex<gstreamer::Element>> {
+    let uri = "file:///D:/repos/reyvr/assets/music.mp3";
+
+    Arc::new(Mutex::new(gstreamer::ElementFactory::make("playbin")
+        .name("playbin")
+        .property("uri", uri)
+        .build()
+        .expect("Could not initialize playbin.")))
+}
+
 fn app() -> Element {
+    let playbin = setup_gstreamer();
     rsx!(
         Body {
             rect {
@@ -31,15 +32,10 @@ fn app() -> Element {
                 main_align: "center",
                 cross_align: "center",
                 Button {
-                    onclick: move |_| println!("Button Clicked!"),
+                    onclick: move |_| {
+                        playbin.lock().expect("Couldn't lock playbin.").set_state(gstreamer::State::Playing).expect("Couldn't set playbin state.");
+                    },
                     label { "Button A" }
-                }
-                FilledButton {
-                    onpress: move |_| println!("Button Pressed!"),
-                    label { "Button B" }
-                }
-                OutlineButton {
-                    label { "Button C" }
                 }
             }
         }
