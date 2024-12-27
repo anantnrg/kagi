@@ -5,5 +5,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.95"
+cpal = "0.15.3"
 freya = "0.2.2"
+symphonia = { version = "0.5.4", features = ["mp3"] }
 
