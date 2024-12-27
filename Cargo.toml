@@ -5,8 +5,5 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.95"
-awedio = { version = "0.4.1", features = ["symphonia-mp3"] }
-cpal = "0.15.3"
 freya = "0.2.2"
-symphonia = { version = "0.5.4", features = ["mp3"] }
-# gstreamer = "0.20"
+
