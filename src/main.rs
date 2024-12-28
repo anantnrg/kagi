@@ -13,6 +13,7 @@ struct Reyvr {
 impl Render for Reyvr {
     fn render(&mut self, _cx: &mut ViewContext<Self>) -> impl IntoElement {
         _cx.set_window_title(self.title.to_string().as_str());
+        let playbin = Arc::clone(&self.playbin);
         div()
             .flex()
             .bg(rgb(0x1e1e2d))
@@ -31,7 +32,13 @@ impl Render for Reyvr {
                 .content_center()
                 .items_center()
                 .child("Play")
-                .on_mouse_down(MouseButton::Left, |_, _| {println!("clicked")}))
+                .on_mouse_down(MouseButton::Left, move |_, _| {
+                    playbin
+                        .lock()
+                        .expect("Could not lock playbin")
+                        .set_state(gstreamer::State::Playing)
+                        .expect("Couldn't set playbin state to playing.");
+                }))
     }
 }
 
