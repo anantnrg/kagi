@@ -19,7 +19,7 @@ impl Render for Reyvr {
             .flex()
             .gap_8()
             .bg(rgb(0x1e1e2d))
-            .size(px(500.0))
+            .size_full()
             .justify_center()
             .items_center()
             .text_color(rgb(0xffffff))
