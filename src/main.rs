@@ -20,8 +20,7 @@ impl Render for Reyvr {
             .justify_center()
             .items_center()
             .text_color(rgb(0xffffff))
-            .child(format!("{}", &self.title))
-            .child(div().child("Play").on_mouse_down(MouseButton::Left, |_, _| {println!("clicked")}))
+            .child(div().w(px(150.)).h(px(30.)).bg(rgb(0x8266B7)).child("Play").on_mouse_down(MouseButton::Left, |_, _| {println!("clicked")}))
     }
 }
 
