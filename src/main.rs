@@ -1,6 +1,7 @@
 use anyhow::Error;
 use gpui::{
-    div, prelude::*, px, rgb, size, App, AppContext, Bounds, MouseButton, SharedString, TitlebarOptions, ViewContext, WindowBounds, WindowOptions
+    App, AppContext, Bounds, MouseButton, SharedString, TitlebarOptions, ViewContext, WindowBounds,
+    WindowOptions, div, prelude::*, px, rgb, size,
 };
 use gstreamer::prelude::*;
 use std::sync::{Arc, Mutex};
@@ -16,43 +17,76 @@ impl Render for Reyvr {
         let playbin = Arc::clone(&self.playbin);
         div()
             .flex()
+            .gap_8()
             .bg(rgb(0x1e1e2d))
             .size(px(500.0))
             .justify_center()
             .items_center()
             .text_color(rgb(0xffffff))
-            .child(div()
-                .flex()
-                .w(px(150.))
-                .h(px(30.))
-                .bg(rgb(0x8266B7))
-                .text_color(rgb(0x1e1e2d))
-                .rounded_md()
-                .justify_center()
-                .content_center()
-                .items_center()
-                .child("Play")
-                .on_mouse_down(MouseButton::Left, move |_, _| {
-                    playbin
-                        .lock()
-                        .expect("Could not lock playbin")
-                        .set_state(gstreamer::State::Playing)
-                        .expect("Couldn't set playbin state to playing.");
-                }))
+            .child(
+                div()
+                    .flex()
+                    .w(px(260.))
+                    .h(px(60.))
+                    .bg(rgb(0xcba6f7))
+                    .border_2()
+                    .border_color(rgb(0x45475a))
+                    .text_color(rgb(0x1e1e2d))
+                    .rounded_lg()
+                    .justify_center()
+                    .content_center()
+                    .items_center()
+                    .child("Play")
+                    .on_mouse_down(MouseButton::Left, {
+                        let playbin = Arc::clone(&playbin);
+                        move |_, _| {
+                            playbin
+                                .lock()
+                                .expect("Could not lock playbin")
+                                .set_state(gstreamer::State::Playing)
+                                .expect("Couldn't set playbin state to playing.");
+                        }
+                    }),
+            )
+            .child(
+                div()
+                    .flex()
+                    .w(px(260.))
+                    .h(px(60.))
+                    .bg(rgb(0xcba6f7))
+                    .text_color(rgb(0x1e1e2d))
+                    .border_2()
+                    .border_color(rgb(0x45475a))
+                    .rounded_lg()
+                    .justify_center()
+                    .content_center()
+                    .items_center()
+                    .child("Pause")
+                    .on_mouse_down(MouseButton::Left, {
+                        let playbin = Arc::clone(&playbin);
+                        move |_, _| {
+                            playbin
+                                .lock()
+                                .expect("Could not lock playbin")
+                                .set_state(gstreamer::State::Paused)
+                                .expect("Couldn't set playbin state to paused.");
+                        }
+                    }),
+            )
     }
 }
 
 fn main() -> Result<(), Error> {
     gstreamer::init()?;
-    
+
     let uri = "file:///D:/repos/reyvr/assets/music.mp3";
     let playbin = Arc::new(Mutex::new(
-            gstreamer::ElementFactory::make("playbin")
-                .name("playbin")
-                .property("uri", uri)
-                .build()
-                .expect("Could not initialize playbin."),
-        ));
+        gstreamer::ElementFactory::make("playbin")
+            .name("playbin")
+            .property("uri", uri)
+            .build()
+            .expect("Could not initialize playbin."),
+    ));
     App::new().run(|cx: &mut AppContext| {
         let bounds = Bounds::centered(None, size(px(500.), px(500.0)), cx);
         cx.open_window(
@@ -70,7 +104,7 @@ fn main() -> Result<(), Error> {
             |cx| {
                 cx.new_view(|_cx| Reyvr {
                     title: "Reyvr - Nothing playing.".into(),
-                    playbin
+                    playbin,
                 })
             },
         )
