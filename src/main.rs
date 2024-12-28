@@ -8,6 +8,7 @@ struct Reyvr {
 
 impl Render for Reyvr {
     fn render(&mut self, _cx: &mut ViewContext<Self>) -> impl IntoElement {
+        _cx.set_window_title(self.title.to_string().as_str());
         div()
             .flex()
             .bg(rgb(0x1e1e2d))
@@ -36,7 +37,7 @@ fn main() {
                 },
                 |cx| {
                     cx.new_view(|_cx| Reyvr {
-                        title: "Reyvr".into(),
+                        title: "Reyvr - Nothing playing.".into(),
                     })
                 },
             )
