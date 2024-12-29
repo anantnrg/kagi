@@ -26,8 +26,8 @@ impl Render for Reyvr {
             .child(
                 div()
                     .flex()
-                    .w(px(260.))
-                    .h(px(60.))
+                    .w(px(230.))
+                    .h(px(40.))
                     .bg(rgb(0xcba6f7))
                     .border_2()
                     .border_color(rgb(0x45475a))
@@ -51,8 +51,8 @@ impl Render for Reyvr {
             .child(
                 div()
                     .flex()
-                    .w(px(260.))
-                    .h(px(60.))
+                    .w(px(230.))
+                    .h(px(40.))
                     .bg(rgb(0xcba6f7))
                     .text_color(rgb(0x1e1e2d))
                     .border_2()
@@ -62,6 +62,56 @@ impl Render for Reyvr {
                     .content_center()
                     .items_center()
                     .child("Pause")
+                    .on_mouse_down(MouseButton::Left, {
+                        let playbin = Arc::clone(&playbin);
+                        move |_, _| {
+                            playbin
+                                .lock()
+                                .expect("Could not lock playbin")
+                                .set_state(gstreamer::State::Paused)
+                                .expect("Couldn't set playbin state to paused.");
+                        }
+                    }),
+            )
+            .child(
+                div()
+                    .flex()
+                    .w(px(40.))
+                    .h(px(40.))
+                    .bg(rgb(0xcba6f7))
+                    .text_color(rgb(0x1e1e2d))
+                    .border_2()
+                    .border_color(rgb(0x45475a))
+                    .rounded_lg()
+                    .justify_center()
+                    .content_center()
+                    .items_center()
+                    .child("+")
+                    .on_mouse_down(MouseButton::Left, {
+                        let playbin = Arc::clone(&playbin);
+                        move |_, _| {
+                            playbin
+                                .lock()
+                                .expect("Could not lock playbin")
+                                .set_state(gstreamer::State::Paused)
+                                .expect("Couldn't set playbin state to paused.");
+                        }
+                    }),
+            )
+            .child(
+                div()
+                    .flex()
+                    .w(px(40.))
+                    .h(px(40.))
+                    .bg(rgb(0xcba6f7))
+                    .text_color(rgb(0x1e1e2d))
+                    .border_2()
+                    .border_color(rgb(0x45475a))
+                    .rounded_lg()
+                    .justify_center()
+                    .content_center()
+                    .items_center()
+                    .child("-")
                     .on_mouse_down(MouseButton::Left, {
                         let playbin = Arc::clone(&playbin);
                         move |_, _| {
