@@ -9,12 +9,15 @@ use std::sync::{Arc, Mutex};
 struct Reyvr {
     title: SharedString,
     playbin: Arc<Mutex<gstreamer::Element>>,
+    volume: Arc<Mutex<f64>>,
 }
 
 impl Render for Reyvr {
     fn render(&mut self, _cx: &mut ViewContext<Self>) -> impl IntoElement {
         _cx.set_window_title(self.title.to_string().as_str());
         let playbin = Arc::clone(&self.playbin);
+        let volume = Arc::clone(&self.volume);
+
         div()
             .flex()
             .gap_8()
@@ -89,12 +92,18 @@ impl Render for Reyvr {
                     .child("+")
                     .on_mouse_down(MouseButton::Left, {
                         let playbin = Arc::clone(&playbin);
+                        let volume = Arc::clone(&volume);
                         move |_, _| {
+                            let mut vol = volume.lock().expect("Could not lock volume");
+                            *vol += 0.2;
+                            if *vol > 1.0 {
+                                *vol = 1.0; // Clamp to max volume
+                            }
                             playbin
                                 .lock()
                                 .expect("Could not lock playbin")
-                                .set_state(gstreamer::State::Paused)
-                                .expect("Couldn't set playbin state to paused.");
+                                .set_property("volume", *vol);
+                            println!("volume set to: {}", *vol);
                         }
                     }),
             )
@@ -114,12 +123,18 @@ impl Render for Reyvr {
                     .child("-")
                     .on_mouse_down(MouseButton::Left, {
                         let playbin = Arc::clone(&playbin);
+                        let volume = Arc::clone(&volume);
                         move |_, _| {
+                            let mut vol = volume.lock().expect("Could not lock volume");
+                            *vol -= 0.2;
+                            if *vol < 0.0 {
+                                *vol = 0.0; // Clamp to min volume
+                            }
                             playbin
                                 .lock()
                                 .expect("Could not lock playbin")
-                                .set_state(gstreamer::State::Paused)
-                                .expect("Couldn't set playbin state to paused.");
+                                .set_property("volume", *vol);
+                            println!("volume set to: {}", *vol);
                         }
                     }),
             )
@@ -137,6 +152,10 @@ fn main() -> Result<(), Error> {
             .build()
             .expect("Could not initialize playbin."),
     ));
+    playbin
+        .lock()
+        .expect("Could not lock playbin")
+        .set_property("volume", 1.);
     App::new().run(|cx: &mut AppContext| {
         let bounds = Bounds::centered(None, size(px(500.), px(500.0)), cx);
         cx.open_window(
@@ -155,6 +174,7 @@ fn main() -> Result<(), Error> {
                 cx.new_view(|_cx| Reyvr {
                     title: "Reyvr - Nothing playing.".into(),
                     playbin,
+                    volume: Arc::new(Mutex::new(0.5)),
                 })
             },
         )
