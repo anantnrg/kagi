@@ -27,38 +27,38 @@ impl Button {
         }
     }
 
-    fn text(mut self, text: impl Into<SharedString>) -> Self {
+    pub fn text(mut self, text: impl Into<SharedString>) -> Self {
         self.text = text.into();
         self
     }
 
-    fn size(mut self, width: f32, height: f32) -> Self {
+    pub fn size(mut self, width: f32, height: f32) -> Self {
         self.width = width;
         self.height = height;
         self
     }
 
-    fn bg(mut self, color: u32) -> Self {
+    pub fn bg(mut self, color: u32) -> Self {
         self.bg_color = color;
         self
     }
 
-    fn text_color(mut self, color: u32) -> Self {
+    pub fn text_color(mut self, color: u32) -> Self {
         self.text_color = color;
         self
     }
 
-    fn border_color(mut self, color: u32) -> Self {
+    pub fn border_color(mut self, color: u32) -> Self {
         self.border_color = color;
         self
     }
 
-    fn rounded(mut self, rounded: f32) -> Self {
+    pub fn rounded(mut self, rounded: f32) -> Self {
         self.rounded = rounded;
         self
     }
 
-    fn on_click<F>(mut self, callback: F) -> Self
+    pub fn on_click<F>(mut self, callback: F) -> Self
     where
         F: Fn(MouseDownEvent, &mut WindowContext) + 'static,
     {

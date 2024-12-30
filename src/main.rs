@@ -141,7 +141,7 @@ impl Render for Reyvr {
                         }
                     }),
             )
-            .child(Button::new())
+            .child(Button::new().text(""))
     }
 }
 
