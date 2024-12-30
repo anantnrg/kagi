@@ -1,4 +1,5 @@
 use gpui::{MouseButton, MouseDownEvent, SharedString, WindowContext, div, prelude::*, px, rgb};
+use gstreamer::Bin;
 
 #[derive(IntoElement)]
 pub struct Button {

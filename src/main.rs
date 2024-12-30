@@ -29,119 +29,57 @@ impl Render for Reyvr {
             .justify_center()
             .items_center()
             .text_color(rgb(0xffffff))
-            .child(
-                div()
-                    .flex()
-                    .w(px(230.))
-                    .h(px(40.))
-                    .bg(rgb(0xcba6f7))
-                    .border_2()
-                    .border_color(rgb(0x45475a))
-                    .text_color(rgb(0x1e1e2d))
-                    .rounded_lg()
-                    .justify_center()
-                    .content_center()
-                    .items_center()
-                    .child("Play")
-                    .on_mouse_down(MouseButton::Left, {
-                        let playbin = Arc::clone(&playbin);
-                        move |_, _| {
-                            playbin
-                                .lock()
-                                .expect("Could not lock playbin")
-                                .set_state(gstreamer::State::Playing)
-                                .expect("Couldn't set playbin state to playing.");
-                        }
-                    }),
-            )
-            .child(
-                div()
-                    .flex()
-                    .w(px(230.))
-                    .h(px(40.))
-                    .bg(rgb(0xcba6f7))
-                    .text_color(rgb(0x1e1e2d))
-                    .border_2()
-                    .border_color(rgb(0x45475a))
-                    .rounded_lg()
-                    .justify_center()
-                    .content_center()
-                    .items_center()
-                    .child("Pause")
-                    .on_mouse_down(MouseButton::Left, {
-                        let playbin = Arc::clone(&playbin);
-                        move |_, _| {
-                            playbin
-                                .lock()
-                                .expect("Could not lock playbin")
-                                .set_state(gstreamer::State::Paused)
-                                .expect("Couldn't set playbin state to paused.");
-                        }
-                    }),
-            )
-            .child(
-                div()
-                    .flex()
-                    .w(px(40.))
-                    .h(px(40.))
-                    .bg(rgb(0xcba6f7))
-                    .text_color(rgb(0x1e1e2d))
-                    .border_2()
-                    .border_color(rgb(0x45475a))
-                    .rounded_lg()
-                    .justify_center()
-                    .content_center()
-                    .items_center()
-                    .child("+")
-                    .on_mouse_down(MouseButton::Left, {
-                        let playbin = Arc::clone(&playbin);
-                        let volume = Arc::clone(&volume);
-                        move |_, _| {
-                            let mut vol = volume.lock().expect("Could not lock volume");
-                            *vol += 0.2;
-                            if *vol > 1.0 {
-                                *vol = 1.0;
-                            }
-                            playbin
-                                .lock()
-                                .expect("Could not lock playbin")
-                                .set_property("volume", *vol);
-                            println!("volume set to: {}", *vol);
-                        }
-                    }),
-            )
-            .child(
-                div()
-                    .flex()
-                    .w(px(40.))
-                    .h(px(40.))
-                    .bg(rgb(0xcba6f7))
-                    .text_color(rgb(0x1e1e2d))
-                    .border_2()
-                    .border_color(rgb(0x45475a))
-                    .rounded_lg()
-                    .justify_center()
-                    .content_center()
-                    .items_center()
-                    .child("-")
-                    .on_mouse_down(MouseButton::Left, {
-                        let playbin = Arc::clone(&playbin);
-                        let volume = Arc::clone(&volume);
-                        move |_, _| {
-                            let mut vol = volume.lock().expect("Could not lock volume");
-                            *vol -= 0.2;
-                            if *vol < 0.0 {
-                                *vol = 0.0;
-                            }
-                            playbin
-                                .lock()
-                                .expect("Could not lock playbin")
-                                .set_property("volume", *vol);
-                            println!("volume set to: {}", *vol);
-                        }
-                    }),
-            )
-            .child(Button::new().text(""))
+            .child(Button::new().text("Play").on_click({
+                let playbin = Arc::clone(&playbin);
+                move |_, _| {
+                    let playbin = playbin.lock().expect("Could not lock playbin");
+                    playbin
+                        .set_state(gstreamer::State::Playing)
+                        .expect("Couldn't set playbin state to playing.");
+                }
+            }))
+            .child(Button::new().text("Pause").on_click({
+                let playbin = Arc::clone(&playbin);
+                move |_, _| {
+                    playbin
+                        .lock()
+                        .expect("Could not lock playbin")
+                        .set_state(gstreamer::State::Paused)
+                        .expect("Couldn't set playbin state to paused.");
+                }
+            }))
+            .child(Button::new().text("+").on_click({
+                let playbin = Arc::clone(&playbin);
+                let volume = Arc::clone(&volume);
+                move |_, _| {
+                    let mut vol = volume.lock().expect("Could not lock volume");
+                    *vol += 0.2;
+                    if *vol > 1.0 {
+                        *vol = 1.0;
+                    }
+                    playbin
+                        .lock()
+                        .expect("Could not lock playbin")
+                        .set_property("volume", *vol);
+                    println!("volume set to: {}", *vol);
+                }
+            }))
+            .child(Button::new().text("-").on_click({
+                let playbin = Arc::clone(&playbin);
+                let volume = Arc::clone(&volume);
+                move |_, _| {
+                    let mut vol = volume.lock().expect("Could not lock volume");
+                    *vol -= 0.2;
+                    if *vol < 0.0 {
+                        *vol = 0.0;
+                    }
+                    playbin
+                        .lock()
+                        .expect("Could not lock playbin")
+                        .set_property("volume", *vol);
+                    println!("volume set to: {}", *vol);
+                }
+            }))
     }
 }
 
