@@ -1,9 +1,4 @@
-use gpui::{
-    Bounds, Length, MouseButton, MouseDownEvent, SharedString, ViewContext, WindowContext, div,
-    prelude::*, px, rgb, size,
-};
-
-use crate::Reyvr;
+use gpui::{MouseButton, MouseDownEvent, SharedString, WindowContext, div, prelude::*, px, rgb};
 
 #[derive(IntoElement)]
 pub struct Button {
@@ -17,6 +12,7 @@ pub struct Button {
     on_click: Box<dyn Fn(MouseDownEvent, &mut WindowContext) + 'static>,
 }
 
+#[allow(dead_code)]
 impl Button {
     pub fn new() -> Self {
         Self {
