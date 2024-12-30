@@ -1,6 +1,6 @@
 use gpui::{
-    Bounds, MouseButton, MouseDownEvent, SharedString, ViewContext, WindowContext, div, prelude::*,
-    px, rgb, size,
+    Bounds, Length, MouseButton, MouseDownEvent, SharedString, ViewContext, WindowContext, div,
+    prelude::*, px, rgb, size,
 };
 
 use crate::Reyvr;
@@ -13,8 +13,8 @@ pub struct Button {
     bg_color: u32,
     text_color: u32,
     border_color: u32,
-    rounded: bool,
-    on_click: Option<Box<dyn Fn(MouseDownEvent, &mut ViewContext<Reyvr>)>>,
+    rounded: f32,
+    on_click: Box<dyn Fn(MouseDownEvent, &mut WindowContext) + 'static>,
 }
 
 impl Button {
@@ -26,8 +26,8 @@ impl Button {
             bg_color: 0xcba6f7,
             text_color: 0x1e1e2d,
             border_color: 0x45475a,
-            rounded: true,
-            on_click: None,
+            rounded: 8.0,
+            on_click: Box::new(|_, _| println!("Clicked!")),
         }
     }
 
@@ -57,22 +57,23 @@ impl Button {
         self
     }
 
-    fn rounded(mut self, rounded: bool) -> Self {
+    fn rounded(mut self, rounded: f32) -> Self {
         self.rounded = rounded;
         self
     }
 
     fn on_click<F>(mut self, callback: F) -> Self
     where
-        F: Fn(MouseDownEvent, &mut ViewContext<Reyvr>) + 'static,
+        F: Fn(MouseDownEvent, &mut WindowContext) + 'static,
     {
-        self.on_click = Some(Box::new(callback));
+        self.on_click = Box::new(callback);
         self
     }
 }
 
 impl RenderOnce for Button {
     fn render(self, _cx: &mut WindowContext) -> impl IntoElement {
+        let on_click = self.on_click;
         div()
             .flex()
             .w(px(self.width))
@@ -80,11 +81,15 @@ impl RenderOnce for Button {
             .bg(rgb(self.bg_color))
             .text_color(rgb(self.text_color))
             .border_2()
+            .rounded(px(self.rounded))
             .border_color(rgb(self.border_color))
             .justify_center()
             .content_center()
             .items_center()
             .child(self.text)
+            .on_mouse_down(MouseButton::Left, move |event, context| {
+                (on_click)(event.clone(), context);
+            })
             .into_element()
     }
 }
