@@ -1,4 +1,7 @@
+mod components;
+
 use anyhow::Error;
+use components::button::Button;
 use gpui::{
     App, AppContext, Bounds, MouseButton, SharedString, TitlebarOptions, ViewContext, WindowBounds,
     WindowOptions, div, prelude::*, px, rgb, size,
@@ -13,8 +16,8 @@ struct Reyvr {
 }
 
 impl Render for Reyvr {
-    fn render(&mut self, _cx: &mut ViewContext<Self>) -> impl IntoElement {
-        _cx.set_window_title(self.title.to_string().as_str());
+    fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
+        cx.set_window_title(self.title.to_string().as_str());
         let playbin = Arc::clone(&self.playbin);
         let volume = Arc::clone(&self.volume);
 
@@ -97,7 +100,7 @@ impl Render for Reyvr {
                             let mut vol = volume.lock().expect("Could not lock volume");
                             *vol += 0.2;
                             if *vol > 1.0 {
-                                *vol = 1.0; // Clamp to max volume
+                                *vol = 1.0;
                             }
                             playbin
                                 .lock()
@@ -128,7 +131,7 @@ impl Render for Reyvr {
                             let mut vol = volume.lock().expect("Could not lock volume");
                             *vol -= 0.2;
                             if *vol < 0.0 {
-                                *vol = 0.0; // Clamp to min volume
+                                *vol = 0.0;
                             }
                             playbin
                                 .lock()
@@ -138,6 +141,7 @@ impl Render for Reyvr {
                         }
                     }),
             )
+            .child(Button::new())
     }
 }
 

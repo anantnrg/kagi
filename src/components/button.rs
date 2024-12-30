@@ -1,71 +1,90 @@
-use gpui::{Div, ElementId, Pixels, SharedString, Styled, WindowContext, div, prelude::*};
+use gpui::{
+    Bounds, MouseButton, MouseDownEvent, SharedString, ViewContext, WindowContext, div, prelude::*,
+    px, rgb, size,
+};
 
+use crate::Reyvr;
+
+#[derive(IntoElement)]
 pub struct Button {
-    base: Div,
-    id: ElementId,
-    icon: Option<SharedString>,
-    label: Option<SharedString>,
-    rounded: Pixels,
-    size: Pixels,
-    on_click: Option<Box<dyn Fn(&ClickEvent, &mut WindowContext) + 'static>>,
+    text: SharedString,
+    width: f32,
+    height: f32,
+    bg_color: u32,
+    text_color: u32,
+    border_color: u32,
+    rounded: bool,
+    on_click: Option<Box<dyn Fn(MouseDownEvent, &mut ViewContext<Reyvr>)>>,
 }
 
 impl Button {
-    pub fn new(id: impl Into<ElementId>) -> Self {
+    pub fn new() -> Self {
         Self {
-            base: div(),
-            id: id.into(),
-            icon: None,
-            label: None,
-            rounded: 8.0.into(),
-            size: 16.0.into(),
+            text: SharedString::from("Button"),
+            width: 230.0,
+            height: 40.0,
+            bg_color: 0xcba6f7,
+            text_color: 0x1e1e2d,
+            border_color: 0x45475a,
+            rounded: true,
             on_click: None,
         }
     }
 
-    pub fn icon(mut self, icon: impl Into<SharedString>) -> Self {
-        self.icon = Some(icon.into());
+    fn text(mut self, text: impl Into<SharedString>) -> Self {
+        self.text = text.into();
         self
     }
 
-    pub fn label(mut self, label: impl Into<SharedString>) -> Self {
-        self.label = Some(label.into());
+    fn size(mut self, width: f32, height: f32) -> Self {
+        self.width = width;
+        self.height = height;
         self
     }
 
-    pub fn rounded(mut self, size: impl Into<Pixels>) -> Self {
-        self.rounded = size.into();
+    fn bg(mut self, color: u32) -> Self {
+        self.bg_color = color;
         self
     }
 
-    pub fn size(mut self, size: impl Into<Pixels>) -> Self {
-        self.size = size.into();
+    fn text_color(mut self, color: u32) -> Self {
+        self.text_color = color;
         self
     }
 
-    pub fn on_click(mut self, handler: impl Fn(&ClickEvent, &mut WindowContext) + 'static) -> Self {
-        self.on_click = Some(Box::new(handler));
+    fn border_color(mut self, color: u32) -> Self {
+        self.border_color = color;
         self
     }
 
-    pub fn render(self, cx: &mut WindowContext) -> Div {
-        let mut button = self.base;
-        button
-            .style()
-            .padding(self.size)
-            .border_radius(self.rounded);
+    fn rounded(mut self, rounded: bool) -> Self {
+        self.rounded = rounded;
+        self
+    }
 
-        if let Some(icon) = self.icon {
-            button = button.child(div().text(icon).style(|s| s.margin_right(4.0)));
-        }
-        if let Some(label) = self.label {
-            button = button.child(div().text(label));
-        }
+    fn on_click<F>(mut self, callback: F) -> Self
+    where
+        F: Fn(MouseDownEvent, &mut ViewContext<Reyvr>) + 'static,
+    {
+        self.on_click = Some(Box::new(callback));
+        self
+    }
+}
 
-        if let Some(handler) = self.on_click {
-            button = button.on_click(move |evt, ctx| handler(evt, ctx));
-        }
-
-        button
+impl RenderOnce for Button {
+    fn render(self, _cx: &mut WindowContext) -> impl IntoElement {
+        div()
+            .flex()
+            .w(px(self.width))
+            .h(px(self.height))
+            .bg(rgb(self.bg_color))
+            .text_color(rgb(self.text_color))
+            .border_2()
+            .border_color(rgb(self.border_color))
+            .justify_center()
+            .content_center()
+            .items_center()
+            .child(self.text)
+            .into_element()
     }
 }
