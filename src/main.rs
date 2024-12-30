@@ -3,7 +3,7 @@ mod components;
 use anyhow::Error;
 use components::button::Button;
 use gpui::{
-    App, AppContext, Bounds, MouseButton, SharedString, TitlebarOptions, ViewContext, WindowBounds,
+    App, AppContext, Bounds, SharedString, TitlebarOptions, ViewContext, WindowBounds,
     WindowOptions, div, prelude::*, px, rgb, size,
 };
 use gstreamer::prelude::*;
