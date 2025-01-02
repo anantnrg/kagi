@@ -1,15 +1,11 @@
 use gpui::{
-    Bounds, DragMoveEvent, EntityId, InteractiveElement, MouseButton, MouseDownEvent,
+    Bounds, DragMoveEvent, EntityId, InteractiveElement, IntoElement, MouseButton, MouseDownEvent,
     ParentElement as _, Pixels, Point, Render, StatefulInteractiveElement as _, Styled,
-    ViewContext, VisualContext as _, div, prelude::FluentBuilder as _, px, relative, rgb,
+    ViewContext, VisualContext as _, canvas, div, px, relative, rgb,
 };
 
 #[derive(Clone, Copy, Render)]
 pub struct Thumb(EntityId);
-
-enum Event {
-    Change(f32),
-}
 
 pub struct Slider {
     min: f32,
@@ -17,6 +13,7 @@ pub struct Slider {
     step: f32,
     value: f32,
     bounds: Bounds<Pixels>,
+    on_change: Box<dyn Fn(f32) + 'static>,
 }
 
 #[allow(dead_code)]
@@ -28,6 +25,7 @@ impl Slider {
             step: 1.0,
             value: 100.0,
             bounds: Bounds::default(),
+            on_change: Box::new(|value| println!("Value: {}!", value)),
         }
     }
 
@@ -79,6 +77,7 @@ impl Slider {
         let value =
             (((min + (max - min) * relative) / step).round() * step).clamp(self.min, self.max);
         self.value = value;
+        (self.on_change)(self.value);
     }
 
     fn render_thumb(&self, cx: &mut ViewContext<Slider>) -> impl gpui::IntoElement {
@@ -109,5 +108,48 @@ impl Slider {
             .rounded_full()
             .border_1()
             .bg(rgb(0xfff))
+    }
+
+    fn on_mouse_down(&mut self, event: &MouseDownEvent, cx: &mut ViewContext<Slider>) {
+        self.handle_drag(event.position, cx);
+    }
+}
+
+impl Render for Slider {
+    fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
+        div()
+            .id("slider")
+            .on_mouse_down(MouseButton::Left, cx.listener(Self::on_mouse_down))
+            .h_5()
+            .child(
+                div()
+                    .id("slider-bar")
+                    .relative()
+                    .w_full()
+                    .my_1p5()
+                    .h_1p5()
+                    .bg(rgb(0x313244))
+                    .rounded(px(3.))
+                    .child(
+                        div()
+                            .absolute()
+                            .top_0()
+                            .left_0()
+                            .h_full()
+                            .w(relative(self.relative_value()))
+                            .bg(rgb(0x45475a))
+                            .rounded_l(px(3.)),
+                    )
+                    .child(self.render_thumb(cx))
+                    .child({
+                        let view = cx.view().clone();
+                        canvas(
+                            move |bounds, cx| view.update(cx, |r, _| r.bounds = bounds),
+                            |_, _, _| {},
+                        )
+                        .absolute()
+                        .size_full()
+                    }),
+            )
     }
 }
