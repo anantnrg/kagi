@@ -1,4 +1,8 @@
-use gpui::{Bounds, EntityId, Pixels, Point, Render};
+use gpui::{
+    Bounds, DragMoveEvent, EntityId, InteractiveElement, MouseButton, MouseDownEvent,
+    ParentElement as _, Pixels, Point, Render, StatefulInteractiveElement as _, Styled,
+    ViewContext, VisualContext as _, div, prelude::FluentBuilder as _, px, relative, rgb,
+};
 
 #[derive(Clone, Copy, Render)]
 pub struct Thumb(EntityId);
@@ -52,14 +56,58 @@ impl Slider {
         self
     }
 
-    fn handle_drag(&mut self, position: Point<Pixels>, cx: &mut gpui::ViewContext<Self>) {
+    fn relative_value(&self) -> f32 {
+        let step = self.step;
+        let value = self.value;
+        let min = self.min;
+        let max = self.max;
+
+        let relative_value = (value - min) / (max - min);
+        let relative_step = step / (max - min);
+
+        let relative_value = (relative_value / relative_step).round() * relative_step;
+        relative_value.clamp(0.0, 1.0)
+    }
+
+    fn handle_drag(&mut self, position: Point<Pixels>, _cx: &mut ViewContext<Slider>) {
         let bounds = self.bounds;
         let min = self.min;
         let max = self.max;
         let step = self.step;
 
         let relative = (position.x - bounds.left()) / bounds.size.width;
-        let value = ((min + (max - min) * relative) / step).round() * step;
-        self.value = value.clamp(self.min, self.max);
+        let value =
+            (((min + (max - min) * relative) / step).round() * step).clamp(self.min, self.max);
+        self.value = value;
+    }
+
+    fn render_thumb(&self, cx: &mut ViewContext<Slider>) -> impl gpui::IntoElement {
+        let entity_id = cx.entity_id();
+
+        div()
+            .id("thumb")
+            .on_drag(Thumb(entity_id), |drag, _, cx| {
+                cx.stop_propagation();
+                cx.new_view(|_| drag.clone())
+            })
+            .on_drag_move(
+                cx.listener(move |view, e: &DragMoveEvent<Thumb>, cx| match e.drag(cx) {
+                    Thumb(id) => {
+                        if *id != entity_id {
+                            return;
+                        }
+
+                        view.handle_drag(e.event.position, cx)
+                    }
+                }),
+            )
+            .absolute()
+            .top(px(-5.))
+            .left(relative(self.relative_value()))
+            .ml(-px(8.))
+            .size_4()
+            .rounded_full()
+            .border_1()
+            .bg(rgb(0xfff))
     }
 }
