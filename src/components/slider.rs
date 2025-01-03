@@ -18,7 +18,7 @@ pub struct Slider {
 
 #[allow(dead_code)]
 impl Slider {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Slider {
             min: 0.0,
             max: 100.0,
@@ -29,32 +29,32 @@ impl Slider {
         }
     }
 
-    fn min(mut self, value: f32) -> Self {
+    pub fn min(mut self, value: f32) -> Self {
         self.min = value;
         self
     }
 
-    fn max(mut self, value: f32) -> Self {
+    pub fn max(mut self, value: f32) -> Self {
         self.max = value;
         self
     }
 
-    fn step(mut self, value: f32) -> Self {
+    pub fn step(mut self, value: f32) -> Self {
         self.step = value;
         self
     }
 
-    fn default(mut self) -> Self {
+    pub fn default(mut self) -> Self {
         self.value = 0.0;
         self
     }
 
-    fn set(mut self, value: f32) -> Self {
+    pub fn set(mut self, value: f32) -> Self {
         self.value = value;
         self
     }
 
-    fn relative_value(&self) -> f32 {
+    pub fn relative_value(&self) -> f32 {
         let step = self.step;
         let value = self.value;
         let min = self.min;
@@ -67,7 +67,7 @@ impl Slider {
         relative_value.clamp(0.0, 1.0)
     }
 
-    fn handle_drag(&mut self, position: Point<Pixels>, _cx: &mut ViewContext<Slider>) {
+    pub fn handle_drag(&mut self, position: Point<Pixels>, _cx: &mut ViewContext<Slider>) {
         let bounds = self.bounds;
         let min = self.min;
         let max = self.max;
@@ -80,7 +80,7 @@ impl Slider {
         (self.on_change)(self.value);
     }
 
-    fn render_thumb(&self, cx: &mut ViewContext<Slider>) -> impl gpui::IntoElement {
+    pub fn render_thumb(&self, cx: &mut ViewContext<Slider>) -> impl gpui::IntoElement {
         let entity_id = cx.entity_id();
 
         div()
@@ -110,22 +110,22 @@ impl Slider {
             .bg(rgb(0xfff))
     }
 
-    fn on_mouse_down(&mut self, event: &MouseDownEvent, cx: &mut ViewContext<Slider>) {
+    pub fn on_mouse_down(&mut self, event: &MouseDownEvent, cx: &mut ViewContext<Slider>) {
         self.handle_drag(event.position, cx);
     }
 }
 
 impl Render for Slider {
-    fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
+    fn render(&mut self, cx: &mut ViewContext<Slider>) -> impl IntoElement {
         div()
             .id("slider")
-            .on_mouse_down(MouseButton::Left, cx.listener(Self::on_mouse_down))
+            .on_mouse_down(MouseButton::Left, cx.listener(Slider::on_mouse_down))
             .h_5()
             .child(
                 div()
                     .id("slider-bar")
                     .relative()
-                    .w_full()
+                    .w_32()
                     .my_1p5()
                     .h_1p5()
                     .bg(rgb(0x313244))

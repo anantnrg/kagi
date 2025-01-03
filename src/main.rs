@@ -1,7 +1,7 @@
 mod components;
 
 use anyhow::Error;
-use components::button::Button;
+use components::{button::Button, slider::Slider};
 use gpui::{
     App, AppContext, Bounds, SharedString, TitlebarOptions, ViewContext, WindowBounds,
     WindowOptions, div, prelude::*, px, rgb, size,
@@ -48,7 +48,7 @@ impl Render for Reyvr {
                         .expect("Couldn't set playbin state to paused.");
                 }
             }))
-            .child(Button::new().text("+").on_click({
+            .child(Button::new().text("+").size(40.0, 40.0).on_click({
                 let playbin = Arc::clone(&playbin);
                 let volume = Arc::clone(&volume);
                 move |_, _| {
@@ -64,7 +64,7 @@ impl Render for Reyvr {
                     println!("volume set to: {}", *vol);
                 }
             }))
-            .child(Button::new().text("-").on_click({
+            .child(Button::new().text("-").size(40.0, 40.0).on_click({
                 let playbin = Arc::clone(&playbin);
                 let volume = Arc::clone(&volume);
                 move |_, _| {
@@ -80,6 +80,7 @@ impl Render for Reyvr {
                     println!("volume set to: {}", *vol);
                 }
             }))
+            .child(cx.new_view(|_| Slider::new().min(0.).max(5.).step(1.0)))
     }
 }
 
