@@ -54,6 +54,14 @@ impl Slider {
         self
     }
 
+    pub fn on_change<F>(mut self, callback: F) -> Self
+    where
+        F: Fn(f32) + 'static,
+    {
+        self.on_change = Box::new(callback);
+        self
+    }
+
     pub fn relative_value(&self) -> f32 {
         let step = self.step;
         let value = self.value;
@@ -68,6 +76,7 @@ impl Slider {
     }
 
     pub fn handle_drag(&mut self, position: Point<Pixels>, _cx: &mut ViewContext<Slider>) {
+        println!("handle drag");
         let bounds = self.bounds;
         let min = self.min;
         let max = self.max;
@@ -95,6 +104,7 @@ impl Slider {
                         if *id != entity_id {
                             return;
                         }
+                        println!("handle drag from thumb");
 
                         view.handle_drag(e.event.position, cx)
                     }
@@ -111,6 +121,7 @@ impl Slider {
     }
 
     pub fn on_mouse_down(&mut self, event: &MouseDownEvent, cx: &mut ViewContext<Slider>) {
+        println!("mouse down");
         self.handle_drag(event.position, cx);
     }
 }
