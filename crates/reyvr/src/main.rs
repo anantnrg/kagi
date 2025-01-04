@@ -1,4 +1,4 @@
-use components::button::Button;
+use components::button::{Button, ButtonVariants as _};
 use gpui::*;
 
 struct Reyvr {
@@ -16,12 +16,19 @@ impl Render for Reyvr {
             .justify_center()
             .items_center()
             .text_color(rgb(0xffffff))
-            .child(Button::new("button").on_click(|_, _| println!("Clciked")))
+            .child(
+                Button::new("button")
+                    .primary()
+                    .label("Button")
+                    .on_click(|_, _| println!("Clciked")),
+            )
     }
 }
 
 fn main() {
     App::new().run(|cx: &mut AppContext| {
+        components::init(cx);
+
         let bounds = Bounds::centered(None, size(px(500.), px(500.0)), cx);
         cx.open_window(
             WindowOptions {
