@@ -1,166 +1,119 @@
-use gpui::{
-    Bounds, DragMoveEvent, EntityId, InteractiveElement, IntoElement, MouseButton, MouseDownEvent,
-    ParentElement as _, Pixels, Point, Render, StatefulInteractiveElement as _, Styled,
-    ViewContext, VisualContext as _, canvas, div, px, relative, rgb,
-};
-
-#[derive(Clone, Copy, Render)]
-pub struct Thumb(EntityId);
+use gpui::{DragMoveEvent, MouseButton, ViewContext, WindowContext, div, prelude::*, px, rgb};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub struct Slider {
-    min: f32,
-    max: f32,
-    step: f32,
+    width: f32,
+    height: f32,
+    thumb_size: f32,
+    bg_color: u32,
+    thumb_color: u32,
     value: f32,
-    bounds: Bounds<Pixels>,
-    on_change: Box<dyn Fn(f32) + 'static>,
+    on_change: Box<dyn Fn(f64, &mut WindowContext) + 'static>,
 }
 
-#[allow(dead_code)]
 impl Slider {
     pub fn new() -> Self {
-        Slider {
-            min: 0.0,
-            max: 100.0,
-            step: 1.0,
-            value: 100.0,
-            bounds: Bounds::default(),
-            on_change: Box::new(|value| println!("Value: {}!", value)),
+        Self {
+            width: 200.0,
+            height: 10.0,
+            thumb_size: 20.0,
+            bg_color: 0x45475a,
+            thumb_color: 0xcba6f7,
+            value: 0.5,
+            on_change: Box::new(|_, _| println!("Value changed!")),
         }
     }
 
+    pub fn size(mut self, width: f32, height: f32) -> Self {
+        self.width = width;
+        self.height = height;
+        self
+    }
+
+    pub fn thumb_size(mut self, size: f32) -> Self {
+        self.thumb_size = size;
+        self
+    }
+
+    pub fn bg(mut self, color: u32) -> Self {
+        self.bg_color = color;
+        self
+    }
+
+    pub fn thumb_color(mut self, color: u32) -> Self {
+        self.thumb_color = color;
+        self
+    }
+
+    pub fn value(mut self, value: f32) -> Self {
+        self.value = value.clamp(0.0, 1.0);
+        self
+    }
+
     pub fn min(mut self, value: f32) -> Self {
-        self.min = value;
+        self.value = self.value.clamp(value, self.value);
         self
     }
 
     pub fn max(mut self, value: f32) -> Self {
-        self.max = value;
+        self.value = self.value.clamp(self.value, value);
         self
     }
 
-    pub fn step(mut self, value: f32) -> Self {
-        self.step = value;
-        self
-    }
-
-    pub fn default(mut self) -> Self {
-        self.value = 0.0;
-        self
-    }
-
-    pub fn set(mut self, value: f32) -> Self {
-        self.value = value;
+    pub fn step(mut self, _step: f32) -> Self {
+        // Optional stepping logic
         self
     }
 
     pub fn on_change<F>(mut self, callback: F) -> Self
     where
-        F: Fn(f32) + 'static,
+        F: Fn(f64, &mut WindowContext) + 'static,
     {
         self.on_change = Box::new(callback);
         self
-    }
-
-    pub fn relative_value(&self) -> f32 {
-        let step = self.step;
-        let value = self.value;
-        let min = self.min;
-        let max = self.max;
-
-        let relative_value = (value - min) / (max - min);
-        let relative_step = step / (max - min);
-
-        let relative_value = (relative_value / relative_step).round() * relative_step;
-        relative_value.clamp(0.0, 1.0)
-    }
-
-    pub fn handle_drag(&mut self, position: Point<Pixels>, _cx: &mut ViewContext<Slider>) {
-        println!("handle drag");
-        let bounds = self.bounds;
-        let min = self.min;
-        let max = self.max;
-        let step = self.step;
-
-        let relative = (position.x - bounds.left()) / bounds.size.width;
-        let value =
-            (((min + (max - min) * relative) / step).round() * step).clamp(self.min, self.max);
-        self.value = value;
-        (self.on_change)(self.value);
-    }
-
-    pub fn render_thumb(&self, cx: &mut ViewContext<Slider>) -> impl gpui::IntoElement {
-        let entity_id = cx.entity_id();
-
-        div()
-            .id("thumb")
-            .on_drag(Thumb(entity_id), |drag, _, cx| {
-                cx.stop_propagation();
-                cx.new_view(|_| drag.clone())
-            })
-            .on_drag_move(
-                cx.listener(move |view, e: &DragMoveEvent<Thumb>, cx| match e.drag(cx) {
-                    Thumb(id) => {
-                        if *id != entity_id {
-                            return;
-                        }
-                        println!("handle drag from thumb");
-
-                        view.handle_drag(e.event.position, cx)
-                    }
-                }),
-            )
-            .absolute()
-            .top(px(-5.))
-            .left(relative(self.relative_value()))
-            .ml(-px(8.))
-            .size_4()
-            .rounded_full()
-            .border_1()
-            .bg(rgb(0xfff))
-    }
-
-    pub fn on_mouse_down(&mut self, event: &MouseDownEvent, cx: &mut ViewContext<Slider>) {
-        println!("mouse down");
-        self.handle_drag(event.position, cx);
     }
 }
 
 impl Render for Slider {
     fn render(&mut self, cx: &mut ViewContext<Slider>) -> impl IntoElement {
+        let width = self.width;
+        let height = self.height;
+        let thumb_size = self.thumb_size;
+        let bg_color = self.bg_color;
+        let thumb_color = self.thumb_color;
+        let value = Rc::new(RefCell::new(self.value));
+        let on_change = &self.on_change;
+
+        let thumb_pos = *value.borrow() * width;
+
         div()
-            .id("slider")
-            .on_mouse_down(MouseButton::Left, cx.listener(Slider::on_mouse_down))
-            .h_5()
-            .child(
+            .flex()
+            .w(px(width))
+            .h(px(height))
+            .bg(rgb(bg_color))
+            .rounded(px(height / 2.0))
+            .justify_center()
+            .items_center()
+            .child({
+                let value_clone = Rc::clone(&value);
                 div()
-                    .id("slider-bar")
-                    .relative()
-                    .w_32()
-                    .my_1p5()
-                    .h_1p5()
-                    .bg(rgb(0x313244))
-                    .rounded(px(3.))
-                    .child(
-                        div()
-                            .absolute()
-                            .top_0()
-                            .left_0()
-                            .h_full()
-                            .w(relative(self.relative_value()))
-                            .bg(rgb(0x45475a))
-                            .rounded_l(px(3.)),
-                    )
-                    .child(self.render_thumb(cx))
-                    .child({
-                        let view = cx.view().clone();
-                        canvas(
-                            move |bounds, cx| view.update(cx, |r, _| r.bounds = bounds),
-                            |_, _, _| {},
-                        )
-                        .absolute()
-                        .size_full()
-                    }),
-            )
+                    .absolute()
+                    .left(px(thumb_pos - thumb_size / 2.0))
+                    .w(px(thumb_size))
+                    .h(px(thumb_size))
+                    .bg(rgb(thumb_color))
+                    .rounded(px(thumb_size / 2.0))
+                    .on_mouse_down(MouseButton::Left, move |_, context| {
+                        context.stop_propagation();
+                    })
+                    .on_drag_move(move |e: &DragMoveEvent<f32>, context| {
+                        let new_value = (e.event.position.x / width).clamp(px(0.0), px(1.0)).0;
+                        if (*value_clone.borrow() - new_value).abs() > f32::EPSILON {
+                            *value_clone.borrow_mut() = new_value;
+                            on_change(new_value.into(), context);
+                        }
+                    })
+            })
     }
 }
