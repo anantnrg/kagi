@@ -1,12 +1,13 @@
-use anyhow::Error;
-use std::sync::{Arc, Mutex};
-
+/// Common backend trait. Can be used to implement multple backends.
 pub trait Backend: Send + Sync {
     /// Initialize the backend.
     fn init() -> anyhow::Result<()>;
 
-    /// Play a track given a URI.
-    fn play(&self, uri: &str) -> anyhow::Result<()>;
+    /// Load a file from given URI.
+    fn load(&self, uri: &str) -> anyhow::Result<()>;
+
+    /// Play playback.
+    fn play(&self) -> anyhow::Result<()>;
 
     /// Pause playback.
     fn pause(&self) -> anyhow::Result<()>;
@@ -14,8 +15,14 @@ pub trait Backend: Send + Sync {
     /// Stop playback.
     fn stop(&self) -> anyhow::Result<()>;
 
+    /// Set the playback volume.
+    fn set_volume(&self, volume: f32) -> anyhow::Result<()>;
+
+    /// Get the playback volume.
+    fn get_volume(&self) -> anyhow::Result<f32>;
+
     /// Get the current playback state.
-    fn state(&self) -> anyhow::Result<PlaybackState>;
+    fn get_state(&self) -> anyhow::Result<PlaybackState>;
 }
 
 /// Playback state representation.
