@@ -83,3 +83,17 @@ impl Backend for GstBackend {
         }
     }
 }
+
+impl GstBackend {
+    /// Constructor to create a new GstBackend instance.
+    pub fn new() -> Result<GstBackend, anyhow::Error> {
+        let playbin = gstreamer::ElementFactory::make("playbin")
+            .name("playbin")
+            .build()
+            .map_err(|e| anyhow!("Failed to create playbin: {:?}", e))?;
+
+        Ok(GstBackend {
+            playbin: Arc::new(Mutex::new(playbin)),
+        })
+    }
+}
