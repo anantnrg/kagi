@@ -22,26 +22,64 @@ impl Backend for GstBackend {
     }
 
     fn play(&self) -> anyhow::Result<()> {
-        todo!()
+        let playbin = Arc::clone(&self.playbin);
+        playbin
+            .lock()
+            .expect("Could not lock playbin")
+            .set_state(gstreamer::State::Playing)
+            .expect("Couldn't set playbin state to playing.");
+        Ok(())
     }
 
     fn pause(&self) -> anyhow::Result<()> {
-        todo!()
+        let playbin = Arc::clone(&self.playbin);
+        playbin
+            .lock()
+            .expect("Could not lock playbin")
+            .set_state(gstreamer::State::Paused)
+            .expect("Couldn't set playbin state to paused.");
+        Ok(())
     }
 
     fn stop(&self) -> anyhow::Result<()> {
-        todo!()
+        let playbin = Arc::clone(&self.playbin);
+        playbin
+            .lock()
+            .expect("Could not lock playbin")
+            .set_state(gstreamer::State::Null)
+            .expect("Couldn't set playbin state to stopped.");
+        Ok(())
     }
 
     fn set_volume(&self, volume: f32) -> anyhow::Result<()> {
-        todo!()
+        let playbin = Arc::clone(&self.playbin);
+        playbin
+            .lock()
+            .expect("Could not lock playbin")
+            .set_property("volume", volume);
+        Ok(())
     }
 
     fn get_volume(&self) -> anyhow::Result<f32> {
-        todo!()
+        let playbin = Arc::clone(&self.playbin);
+        let volume: f32 = playbin
+            .lock()
+            .expect("Could not lock playbin")
+            .property("volume");
+        Ok(volume)
     }
 
     fn get_state(&self) -> anyhow::Result<backend::PlaybackState> {
-        todo!()
+        let playbin = Arc::clone(&self.playbin);
+
+        match playbin
+            .lock()
+            .expect("Could not lock playbin")
+            .current_state()
+        {
+            gstreamer::State::Playing => Ok(backend::PlaybackState::Playing),
+            gstreamer::State::Paused => Ok(backend::PlaybackState::Paused),
+            _ => Ok(backend::PlaybackState::Stopped),
+        }
     }
 }
