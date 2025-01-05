@@ -1944,11 +1944,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d196ffc1627db18a531359249b2bf8416178d84b729f3cebeb278f285fb9b58c"
 
 [[package]]
-name = "gstreamer"
+name = "gst_backend"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "backend",
- "gstreamer 0.23.4",
+ "gstreamer",
 ]
 
 [[package]]
