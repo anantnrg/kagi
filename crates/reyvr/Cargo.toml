@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 gpui = { git = "https://github.com/zed-industries/zed" }
 components = { path = "../components" }
+anyhow = "1.0.95"
