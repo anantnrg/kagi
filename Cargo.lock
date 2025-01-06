@@ -4555,6 +4555,12 @@ dependencies = [
 [[package]]
 name = "ui"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "components",
+ "gpui",
+ "gstreamer",
+]
 
 [[package]]
 name = "unicase"
