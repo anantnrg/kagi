@@ -4,5 +4,6 @@ use std::sync::{Arc, Mutex};
 use ui::run_app;
 
 fn main() -> Result<(), Error> {
-    GstBackend::Ok(())
+    GstBackend::init();
+    Ok(())
 }

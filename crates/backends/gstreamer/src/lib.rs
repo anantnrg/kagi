@@ -8,11 +8,11 @@ pub struct GstBackend {
 }
 
 impl Backend for GstBackend {
-    pub fn init() -> anyhow::Result<()> {
+    fn init() -> anyhow::Result<()> {
         gstreamer::init().map_err(|e| anyhow!("Failed to initialize Gstreamer backend: {e}"))
     }
 
-    pub fn load(&self, uri: &str) -> anyhow::Result<()> {
+    fn load(&self, uri: &str) -> anyhow::Result<()> {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
@@ -21,7 +21,7 @@ impl Backend for GstBackend {
         Ok(())
     }
 
-    pub fn play(&self) -> anyhow::Result<()> {
+    fn play(&self) -> anyhow::Result<()> {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
@@ -31,7 +31,7 @@ impl Backend for GstBackend {
         Ok(())
     }
 
-    pub fn pause(&self) -> anyhow::Result<()> {
+    fn pause(&self) -> anyhow::Result<()> {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
@@ -41,7 +41,7 @@ impl Backend for GstBackend {
         Ok(())
     }
 
-    pub fn stop(&self) -> anyhow::Result<()> {
+    fn stop(&self) -> anyhow::Result<()> {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
@@ -51,7 +51,7 @@ impl Backend for GstBackend {
         Ok(())
     }
 
-    pub fn set_volume(&self, volume: f32) -> anyhow::Result<()> {
+    fn set_volume(&self, volume: f32) -> anyhow::Result<()> {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
@@ -60,7 +60,7 @@ impl Backend for GstBackend {
         Ok(())
     }
 
-    pub fn get_volume(&self) -> anyhow::Result<f32> {
+    fn get_volume(&self) -> anyhow::Result<f32> {
         let playbin = Arc::clone(&self.playbin);
         let volume: f32 = playbin
             .lock()
@@ -69,7 +69,7 @@ impl Backend for GstBackend {
         Ok(volume)
     }
 
-    pub fn get_state(&self) -> anyhow::Result<backend::PlaybackState> {
+    fn get_state(&self) -> anyhow::Result<backend::PlaybackState> {
         let playbin = Arc::clone(&self.playbin);
 
         match playbin
