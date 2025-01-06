@@ -51,7 +51,7 @@ impl Backend for GstBackend {
         Ok(())
     }
 
-    fn set_volume(&self, volume: f32) -> anyhow::Result<()> {
+    fn set_volume(&self, volume: f64) -> anyhow::Result<()> {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()

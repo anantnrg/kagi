@@ -18,7 +18,7 @@ pub trait Backend: Send + Sync {
     fn stop(&self) -> anyhow::Result<()>;
 
     /// Set the playback volume.
-    fn set_volume(&self, volume: f32) -> anyhow::Result<()>;
+    fn set_volume(&self, volume: f64) -> anyhow::Result<()>;
 
     /// Get the playback volume.
     fn get_volume(&self) -> anyhow::Result<f32>;

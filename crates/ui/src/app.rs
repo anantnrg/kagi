@@ -7,7 +7,7 @@ use std::sync::{Arc, Mutex};
 pub struct Reyvr {
     pub title: SharedString,
     pub backend: Arc<dyn Backend>,
-    pub volume: Arc<Mutex<f32>>,
+    pub volume: Arc<Mutex<f64>>,
 }
 
 impl Render for Reyvr {
