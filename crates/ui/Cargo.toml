@@ -6,6 +6,5 @@ edition = "2024"
 [dependencies]
 gpui.workspace = true
 anyhow.workspace = true
-gstreamer.workspace = true
 components = { path = "../components" }
 backend = { path = "../backend" }

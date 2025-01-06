@@ -4562,7 +4562,6 @@ dependencies = [
  "backend",
  "components",
  "gpui",
- "gstreamer",
 ]
 
 [[package]]

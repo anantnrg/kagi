@@ -1,7 +1,6 @@
 use backend::Backend;
 use components::button::Button;
 use gpui::*;
-use gstreamer::prelude::*;
 use std::sync::{Arc, Mutex};
 
 pub struct Reyvr {
@@ -26,13 +25,13 @@ impl Render for Reyvr {
             .child(Button::new().text("Play").on_click({
                 let backend = self.backend.clone();
                 move |_, _| {
-                    backend.play();
+                    backend.play().expect("Could not play");
                 }
             }))
             .child(Button::new().text("Pause").on_click({
                 let backend = self.backend.clone();
                 move |_, _| {
-                    backend.pause();
+                    backend.pause().expect("Could not pause playback");
                 }
             }))
             .child(Button::new().text("+").size(40.0, 40.0).on_click({
@@ -45,7 +44,7 @@ impl Render for Reyvr {
                     if *vol > 1.0 {
                         *vol = 1.0;
                     }
-                    backend.set_volume(*vol);
+                    backend.set_volume(*vol).expect("Could not set volume");
                     println!("volume set to: {}", *vol);
                 }
             }))
@@ -58,7 +57,7 @@ impl Render for Reyvr {
                     if *vol < 0.0 {
                         *vol = 0.0;
                     }
-                    backend.set_volume(*vol);
+                    backend.set_volume(*vol).expect("Could not set volume");
                     println!("volume set to: {}", *vol);
                 }
             }))
