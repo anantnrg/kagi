@@ -3627,6 +3627,7 @@ name = "reyvr"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "backend",
  "gpui",
  "gst_backend",
  "ui",
