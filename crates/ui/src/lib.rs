@@ -1,11 +1,11 @@
 pub mod app;
 
-use anyhow::anyhow;
 use app::Reyvr;
+use backend::Backend;
 use gpui::*;
 use std::sync::{Arc, Mutex};
 
-pub fn run_app(playbin: Arc<Mutex<gstreamer::Element>>) -> anyhow::Result<()> {
+pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
     let app = App::new();
 
     app.run(|cx: &mut AppContext| {
@@ -25,12 +25,12 @@ pub fn run_app(playbin: Arc<Mutex<gstreamer::Element>>) -> anyhow::Result<()> {
             |cx| {
                 cx.new_view(|_cx| Reyvr {
                     title: "Reyvr - Nothing playing.".into(),
-                    playbin,
+                    backend,
                     volume: Arc::new(Mutex::new(0.5)),
                 })
             },
         )
-        .map_err(|e| anyhow!("Could not run app: {e}"));
+        .unwrap();
     });
     Ok(())
 }

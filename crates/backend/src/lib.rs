@@ -1,7 +1,9 @@
 /// Common backend trait. Can be used to implement multple backends.
 pub trait Backend: Send + Sync {
     /// Initialize the backend.
-    fn init() -> anyhow::Result<()>;
+    fn init() -> anyhow::Result<()>
+    where
+        Self: Sized;
 
     /// Load a file from given URI.
     fn load(&self, uri: &str) -> anyhow::Result<()>;
