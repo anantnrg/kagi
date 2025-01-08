@@ -21,7 +21,6 @@ impl Render for Reyvr {
             .size_full()
             .justify_center()
             .items_center()
-            .text_color(rgb(0xffffff))
             .child(Button::new().text("Play").on_click({
                 let backend = self.backend.clone();
                 move |_, _| {

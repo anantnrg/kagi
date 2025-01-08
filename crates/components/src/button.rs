@@ -91,8 +91,8 @@ impl RenderOnce for Button {
             .child(self.text)
             .hover(move |this| {
                 this.bg(rgb(self.hover_bg_color))
-                    .border_color(rgb(self.hover_border_color))
                     .text_color(rgb(self.hover_text_color))
+                    .border_color(rgb(self.hover_border_color))
             })
             .on_mouse_down(MouseButton::Left, move |event, context| {
                 (on_click)(event.clone(), context);
