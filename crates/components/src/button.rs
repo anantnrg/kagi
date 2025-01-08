@@ -8,6 +8,9 @@ pub struct Button {
     bg_color: u32,
     text_color: u32,
     border_color: u32,
+    hover_bg_color: u32,
+    hover_text_color: u32,
+    hover_border_color: u32,
     rounded: f32,
     on_click: Box<dyn Fn(MouseDownEvent, &mut WindowContext) + 'static>,
 }
@@ -20,8 +23,11 @@ impl Button {
             width: 230.0,
             height: 40.0,
             bg_color: 0x45475a,
-            text_color: 0x1e1e2d,
+            text_color: 0xcdd6f4,
             border_color: 0xcba6f7,
+            hover_bg_color: 0xcba6f7,
+            hover_text_color: 0x1e1e2d,
+            hover_border_color: 0xcba6f7,
             rounded: 8.0,
             on_click: Box::new(|_, _| println!("Clicked!")),
         }
@@ -83,7 +89,11 @@ impl RenderOnce for Button {
             .content_center()
             .items_center()
             .child(self.text)
-            .hover(move |this| this.bg(rgb(self.border_color)))
+            .hover(move |this| {
+                this.bg(rgb(self.hover_bg_color))
+                    .border_color(rgb(self.hover_border_color))
+                    .text_color(rgb(self.hover_text_color))
+            })
             .on_mouse_down(MouseButton::Left, move |event, context| {
                 (on_click)(event.clone(), context);
             })
