@@ -1,3 +1,4 @@
+use crate::layout::Layout;
 use backend::Backend;
 use components::button::Button;
 use gpui::*;
@@ -7,6 +8,7 @@ pub struct Reyvr {
     pub title: SharedString,
     pub backend: Arc<dyn Backend>,
     pub volume: Arc<Mutex<f64>>,
+    pub layout: Layout,
 }
 
 impl Render for Reyvr {

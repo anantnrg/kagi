@@ -1,7 +1,7 @@
 pub struct Layout {
-    left_sidebar: bool,
-    central: CentralLayout,
-    right_sidebar: bool,
+    pub left_sidebar: bool,
+    pub central: CentralLayout,
+    pub right_sidebar: bool,
 }
 
 pub enum CentralLayout {

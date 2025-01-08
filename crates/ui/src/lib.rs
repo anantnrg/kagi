@@ -1,4 +1,5 @@
 pub mod app;
+pub mod layout;
 
 use app::Reyvr;
 use backend::Backend;
