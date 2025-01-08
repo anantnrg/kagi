@@ -8,3 +8,13 @@ pub enum CentralLayout {
     List,
     Art,
 }
+
+impl Layout {
+    pub fn new() -> Layout {
+        Layout {
+            left_sidebar: true,
+            central: CentralLayout::List,
+            right_sidebar: true,
+        }
+    }
+}

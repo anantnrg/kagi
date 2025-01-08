@@ -4,6 +4,7 @@ pub mod layout;
 use app::Reyvr;
 use backend::Backend;
 use gpui::*;
+use layout::Layout;
 use std::sync::{Arc, Mutex};
 
 pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
@@ -28,6 +29,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     title: "Reyvr - Nothing playing.".into(),
                     backend,
                     volume: Arc::new(Mutex::new(0.5)),
+                    layout: Layout::new(),
                 })
             },
         )
