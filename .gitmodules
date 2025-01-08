@@ -1,3 +1,1 @@
-[submodule "crates/components"]
-	path = crates/components
-	url = https://github.com/longbridge/gpui-component
+
