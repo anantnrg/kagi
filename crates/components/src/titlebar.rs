@@ -5,10 +5,10 @@ use gpui::*;
 pub struct Titlebar;
 
 impl RenderOnce for Titlebar {
-    fn render(self, _cx: &mut WindowContext) -> impl IntoElement {
+    fn render(self, cx: &mut WindowContext) -> impl IntoElement {
         div()
             .w_full()
-            .h_8()
+            .h_9()
             .bg(rgb(0x1e1d2d))
             .flex()
             .items_center()
@@ -23,29 +23,38 @@ impl RenderOnce for Titlebar {
                     .h_full()
                     .child(
                         div()
-                            .w(px(35.0))
+                            .w(px(36.0))
                             .h_full()
                             .flex()
                             .items_center()
                             .justify_center()
+                            .hover(|this| this.bg(rgb(0x45475a)))
                             .child(Icon::new(Icons::Minimize).size(20.0)),
                     )
                     .child(
                         div()
-                            .w(px(35.0))
+                            .w(px(36.0))
                             .h_full()
                             .flex()
                             .items_center()
                             .justify_center()
-                            .child(Icon::new(Icons::Maximize).size(20.0)),
+                            .hover(|this| this.bg(rgb(0x45475a)))
+                            .child({
+                                if cx.is_maximized() {
+                                    Icon::new(Icons::Restore).size(20.0)
+                                } else {
+                                    Icon::new(Icons::Maximize).size(20.0)
+                                }
+                            }),
                     )
                     .child(
                         div()
-                            .w(px(35.0))
+                            .w(px(36.0))
                             .h_full()
                             .flex()
                             .items_center()
                             .justify_center()
+                            .hover(|this| this.bg(rgb(0x45475a)))
                             .child(Icon::new(Icons::Close).size(20.0)),
                     ),
             )
