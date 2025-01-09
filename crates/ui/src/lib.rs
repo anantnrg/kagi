@@ -7,10 +7,15 @@ use assets::*;
 use backend::Backend;
 use gpui::*;
 use layout::Layout;
-use std::sync::{Arc, Mutex};
+use std::{
+    path::PathBuf,
+    sync::{Arc, Mutex},
+};
 
 pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
-    let app = App::new();
+    let app = App::new().with_assets(Assets {
+        base: PathBuf::from("assets/icons"),
+    });
 
     app.run(|cx: &mut AppContext| {
         let bounds = Bounds::centered(None, size(px(500.), px(500.0)), cx);

@@ -1,5 +1,9 @@
-struct Assets {
-    base: PathBuf,
+use gpui::*;
+use std::fs;
+use std::path::PathBuf;
+
+pub struct Assets {
+    pub base: PathBuf,
 }
 
 impl AssetSource for Assets {
