@@ -10,7 +10,7 @@ pub enum Icons {
 impl Icons {
     pub fn path(self) -> SharedString {
         match self {
-            Self::Close => "./icons/close.svg",
+            Self::Close => "icons/close.svg",
             Self::Maximize => "icons/maximize.svg",
             Self::Minimize => "icons/minimize.svg",
             Self::Restore => "icons/restore.svg",

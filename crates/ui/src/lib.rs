@@ -14,7 +14,7 @@ use std::{
 
 pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
     let app = App::new().with_assets(Assets {
-        base: PathBuf::from("assets/icons"),
+        base: PathBuf::from("assets"),
     });
 
     app.run(|cx: &mut AppContext| {
