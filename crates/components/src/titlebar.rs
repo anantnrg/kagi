@@ -21,9 +21,33 @@ impl RenderOnce for Titlebar {
                     .items_center()
                     .w_auto()
                     .h_full()
-                    .child(div().w(px(35.0)).h_full().child(Icon::new(Icons::Minimize)))
-                    .child(div().w(px(35.0)).h_full().child(Icon::new(Icons::Maximize)))
-                    .child(div().w(px(35.0)).h_full().child(Icon::new(Icons::Close))),
+                    .child(
+                        div()
+                            .w(px(35.0))
+                            .h_full()
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .child(Icon::new(Icons::Minimize).size(20.0)),
+                    )
+                    .child(
+                        div()
+                            .w(px(35.0))
+                            .h_full()
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .child(Icon::new(Icons::Maximize).size(20.0)),
+                    )
+                    .child(
+                        div()
+                            .w(px(35.0))
+                            .h_full()
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .child(Icon::new(Icons::Close).size(20.0)),
+                    ),
             )
     }
 }
