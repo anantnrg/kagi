@@ -1,6 +1,6 @@
 use crate::layout::Layout;
 use backend::Backend;
-use components::button::Button;
+use components::{button::Button, titlebar::Titlebar};
 use gpui::*;
 use std::sync::{Arc, Mutex};
 
@@ -17,50 +17,57 @@ impl Render for Reyvr {
         let volume = Arc::clone(&self.volume);
 
         div()
-            .flex()
-            .gap_8()
-            .bg(rgb(0x1e1e2d))
-            .size_full()
-            .justify_center()
-            .items_center()
-            .child(Button::new().text("Play").on_click({
-                let backend = self.backend.clone();
-                move |_, _| {
-                    backend.play().expect("Could not play");
-                }
-            }))
-            .child(Button::new().text("Pause").on_click({
-                let backend = self.backend.clone();
-                move |_, _| {
-                    backend.pause().expect("Could not pause playback");
-                }
-            }))
-            .child(Button::new().text("+").size(40.0, 40.0).on_click({
-                let volume = Arc::clone(&volume);
-                let backend = self.backend.clone();
+            .w_full()
+            .h_full()
+            .flex_col()
+            .child(Titlebar::new())
+            .child(
+                div()
+                    .flex()
+                    .gap_8()
+                    .bg(rgb(0x1e1e2d))
+                    .size_full()
+                    .justify_center()
+                    .items_center()
+                    .child(Button::new().text("Play").on_click({
+                        let backend = self.backend.clone();
+                        move |_, _| {
+                            backend.play().expect("Could not play");
+                        }
+                    }))
+                    .child(Button::new().text("Pause").on_click({
+                        let backend = self.backend.clone();
+                        move |_, _| {
+                            backend.pause().expect("Could not pause playback");
+                        }
+                    }))
+                    .child(Button::new().text("+").size(40.0, 40.0).on_click({
+                        let volume = Arc::clone(&volume);
+                        let backend = self.backend.clone();
 
-                move |_, _| {
-                    let mut vol = volume.lock().expect("Could not lock volume");
-                    *vol += 0.2;
-                    if *vol > 1.0 {
-                        *vol = 1.0;
-                    }
-                    backend.set_volume(*vol).expect("Could not set volume");
-                    println!("volume set to: {}", *vol);
-                }
-            }))
-            .child(Button::new().text("-").size(40.0, 40.0).on_click({
-                let backend = self.backend.clone();
-                let volume = Arc::clone(&volume);
-                move |_, _| {
-                    let mut vol = volume.lock().expect("Could not lock volume");
-                    *vol -= 0.2;
-                    if *vol < 0.0 {
-                        *vol = 0.0;
-                    }
-                    backend.set_volume(*vol).expect("Could not set volume");
-                    println!("volume set to: {}", *vol);
-                }
-            }))
+                        move |_, _| {
+                            let mut vol = volume.lock().expect("Could not lock volume");
+                            *vol += 0.2;
+                            if *vol > 1.0 {
+                                *vol = 1.0;
+                            }
+                            backend.set_volume(*vol).expect("Could not set volume");
+                            println!("volume set to: {}", *vol);
+                        }
+                    }))
+                    .child(Button::new().text("-").size(40.0, 40.0).on_click({
+                        let backend = self.backend.clone();
+                        let volume = Arc::clone(&volume);
+                        move |_, _| {
+                            let mut vol = volume.lock().expect("Could not lock volume");
+                            *vol -= 0.2;
+                            if *vol < 0.0 {
+                                *vol = 0.0;
+                            }
+                            backend.set_volume(*vol).expect("Could not set volume");
+                            println!("volume set to: {}", *vol);
+                        }
+                    })),
+            )
     }
 }
