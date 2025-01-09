@@ -18,8 +18,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                 app_id: Some(String::from("reyvr")),
                 focus: true,
                 titlebar: Some(TitlebarOptions {
-                    title: Some(SharedString::new_static("Reyvr")),
-                    appears_transparent: false,
+                    title: None,
+                    appears_transparent: true,
                     ..Default::default()
                 }),
                 ..Default::default()
