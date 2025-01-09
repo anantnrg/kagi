@@ -1,7 +1,9 @@
 pub mod app;
+pub mod assets;
 pub mod layout;
 
 use app::Reyvr;
+use assets::*;
 use backend::Backend;
 use gpui::*;
 use layout::Layout;
