@@ -21,10 +21,9 @@ impl NowPlaying {
         }
     }
 
-    pub fn change_title(mut self, cx: &mut ViewContext<Self>, title: SharedString) -> Self {
+    pub fn change_title(&mut self, cx: &mut ModelContext<Self>, title: SharedString) {
         cx.emit(NowPlayingEvent::Title(title));
         cx.notify();
-        self
     }
 }
 

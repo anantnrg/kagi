@@ -1,14 +1,13 @@
 pub mod app;
 pub mod assets;
 pub mod layout;
-pub mod now_playing;
 
 use app::Reyvr;
 use assets::*;
 use backend::Backend;
+use components::now_playing::NowPlaying;
 use gpui::*;
 use layout::Layout;
-use now_playing::NowPlaying;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},

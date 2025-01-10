@@ -1,8 +1,10 @@
+use crate::now_playing::{self, NowPlaying};
+
 use super::icon::*;
 use gpui::*;
 
 pub struct Titlebar {
-    title: SharedString,
+    now_playing: Model<NowPlaying>,
 }
 
 impl Render for Titlebar {
@@ -15,7 +17,10 @@ impl Render for Titlebar {
             .items_center()
             .justify_between()
             .child("close")
-            .child(format!("Reyvr - Playing {}", self.title))
+            .child(format!(
+                "Reyvr - Playing {}",
+                self.now_playing.read(cx).title.clone()
+            ))
             .child(
                 div()
                     .flex()
@@ -63,7 +68,7 @@ impl Render for Titlebar {
 }
 
 impl Titlebar {
-    pub fn new(title: SharedString) -> Titlebar {
-        Titlebar { title }
+    pub fn new(now_playing: Model<NowPlaying>) -> Titlebar {
+        Titlebar { now_playing }
     }
 }

@@ -1,6 +1,6 @@
-use crate::{layout::Layout, now_playing::*};
+use crate::layout::Layout;
 use backend::Backend;
-use components::{button::Button, titlebar::Titlebar};
+use components::{button::Button, now_playing::*, titlebar::Titlebar};
 use gpui::*;
 use std::sync::{Arc, Mutex};
 
@@ -15,7 +15,7 @@ impl Render for Reyvr {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         let volume = Arc::clone(&self.volume);
         let now_playing = cx.new_model(|_cx| NowPlaying::new());
-        let mut titlebar = cx.new_view(|cx| Titlebar::new(now_playing.read(cx).title.clone()));
+        let mut titlebar = cx.new_view(|cx| Titlebar::new(now_playing.clone()));
 
         cx.subscribe(
             &now_playing,
@@ -44,8 +44,11 @@ impl Render for Reyvr {
                     .items_center()
                     .child(Button::new().text("Play").on_click({
                         let backend = self.backend.clone();
-                        now_playing.read(cx).change_title(cx, "fdsa");
-                        move |_, _| {
+                        let now_playing = now_playing.clone();
+                        move |_, cx| {
+                            now_playing.update(cx, |np, cx| {
+                                np.change_title(cx, "fdsa".into());
+                            });
                             backend.play().expect("Could not play");
                         }
                     }))
