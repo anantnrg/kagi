@@ -29,7 +29,7 @@ impl RenderOnce for Titlebar {
                             .items_center()
                             .justify_center()
                             .hover(|this| this.bg(rgb(0x45475a)))
-                            .child(Icon::new(Icons::Minimize).size(20.0)),
+                            .child(Icon::new(Icons::Minimize).size(20.0).color(0xffffff)),
                     )
                     .child(
                         div()
@@ -41,9 +41,9 @@ impl RenderOnce for Titlebar {
                             .hover(|this| this.bg(rgb(0x45475a)))
                             .child({
                                 if cx.is_maximized() {
-                                    Icon::new(Icons::Restore).size(20.0)
+                                    Icon::new(Icons::Restore).size(20.0).color(0xffffff)
                                 } else {
-                                    Icon::new(Icons::Maximize).size(20.0)
+                                    Icon::new(Icons::Maximize).size(20.0).color(0xffffff)
                                 }
                             }),
                     )
@@ -54,8 +54,8 @@ impl RenderOnce for Titlebar {
                             .flex()
                             .items_center()
                             .justify_center()
-                            .hover(|this| this.bg(rgb(0x45475a)))
-                            .child(Icon::new(Icons::Close).size(20.0)),
+                            .hover(|this| this.bg(rgb(0xe81123)))
+                            .child(Icon::new(Icons::Close).size(20.0).color(0xffffff)),
                     ),
             )
     }
