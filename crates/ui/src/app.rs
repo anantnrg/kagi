@@ -49,7 +49,7 @@ impl Render for Reyvr {
                         let now_playing = now_playing.clone();
                         move |_, cx| {
                             now_playing.update(cx, |np, cx| {
-                                np.change_title(cx, "New Song Title".into());
+                                np.change_title(cx, "LIKE XYU WXULD KNXW (AUTUMN TREES)".into());
                                 cx.notify();
                             });
                             backend.play().expect("Could not play");
