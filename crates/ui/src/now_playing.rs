@@ -22,7 +22,6 @@ impl NowPlaying {
     }
 
     pub fn change_title(mut self, cx: &mut ViewContext<Self>, title: SharedString) -> Self {
-        self.title = title.clone();
         cx.emit(NowPlayingEvent::Title(title));
         cx.notify();
         self

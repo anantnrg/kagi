@@ -2,7 +2,7 @@ use super::icon::*;
 use gpui::*;
 
 pub struct Titlebar {
-    title: Model<SharedString>,
+    title: SharedString,
 }
 
 impl Render for Titlebar {
@@ -15,7 +15,7 @@ impl Render for Titlebar {
             .items_center()
             .justify_between()
             .child("close")
-            .child(format!("Reyvr - Playing {}", self.title.read(cx)))
+            .child(format!("Reyvr - Playing {}", self.title))
             .child(
                 div()
                     .flex()
@@ -63,7 +63,7 @@ impl Render for Titlebar {
 }
 
 impl Titlebar {
-    pub fn new(title: Model<SharedString>) -> Titlebar {
+    pub fn new(title: SharedString) -> Titlebar {
         Titlebar { title }
     }
 }
