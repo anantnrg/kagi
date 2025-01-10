@@ -1,6 +1,7 @@
 pub mod app;
 pub mod assets;
 pub mod layout;
+pub mod now_playing;
 
 use app::Reyvr;
 use assets::*;

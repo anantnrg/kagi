@@ -18,10 +18,6 @@ impl Render for Reyvr {
         let title = cx.new_model(|_cx| SharedString::new_static("nothing"));
         let mut titlebar = cx.new_view(|_| Titlebar::new(title));
 
-        cx.observe(&title, |_, _, cx| {
-            cx.notify();
-        })
-        .detach();
         cx.subscribe(&title, |this, _, _, cx| {
             cx.notify();
         });
