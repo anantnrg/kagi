@@ -8,6 +8,7 @@ use assets::*;
 use backend::Backend;
 use gpui::*;
 use layout::Layout;
+use now_playing::NowPlaying;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -34,10 +35,10 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             },
             |cx| {
                 cx.new_view(|_cx| Reyvr {
-                    title: "Reyvr - Nothing playing.".into(),
                     backend,
                     volume: Arc::new(Mutex::new(0.5)),
                     layout: Layout::new(),
+                    now_playing: NowPlaying::new(),
                 })
             },
         )

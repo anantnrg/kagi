@@ -1,19 +1,18 @@
-use crate::layout::Layout;
+use crate::{layout::Layout, now_playing::*};
 use backend::Backend;
 use components::{button::Button, titlebar::Titlebar};
 use gpui::*;
 use std::sync::{Arc, Mutex};
 
 pub struct Reyvr {
-    pub title: SharedString,
     pub backend: Arc<dyn Backend>,
     pub volume: Arc<Mutex<f64>>,
     pub layout: Layout,
+    pub now_playing: NowPlaying,
 }
 
 impl Render for Reyvr {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
-        cx.set_window_title(self.title.to_string().as_str());
         let volume = Arc::clone(&self.volume);
         let title = cx.new_model(|_cx| SharedString::new_static("nothing"));
         let mut titlebar = cx.new_view(|_| Titlebar::new(title));
