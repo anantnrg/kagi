@@ -19,7 +19,7 @@ impl Render for Titlebar {
             .child("close")
             .child(format!(
                 "Reyvr - Playing {}",
-                self.now_playing.read(cx).title.clone()
+                self.now_playing.read(cx).title
             ))
             .child(
                 div()

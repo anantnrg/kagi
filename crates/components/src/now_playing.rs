@@ -1,5 +1,6 @@
 use gpui::*;
 
+#[derive(Clone)]
 pub struct NowPlaying {
     pub title: SharedString,
     pub artists: Vec<SharedString>,

@@ -14,7 +14,9 @@ pub struct Reyvr {
 impl Render for Reyvr {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         let volume = Arc::clone(&self.volume);
-        let now_playing = cx.new_model(|_cx| NowPlaying::new());
+
+        let now_playing = cx.new_model(|_cx| self.now_playing.clone());
+
         let mut titlebar = cx.new_view(|cx| Titlebar::new(now_playing.clone()));
 
         cx.subscribe(
@@ -47,7 +49,8 @@ impl Render for Reyvr {
                         let now_playing = now_playing.clone();
                         move |_, cx| {
                             now_playing.update(cx, |np, cx| {
-                                np.change_title(cx, "fdsa".into());
+                                np.change_title(cx, "New Song Title".into());
+                                cx.notify();
                             });
                             backend.play().expect("Could not play");
                         }
