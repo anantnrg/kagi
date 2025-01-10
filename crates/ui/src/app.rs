@@ -15,12 +15,22 @@ impl Render for Reyvr {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         cx.set_window_title(self.title.to_string().as_str());
         let volume = Arc::clone(&self.volume);
+        let title = cx.new_model(|_cx| SharedString::new_static("nothing"));
+        let mut titlebar = cx.new_view(|_| Titlebar::new(title));
+
+        cx.observe(&title, |_, _, cx| {
+            cx.notify();
+        })
+        .detach();
+        cx.subscribe(&title, |this, _, _, cx| {
+            cx.notify();
+        });
 
         div()
             .w_full()
             .h_full()
             .flex_col()
-            .child(Titlebar::new())
+            .child(titlebar.clone())
             .child(
                 div()
                     .flex()
@@ -31,6 +41,7 @@ impl Render for Reyvr {
                     .items_center()
                     .child(Button::new().text("Play").on_click({
                         let backend = self.backend.clone();
+                        // titlebar.update(cx, "LIKE YXU WXULD KNXW (AUTUMN TREES)");
                         move |_, _| {
                             backend.play().expect("Could not play");
                         }

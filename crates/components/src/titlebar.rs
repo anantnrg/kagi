@@ -1,11 +1,12 @@
 use super::icon::*;
 use gpui::*;
 
-#[derive(IntoElement)]
-pub struct Titlebar;
+pub struct Titlebar {
+    title: Model<SharedString>,
+}
 
-impl RenderOnce for Titlebar {
-    fn render(self, cx: &mut WindowContext) -> impl IntoElement {
+impl Render for Titlebar {
+    fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         div()
             .w_full()
             .h_9()
@@ -14,7 +15,7 @@ impl RenderOnce for Titlebar {
             .items_center()
             .justify_between()
             .child("close")
-            .child("Reyvr - Playing nothing")
+            .child(format!("Reyvr - Playing {}", self.title.read(cx)))
             .child(
                 div()
                     .flex()
@@ -62,7 +63,7 @@ impl RenderOnce for Titlebar {
 }
 
 impl Titlebar {
-    pub fn new() -> Titlebar {
-        Titlebar {}
+    pub fn new(title: Model<SharedString>) -> Titlebar {
+        Titlebar { title }
     }
 }
