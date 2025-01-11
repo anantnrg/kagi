@@ -18,16 +18,17 @@ impl Render for Reyvr {
 
         let now_playing = cx.new_model(|_cx| self.now_playing.clone());
 
-        let mut titlebar = cx.new_view(|cx| Titlebar::new(now_playing.clone()));
+        let titlebar = cx.new_view(|_| Titlebar::new(now_playing.clone()));
 
         cx.subscribe(
             &now_playing,
             |this, _, event: &NowPlayingEvent, cx| match event {
-                NowPlayingEvent::Title(title) => {
+                NowPlayingEvent::Update(title, album, artists) => {
                     this.now_playing.title = title.clone();
+                    this.now_playing.album = album.clone();
+                    this.now_playing.artists = artists.clone();
                     cx.notify();
                 }
-                _ => {}
             },
         )
         .detach();
@@ -50,7 +51,12 @@ impl Render for Reyvr {
                         let now_playing = now_playing.clone();
                         move |_, cx| {
                             now_playing.update(cx, |np, cx| {
-                                np.change_title(cx, "LIKE XYU WXULD KNXW (AUTUMN TREES)".into());
+                                np.update(
+                                    cx,
+                                    "LIKE XYU WXULD KNXW (AUTUMN TREES)".into(),
+                                    "PSYCHX".into(),
+                                    vec!["Kordhell".into(), "Scarlxrd".into()],
+                                );
                                 cx.notify();
                             });
                             backend.play().expect("Could not play");

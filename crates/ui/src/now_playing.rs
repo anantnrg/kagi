@@ -3,14 +3,12 @@ use gpui::*;
 #[derive(Clone)]
 pub struct NowPlaying {
     pub title: SharedString,
-    pub artists: Vec<SharedString>,
     pub album: SharedString,
+    pub artists: Vec<SharedString>,
 }
 
 pub enum NowPlayingEvent {
-    Title(SharedString),
-    Artists(Vec<SharedString>),
-    Album(SharedString),
+    Update(SharedString, SharedString, Vec<SharedString>),
 }
 
 impl NowPlaying {
@@ -22,8 +20,14 @@ impl NowPlaying {
         }
     }
 
-    pub fn change_title(&mut self, cx: &mut ModelContext<Self>, title: SharedString) {
-        cx.emit(NowPlayingEvent::Title(title));
+    pub fn update(
+        &mut self,
+        cx: &mut ModelContext<Self>,
+        title: SharedString,
+        album: SharedString,
+        artists: Vec<SharedString>,
+    ) {
+        cx.emit(NowPlayingEvent::Update(title, album, artists));
         cx.notify();
     }
 }

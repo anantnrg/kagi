@@ -2,6 +2,7 @@ use crate::now_playing::NowPlaying;
 
 use components::icon::*;
 use gpui::*;
+use prelude::FluentBuilder;
 
 pub struct Titlebar {
     now_playing: Model<NowPlaying>,
@@ -11,7 +12,7 @@ impl Render for Titlebar {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         div()
             .w_full()
-            .h_9()
+            .h_8()
             .bg(rgb(0x1e1d2d))
             .flex()
             .items_center()
@@ -38,14 +39,21 @@ impl Render for Titlebar {
                     .child(div().child("Reyvr").text_color(rgb(0xca9ee6)))
                     .child({
                         let np = self.now_playing.read(cx);
-                        div()
-                            .child(format!(
+                        div().when(np.title.len() != 0, |this| {
+                            this.child(format!(
                                 " - {} | {} | {}",
                                 np.title,
                                 np.album,
                                 np.artists.join(",")
                             ))
+                            .truncate()
+                            .text_ellipsis()
+                            .overflow_hidden()
+                            .whitespace_nowrap()
                             .text_color(rgb(0xcdd6f4))
+                            .max_w(px(200.0))
+                            .mx(px(16.0))
+                        })
                     }),
             )
             .child(
