@@ -16,7 +16,15 @@ impl Render for Titlebar {
             .flex()
             .items_center()
             .justify_between()
-            .child("close")
+            .child(
+                div()
+                    .flex()
+                    .w_9()
+                    .h_full()
+                    .items_center()
+                    .justify_center()
+                    .child(Icon::new(Icons::LeftSidebar).size(20.0).color(0xcdd6f4)),
+            )
             .child(format!(
                 "Reyvr - Playing {}",
                 self.now_playing.read(cx).title

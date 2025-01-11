@@ -5,6 +5,8 @@ pub enum Icons {
     Maximize,
     Minimize,
     Restore,
+    LeftSidebar,
+    RightSidebar,
 }
 
 impl Icons {
@@ -14,6 +16,8 @@ impl Icons {
             Self::Maximize => "icons/maximize.svg",
             Self::Minimize => "icons/minimize.svg",
             Self::Restore => "icons/restore.svg",
+            Self::LeftSidebar => "icons/left_sidebar.svg",
+            Self::RightSidebar => "icons/right_sidebar.svg",
         }
         .into()
     }
