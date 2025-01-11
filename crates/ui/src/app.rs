@@ -1,6 +1,7 @@
+use super::{now_playing::*, titlebar::Titlebar};
 use crate::layout::Layout;
 use backend::Backend;
-use components::{button::Button, now_playing::*, titlebar::Titlebar};
+use components::button::Button;
 use gpui::*;
 use std::sync::{Arc, Mutex};
 

@@ -1,6 +1,6 @@
-use crate::now_playing::{self, NowPlaying};
+use crate::now_playing::NowPlaying;
 
-use super::icon::*;
+use components::icon::*;
 use gpui::*;
 
 pub struct Titlebar {
