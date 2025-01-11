@@ -19,16 +19,35 @@ impl Render for Titlebar {
             .child(
                 div()
                     .flex()
-                    .w_9()
-                    .h_full()
+                    .w_6()
+                    .h_6()
+                    .ml(px(6.0))
                     .items_center()
                     .justify_center()
-                    .child(Icon::new(Icons::LeftSidebar).size(20.0).color(0xcdd6f4)),
+                    .rounded_md()
+                    .hover(|this| this.bg(rgb(0x45475a)))
+                    .child(Icon::new(Icons::LeftSidebar).size(18.0).color(0xcdd6f4)),
             )
-            .child(format!(
-                "Reyvr - Playing {}",
-                self.now_playing.read(cx).title
-            ))
+            .child(
+                div()
+                    .flex()
+                    .w_auto()
+                    .h_full()
+                    .items_center()
+                    .gap_2()
+                    .child(div().child("Reyvr").text_color(rgb(0xca9ee6)))
+                    .child({
+                        let np = self.now_playing.read(cx);
+                        div()
+                            .child(format!(
+                                " - {} | {} | {}",
+                                np.title,
+                                np.album,
+                                np.artists.join(",")
+                            ))
+                            .text_color(rgb(0xcdd6f4))
+                    }),
+            )
             .child(
                 div()
                     .flex()
