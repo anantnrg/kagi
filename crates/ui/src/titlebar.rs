@@ -35,24 +35,17 @@ impl Render for Titlebar {
                     .w_auto()
                     .h_full()
                     .items_center()
-                    .gap_2()
                     .child(div().child("Reyvr").text_color(rgb(0xca9ee6)))
                     .child({
                         let np = self.now_playing.read(cx);
                         div().when(np.title.len() != 0, |this| {
-                            this.child(format!(
-                                " - {} | {} | {}",
-                                np.title,
-                                np.album,
-                                np.artists.join(",")
-                            ))
-                            .truncate()
-                            .text_ellipsis()
-                            .overflow_hidden()
-                            .whitespace_nowrap()
-                            .text_color(rgb(0xcdd6f4))
-                            .max_w(px(200.0))
-                            .mx(px(16.0))
+                            this.child(format!(" - {}", np.title))
+                                .truncate()
+                                .text_ellipsis()
+                                .overflow_hidden()
+                                .whitespace_nowrap()
+                                .text_color(rgb(0xcdd6f4))
+                                .mx(px(16.0))
                         })
                     }),
             )
