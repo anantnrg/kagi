@@ -7,3 +7,4 @@ edition = "2024"
 gstreamer.workspace = true
 anyhow.workspace = true
 backend = { path = "../../backend" }
+gstreamer-pbutils = "0.23.4"

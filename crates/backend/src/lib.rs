@@ -1,3 +1,5 @@
+use playback::Track;
+
 pub mod playback;
 
 /// Common backend trait. Can be used to implement multple backends.
@@ -27,6 +29,9 @@ pub trait Backend: Send + Sync {
 
     /// Get the current playback state.
     fn get_state(&self) -> anyhow::Result<PlaybackState>;
+
+    /// Get metadata
+    fn get_meta(&self) -> anyhow::Result<Track>;
 }
 
 /// Playback state representation.

@@ -1,5 +1,6 @@
 use anyhow::anyhow;
 use backend::Backend;
+use gst_pbutils::prelude::*;
 use gstreamer::prelude::*;
 use std::sync::{Arc, Mutex};
 
@@ -81,6 +82,27 @@ impl Backend for GstBackend {
             gstreamer::State::Paused => Ok(backend::PlaybackState::Paused),
             _ => Ok(backend::PlaybackState::Stopped),
         }
+    }
+    fn get_meta(&self) -> anyhow::Result<backend::playback::Track> {
+        let discoverer = gst_pbutils::Discoverer::new(gst::ClockTime::from_seconds(5))?;
+        let info = discoverer.discover_uri(uri)?;
+
+        let tags = info.tags().unwrap_or_else(|| gst::TagList::new());
+
+        Ok(Song {
+            title: tags
+                .get::<gst::tags::Title>()
+                .unwrap_or_else(|| uri.to_string()),
+            artist: tags
+                .get::<gst::tags::Artist>()
+                .unwrap_or_else(|| "Unknown Artist".into()),
+            album: tags
+                .get::<gst::tags::Album>()
+                .unwrap_or_else(|| "Unknown Album".into()),
+            uri: uri.to_string(),
+            duration: info.duration().map(|d| d.seconds() as f64),
+            album_art_uri: None, // Can be fetched separately if needed
+        })
     }
 }
 

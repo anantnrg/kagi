@@ -3,7 +3,8 @@ members = [
     "crates/reyvr",
     "crates/backend",
     "crates/ui",
-    "crates/backends/gstreamer", "crates/components",
+    "crates/backends/gstreamer",
+    "crates/components",
 ]
 resolver = "2"
 default-members = ["crates/reyvr"]
