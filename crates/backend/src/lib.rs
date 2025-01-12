@@ -1,3 +1,5 @@
+pub mod playback;
+
 /// Common backend trait. Can be used to implement multple backends.
 pub trait Backend: Send + Sync {
     /// Initialize the backend.

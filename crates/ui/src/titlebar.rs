@@ -45,7 +45,7 @@ impl Render for Titlebar {
                                 .overflow_hidden()
                                 .whitespace_nowrap()
                                 .text_color(rgb(0xcdd6f4))
-                                .mx(px(16.0))
+                                .text_sm()
                         })
                     }),
             )
