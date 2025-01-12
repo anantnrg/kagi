@@ -31,7 +31,7 @@ pub trait Backend: Send + Sync {
     fn get_state(&self) -> anyhow::Result<PlaybackState>;
 
     /// Get metadata
-    fn get_meta(&self) -> anyhow::Result<Track>;
+    fn get_meta(&self, uri: &str) -> anyhow::Result<Track>;
 }
 
 /// Playback state representation.

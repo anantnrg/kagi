@@ -1,7 +1,8 @@
 use anyhow::anyhow;
-use backend::Backend;
+use backend::{Backend, playback::Track};
 use gst_pbutils::prelude::*;
 use gstreamer::prelude::*;
+use gstreamer_pbutils as gst_pbutils;
 use std::sync::{Arc, Mutex};
 
 pub struct GstBackend {
@@ -83,25 +84,29 @@ impl Backend for GstBackend {
             _ => Ok(backend::PlaybackState::Stopped),
         }
     }
-    fn get_meta(&self) -> anyhow::Result<backend::playback::Track> {
-        let discoverer = gst_pbutils::Discoverer::new(gst::ClockTime::from_seconds(5))?;
+    fn get_meta(&self, uri: &str) -> anyhow::Result<Track> {
+        let discoverer = gst_pbutils::Discoverer::new(gstreamer::ClockTime::from_seconds(5))?;
         let info = discoverer.discover_uri(uri)?;
 
-        let tags = info.tags().unwrap_or_else(|| gst::TagList::new());
+        let tags = info.tags().unwrap_or_else(|| gstreamer::TagList::new());
 
-        Ok(Song {
+        Ok(Track {
             title: tags
-                .get::<gst::tags::Title>()
+                .get::<gstreamer::tags::Title>()
+                .and_then(|v| Some(v.get().to_string()))
                 .unwrap_or_else(|| uri.to_string()),
-            artist: tags
-                .get::<gst::tags::Artist>()
-                .unwrap_or_else(|| "Unknown Artist".into()),
+            artists: vec![
+                tags.get::<gstreamer::tags::Artist>()
+                    .and_then(|v| Some(v.get().to_string()))
+                    .unwrap_or_else(|| "Unknown Artist".into()),
+            ],
             album: tags
-                .get::<gst::tags::Album>()
+                .get::<gstreamer::tags::Album>()
+                .and_then(|v| Some(v.get().to_string()))
                 .unwrap_or_else(|| "Unknown Album".into()),
             uri: uri.to_string(),
             duration: info.duration().map(|d| d.seconds() as f64),
-            album_art_uri: None, // Can be fetched separately if needed
+            album_art_uri: None,
         })
     }
 }
