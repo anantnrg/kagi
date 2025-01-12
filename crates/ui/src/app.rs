@@ -32,7 +32,11 @@ impl Render for Reyvr {
             },
         )
         .detach();
-
+        let meta = self
+            .backend
+            .get_meta("file:///D:/repos/reyvr/assets/music.mp3")
+            .unwrap();
+        println!("{:?}", meta);
         div()
             .w_full()
             .h_full()

@@ -1,6 +1,5 @@
 use anyhow::anyhow;
 use backend::{Backend, playback::Track};
-use gst_pbutils::prelude::*;
 use gstreamer::prelude::*;
 use gstreamer_pbutils as gst_pbutils;
 use std::sync::{Arc, Mutex};
