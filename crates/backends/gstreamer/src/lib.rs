@@ -84,7 +84,7 @@ impl Backend for GstBackend {
         }
     }
     fn get_meta(&self, uri: &str) -> anyhow::Result<Track> {
-        let discoverer = gst_pbutils::Discoverer::new(gstreamer::ClockTime::from_seconds(5))?;
+        let discoverer = gst_pbutils::Discoverer::new(gstreamer::ClockTime::from_seconds(10))?;
         let info = discoverer.discover_uri(uri)?;
 
         let tags = info.tags().unwrap_or_else(|| gstreamer::TagList::new());
