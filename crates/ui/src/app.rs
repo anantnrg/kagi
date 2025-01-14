@@ -1,12 +1,16 @@
 use super::{now_playing::*, titlebar::Titlebar};
 use crate::layout::Layout;
-use backend::Backend;
+use backend::{Backend, playback::Playlist};
 use components::button::Button;
 use gpui::*;
-use std::sync::{Arc, Mutex};
+use std::{
+    path::PathBuf,
+    sync::{Arc, Mutex},
+};
 
 pub struct Reyvr {
     pub backend: Arc<dyn Backend>,
+    pub playlist: Playlist,
     pub volume: Arc<Mutex<f64>>,
     pub layout: Layout,
     pub now_playing: NowPlaying,
@@ -32,11 +36,11 @@ impl Render for Reyvr {
             },
         )
         .detach();
-        let meta = self
-            .backend
-            .get_meta("file:///D:/repos/reyvr/assets/music.mp3")
-            .unwrap();
-        println!("{:?}", meta);
+        let playlist = Playlist::from_dir(
+            &*self.backend,
+            PathBuf::from("E:\\music\\straight up liquid fire"),
+        );
+        println!("{:#?}", playlist);
         div()
             .w_full()
             .h_full()

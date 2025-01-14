@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::Backend;
 
 #[derive(Debug, Clone)]
@@ -18,8 +20,71 @@ pub struct Playlist {
     pub loaded: bool,
 }
 
+impl Track {
+    pub fn default() -> Self {
+        Track {
+            album: "Unknown Album".into(),
+            album_art_uri: None,
+            artists: vec!["Unknown Artist".into()],
+            duration: None,
+            title: "Unknown Track".into(),
+            uri: "".to_string(),
+        }
+    }
+}
+
 impl Playlist {
-    // pub fn new<B: Backend>(backend: &B) -> Self {}
+    pub fn default() -> Self {
+        Playlist {
+            name: "Unknown Playlist".to_string(),
+            tracks: vec![Track::default()],
+            current_index: 0,
+            loaded: false,
+        }
+    }
+    pub fn from_dir<B: Backend>(backend: &B, dir: PathBuf) -> Self {
+        let mut playlist = Playlist {
+            name: dir
+                .file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_else(|| "Unknown Playlist".into()),
+            tracks: Vec::new(),
+            current_index: 0,
+            loaded: false,
+        };
+
+        if let Ok(entries) = std::fs::read_dir(&dir) {
+            for entry in entries {
+                if let Ok(entry) = entry {
+                    let path = entry.path();
+
+                    if let Some(ext) = path.extension() {
+                        let ext = ext.to_string_lossy().to_lowercase();
+                        if ext == "mp3" || ext == "flac" || ext == "wav" || ext == "ogg" {
+                            let uri = format!("file://{}", path.to_string_lossy());
+
+                            let track = match backend.get_meta(&uri) {
+                                Ok(t) => t,
+                                Err(_) => {
+                                    eprintln!("Failed to load metadata for {:?}", path);
+                                    Track {
+                                        title: path
+                                            .file_stem()
+                                            .map(|n| n.to_string_lossy().to_string())
+                                            .unwrap_or_else(|| "Unknown Track".into()),
+                                        uri: uri.clone(),
+                                        ..Track::default()
+                                    }
+                                }
+                            };
+                            playlist.tracks.push(track);
+                        }
+                    }
+                }
+            }
+        }
+        playlist
+    }
     pub fn load<B: Backend>(&self, backend: &B) -> anyhow::Result<()> {
         let current_song = &self.tracks[self.current_index];
         backend.load(&current_song.uri)?;
