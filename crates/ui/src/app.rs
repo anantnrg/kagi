@@ -11,7 +11,7 @@ use std::{
 #[derive(Clone)]
 pub struct Reyvr {
     pub backend: Arc<dyn Backend>,
-    pub playlist: Playlist,
+    pub playlist: Arc<Mutex<Playlist>>,
     pub volume: Arc<Mutex<f64>>,
     pub layout: Layout,
     pub now_playing: NowPlaying,
@@ -51,7 +51,7 @@ impl Render for Reyvr {
                     .child(Button::new().text("Play").on_click({
                         let app = self.clone();
                         let now_playing = now_playing.clone();
-                        let playlist = self.playlist.clone();
+                        let playlist = app.playlist.clone();
                         move |_, cx| {
                             now_playing.update(cx, |np, cx| {
                                 np.update(
@@ -63,6 +63,8 @@ impl Render for Reyvr {
                                 cx.notify();
                             });
                             playlist
+                                .lock()
+                                .expect("Could not lock playlist")
                                 .load(&app.backend.clone())
                                 .expect("Could not load current track.");
                             app.backend.play().expect("Could not play");
@@ -76,13 +78,14 @@ impl Render for Reyvr {
                     }))
                     .child(Button::new().text("Load Playlist").on_click({
                         let app = self.clone();
+                        let playlist = app.playlist.clone();
 
                         move |_, _| {
-                            let playlist = Playlist::from_dir(
+                            let new_playlist = Playlist::from_dir(
                                 &app.backend.clone(),
                                 PathBuf::from("E:\\music\\PSYCHX - Kordhell, Scarlxrd"),
                             );
-                            app.load_playlist(playlist);
+                            *playlist.lock().expect("Could not lock playlist") = new_playlist;
                             println!("Playlist loaded");
                         }
                     }))
@@ -114,11 +117,5 @@ impl Render for Reyvr {
                         }
                     })),
             )
-    }
-}
-
-impl Reyvr {
-    pub fn load_playlist(&mut self, playlist: Playlist) {
-        self.playlist = playlist;
     }
 }

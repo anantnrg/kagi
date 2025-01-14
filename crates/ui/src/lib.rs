@@ -37,7 +37,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             |cx| {
                 cx.new_view(|_cx| Reyvr {
                     backend,
-                    playlist: Playlist::default(),
+                    playlist: Arc::new(Mutex::new(Playlist::default())),
                     volume: Arc::new(Mutex::new(0.5)),
                     layout: Layout::new(),
                     now_playing: NowPlaying::new(),
