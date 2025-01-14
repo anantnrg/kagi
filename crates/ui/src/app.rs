@@ -38,7 +38,7 @@ impl Render for Reyvr {
         .detach();
         let playlist = Playlist::from_dir(
             &self.backend,
-            PathBuf::from("E:\\music\\straight up liquid fire"),
+            PathBuf::from("E:\\music\\PSYCHX - Kordhell, Scarlxrd"),
         );
         println!("{:#?}", playlist);
         div()

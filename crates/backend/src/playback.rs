@@ -61,12 +61,13 @@ impl Playlist {
                     if let Some(ext) = path.extension() {
                         let ext = ext.to_string_lossy().to_lowercase();
                         if ext == "mp3" || ext == "flac" || ext == "wav" || ext == "ogg" {
-                            let uri = format!("file://{}", path.to_string_lossy());
+                            let uri =
+                                format!("file:///{}", path.to_string_lossy().replace("\\", "/"));
 
                             let track = match backend.get_meta(&uri) {
                                 Ok(t) => t,
                                 Err(_) => {
-                                    eprintln!("Failed to load metadata for {:?}", path);
+                                    eprintln!("Failed to load metadata for {:?}", uri);
                                     Track {
                                         title: path
                                             .file_stem()
