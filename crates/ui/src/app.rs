@@ -8,6 +8,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+#[derive(Clone)]
 pub struct Reyvr {
     pub backend: Arc<dyn Backend>,
     pub playlist: Playlist,
@@ -19,9 +20,7 @@ pub struct Reyvr {
 impl Render for Reyvr {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         let volume = Arc::clone(&self.volume);
-
         let now_playing = cx.new_model(|_cx| self.now_playing.clone());
-
         let titlebar = cx.new_view(|_| Titlebar::new(now_playing.clone()));
 
         cx.subscribe(
@@ -36,11 +35,6 @@ impl Render for Reyvr {
             },
         )
         .detach();
-        let playlist = Playlist::from_dir(
-            &self.backend,
-            PathBuf::from("E:\\music\\PSYCHX - Kordhell, Scarlxrd"),
-        );
-        println!("{:#?}", playlist);
         div()
             .w_full()
             .h_full()
@@ -55,8 +49,9 @@ impl Render for Reyvr {
                     .justify_center()
                     .items_center()
                     .child(Button::new().text("Play").on_click({
-                        let backend = self.backend.clone();
+                        let app = self.clone();
                         let now_playing = now_playing.clone();
+                        let playlist = self.playlist.clone();
                         move |_, cx| {
                             now_playing.update(cx, |np, cx| {
                                 np.update(
@@ -67,13 +62,28 @@ impl Render for Reyvr {
                                 );
                                 cx.notify();
                             });
-                            backend.play().expect("Could not play");
+                            playlist
+                                .load(&app.backend.clone())
+                                .expect("Could not load current track.");
+                            app.backend.play().expect("Could not play");
                         }
                     }))
                     .child(Button::new().text("Pause").on_click({
-                        let backend = self.backend.clone();
+                        let app = self.clone();
                         move |_, _| {
-                            backend.pause().expect("Could not pause playback");
+                            app.backend.pause().expect("Could not pause playback");
+                        }
+                    }))
+                    .child(Button::new().text("Load Playlist").on_click({
+                        let app = self.clone();
+
+                        move |_, _| {
+                            let playlist = Playlist::from_dir(
+                                &app.backend.clone(),
+                                PathBuf::from("E:\\music\\PSYCHX - Kordhell, Scarlxrd"),
+                            );
+                            app.load_playlist(playlist);
+                            println!("Playlist loaded");
                         }
                     }))
                     .child(Button::new().text("+").size(40.0, 40.0).on_click({
@@ -104,5 +114,11 @@ impl Render for Reyvr {
                         }
                     })),
             )
+    }
+}
+
+impl Reyvr {
+    pub fn load_playlist(&mut self, playlist: Playlist) {
+        self.playlist = playlist;
     }
 }

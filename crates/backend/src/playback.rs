@@ -86,13 +86,13 @@ impl Playlist {
         }
         playlist
     }
-    pub fn load<B: Backend>(&self, backend: &B) -> anyhow::Result<()> {
+    pub fn load(&self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
         let current_song = &self.tracks[self.current_index];
         backend.load(&current_song.uri)?;
         Ok(())
     }
 
-    pub fn play_next<B: Backend>(&mut self, backend: &B) -> anyhow::Result<()> {
+    pub fn play_next(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
         if self.current_index + 1 < self.tracks.len() {
             self.current_index += 1;
             self.load(backend)?;
@@ -100,7 +100,7 @@ impl Playlist {
         Ok(())
     }
 
-    pub fn play_previous<B: Backend>(&mut self, backend: &B) -> anyhow::Result<()> {
+    pub fn play_previous(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
         if self.current_index > 0 {
             self.current_index -= 1;
             self.load(backend)?;
