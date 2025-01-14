@@ -58,11 +58,6 @@ impl Render for Reyvr {
                                 .expect("Could not lock playlist")
                                 .load(&app.backend.clone())
                                 .expect("Could not load current track.");
-                            playlist
-                                .lock()
-                                .expect("Could not lock playlist")
-                                .play_next(&app.backend.clone())
-                                .expect("Could not play next.");
                             now_playing.update(cx, |np, cx| {
                                 let playlist = playlist.lock().expect("Could not lock playlist");
                                 let track = playlist.tracks[playlist.current_index].clone();

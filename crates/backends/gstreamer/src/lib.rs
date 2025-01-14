@@ -26,9 +26,9 @@ impl Backend for GstBackend {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
-            .expect("Could not lock playbin")
+            .map_err(|e| anyhow::anyhow!("Could not lock playbin: {e}"))?
             .set_state(gstreamer::State::Playing)
-            .expect("Couldn't set playbin state to playing.");
+            .map_err(|e| anyhow!("Could not set playbin state to playing: {e}"))?;
         Ok(())
     }
 
@@ -36,9 +36,9 @@ impl Backend for GstBackend {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
-            .expect("Could not lock playbin")
+            .map_err(|e| anyhow::anyhow!("Could not lock playbin: {e}"))?
             .set_state(gstreamer::State::Paused)
-            .expect("Couldn't set playbin state to paused.");
+            .map_err(|e| anyhow!("Could not set playbin state to paused: {e}"))?;
         Ok(())
     }
 
@@ -46,9 +46,9 @@ impl Backend for GstBackend {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
-            .expect("Could not lock playbin")
+            .map_err(|e| anyhow::anyhow!("Could not lock playbin: {e}"))?
             .set_state(gstreamer::State::Null)
-            .expect("Couldn't set playbin state to stopped.");
+            .map_err(|e| anyhow!("Could not set playbin state to stopped: {e}"))?;
         Ok(())
     }
 
@@ -56,7 +56,7 @@ impl Backend for GstBackend {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
-            .expect("Could not lock playbin")
+            .map_err(|e| anyhow::anyhow!("Could not lock playbin: {e}"))?
             .set_property("volume", volume);
         Ok(())
     }
@@ -65,7 +65,7 @@ impl Backend for GstBackend {
         let playbin = Arc::clone(&self.playbin);
         let volume: f32 = playbin
             .lock()
-            .expect("Could not lock playbin")
+            .map_err(|e| anyhow::anyhow!("Could not lock playbin: {e}"))?
             .property("volume");
         Ok(volume)
     }
@@ -75,7 +75,7 @@ impl Backend for GstBackend {
 
         match playbin
             .lock()
-            .expect("Could not lock playbin")
+            .map_err(|e| anyhow::anyhow!("Could not lock playbin: {e}"))?
             .current_state()
         {
             gstreamer::State::Playing => Ok(backend::PlaybackState::Playing),
