@@ -53,20 +53,22 @@ impl Render for Reyvr {
                         let now_playing = now_playing.clone();
                         let playlist = app.playlist.clone();
                         move |_, cx| {
-                            now_playing.update(cx, |np, cx| {
-                                np.update(
-                                    cx,
-                                    "LIKE XYU WXULD KNXW (AUTUMN TREES)".into(),
-                                    "PSYCHX".into(),
-                                    vec!["Kordhell".into(), "Scarlxrd".into()],
-                                );
-                                cx.notify();
-                            });
                             playlist
                                 .lock()
                                 .expect("Could not lock playlist")
                                 .load(&app.backend.clone())
                                 .expect("Could not load current track.");
+                            playlist
+                                .lock()
+                                .expect("Could not lock playlist")
+                                .play_next(&app.backend.clone())
+                                .expect("Could not play next.");
+                            now_playing.update(cx, |np, cx| {
+                                let playlist = playlist.lock().expect("Could not lock playlist");
+                                let track = playlist.tracks[playlist.current_index];
+                                np.update(cx, track.title, track.album, track.artists);
+                                cx.notify();
+                            });
                             app.backend.play().expect("Could not play");
                         }
                     }))
