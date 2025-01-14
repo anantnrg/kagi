@@ -65,8 +65,13 @@ impl Render for Reyvr {
                                 .expect("Could not play next.");
                             now_playing.update(cx, |np, cx| {
                                 let playlist = playlist.lock().expect("Could not lock playlist");
-                                let track = playlist.tracks[playlist.current_index];
-                                np.update(cx, track.title, track.album, track.artists);
+                                let track = playlist.tracks[playlist.current_index].clone();
+                                np.update(
+                                    cx,
+                                    track.title.into(),
+                                    track.album.into(),
+                                    track.artists.iter().map(|s| s.clone().into()).collect(),
+                                );
                                 cx.notify();
                             });
                             app.backend.play().expect("Could not play");
