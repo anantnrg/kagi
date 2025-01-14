@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Arc};
 
 use crate::Backend;
 
@@ -42,7 +42,7 @@ impl Playlist {
             loaded: false,
         }
     }
-    pub fn from_dir<B: Backend>(backend: &B, dir: PathBuf) -> Self {
+    pub fn from_dir(backend: &Arc<dyn Backend>, dir: PathBuf) -> Self {
         let mut playlist = Playlist {
             name: dir
                 .file_name()
