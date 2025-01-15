@@ -53,6 +53,14 @@ impl Render for Reyvr {
                         let now_playing = now_playing.clone();
                         let playlist = app.playlist.clone();
                         move |_, cx| {
+                            println!(
+                                "{}",
+                                playlist
+                                    .lock()
+                                    .expect("Could not lock playlist")
+                                    .tracks
+                                    .len()
+                            );
                             if playlist
                                 .lock()
                                 .expect("Could not lock playlist")

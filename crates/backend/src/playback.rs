@@ -37,7 +37,7 @@ impl Playlist {
     pub fn default() -> Self {
         Playlist {
             name: "Unknown Playlist".to_string(),
-            tracks: vec![Track::default()],
+            tracks: vec![],
             current_index: 0,
             loaded: false,
         }
