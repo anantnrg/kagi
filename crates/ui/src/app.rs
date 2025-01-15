@@ -53,14 +53,6 @@ impl Render for Reyvr {
                         let now_playing = now_playing.clone();
                         let playlist = app.playlist.clone();
                         move |_, cx| {
-                            println!(
-                                "{}",
-                                playlist
-                                    .lock()
-                                    .expect("Could not lock playlist")
-                                    .tracks
-                                    .len()
-                            );
                             if playlist
                                 .lock()
                                 .expect("Could not lock playlist")
@@ -68,16 +60,23 @@ impl Render for Reyvr {
                                 .len()
                                 != 0
                             {
-                                if playlist.lock().expect("Could not lock playlist").loaded == false
+                                if playlist.lock().expect("Could not lock playlist").playing
+                                    == false
                                 {
-                                    playlist
-                                        .lock()
-                                        .expect("Could not lock playlist")
-                                        .load(&app.backend.clone())
-                                        .expect("Could not load current track.");
-                                    app.backend.play().expect("Could not play");
-                                } else {
-                                    app.backend.play().expect("Could not play");
+                                    if playlist.lock().expect("Could not lock playlist").loaded
+                                        == false
+                                    {
+                                        playlist
+                                            .lock()
+                                            .expect("Could not lock playlist")
+                                            .load(&app.backend.clone())
+                                            .expect("Could not load current track.");
+                                        app.backend.play().expect("Could not play");
+                                    } else {
+                                        app.backend.play().expect("Could not play");
+                                    }
+                                    playlist.lock().expect("Could not lock playlist").playing =
+                                        true;
                                 }
 
                                 now_playing.update(cx, |np, cx| {
@@ -99,8 +98,12 @@ impl Render for Reyvr {
                     }))
                     .child(Button::new().text("Pause").on_click({
                         let app = self.clone();
+                        let playlist = app.playlist.clone();
+
                         move |_, _| {
-                            app.backend.pause().expect("Could not pause playback");
+                            if playlist.lock().expect("Could not lock playlist").playing == true {
+                                app.backend.pause().expect("Could not pause playback");
+                            }
                         }
                     }))
                     .child(Button::new().text("Load Playlist").on_click({

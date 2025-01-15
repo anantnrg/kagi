@@ -18,6 +18,7 @@ pub struct Playlist {
     pub tracks: Vec<Track>,
     pub current_index: usize,
     pub loaded: bool,
+    pub playing: bool,
 }
 
 impl Track {
@@ -40,6 +41,7 @@ impl Playlist {
             tracks: vec![],
             current_index: 0,
             loaded: false,
+            playing: false,
         }
     }
     pub fn from_dir(backend: &Arc<dyn Backend>, dir: PathBuf) -> Self {
@@ -51,6 +53,7 @@ impl Playlist {
             tracks: Vec::new(),
             current_index: 0,
             loaded: false,
+            playing: false,
         };
 
         if let Ok(entries) = std::fs::read_dir(&dir) {
