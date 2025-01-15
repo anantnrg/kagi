@@ -86,8 +86,9 @@ impl Playlist {
         }
         playlist
     }
-    pub fn load(&self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
+    pub fn load(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
         let current_song = &self.tracks[self.current_index];
+        self.loaded = true;
         backend.load(&current_song.uri)?;
         Ok(())
     }
