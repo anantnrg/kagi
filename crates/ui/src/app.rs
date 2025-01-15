@@ -120,30 +120,39 @@ impl Render for Reyvr {
                         }
                     }))
                     .child(Button::new().text("+").size(40.0, 40.0).on_click({
+                        let app = self.clone();
                         let volume = Arc::clone(&volume);
-                        let backend = self.backend.clone();
+                        let backend = app.backend.clone();
+                        let playlist = app.playlist.clone();
 
                         move |_, _| {
-                            let mut vol = volume.lock().expect("Could not lock volume");
-                            *vol += 0.2;
-                            if *vol > 1.0 {
-                                *vol = 1.0;
+                            if playlist.lock().expect("Could not lock playlist").playing == true {
+                                let mut vol = volume.lock().expect("Could not lock volume");
+                                *vol += 0.2;
+                                if *vol > 1.0 {
+                                    *vol = 1.0;
+                                }
+                                backend.set_volume(*vol).expect("Could not set volume");
+                                println!("volume set to: {}", *vol);
                             }
-                            backend.set_volume(*vol).expect("Could not set volume");
-                            println!("volume set to: {}", *vol);
                         }
                     }))
                     .child(Button::new().text("-").size(40.0, 40.0).on_click({
-                        let backend = self.backend.clone();
+                        let app = self.clone();
+                        let backend = app.backend.clone();
                         let volume = Arc::clone(&volume);
+                        let playlist = app.playlist.clone();
+
                         move |_, _| {
-                            let mut vol = volume.lock().expect("Could not lock volume");
-                            *vol -= 0.2;
-                            if *vol < 0.0 {
-                                *vol = 0.0;
+                            if playlist.lock().expect("Could not lock playlist").playing == true {
+                                let mut vol = volume.lock().expect("Could not lock volume");
+                                *vol -= 0.2;
+                                if *vol < 0.0 {
+                                    *vol = 0.0;
+                                }
+                                backend.set_volume(*vol).expect("Could not set volume");
+                                println!("volume set to: {}", *vol);
                             }
-                            backend.set_volume(*vol).expect("Could not set volume");
-                            println!("volume set to: {}", *vol);
                         }
                     })),
             )
