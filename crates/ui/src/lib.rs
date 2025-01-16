@@ -7,7 +7,7 @@ pub mod titlebar;
 
 use app::Reyvr;
 use assets::*;
-use backend::{playback::Playlist, Backend};
+use backend::{Backend, playback::Playlist};
 use gpui::*;
 use layout::Layout;
 use now_playing::NowPlaying;

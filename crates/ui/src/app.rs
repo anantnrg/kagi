@@ -7,6 +7,7 @@ use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
 };
+use theme::Theme;
 
 #[derive(Clone)]
 pub struct Reyvr {
@@ -15,6 +16,7 @@ pub struct Reyvr {
     pub volume: Arc<Mutex<f64>>,
     pub layout: Layout,
     pub now_playing: NowPlaying,
+    pub theme: Theme,
 }
 
 impl Render for Reyvr {

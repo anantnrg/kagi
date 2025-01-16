@@ -1,13 +1,14 @@
-use gpui::{Hsla, rgb};
+use gpui::{Rgba, rgb};
 
+#[derive(Clone, Copy)]
 pub struct Theme {
-    pub accent: Hsla,
-    pub text: Hsla,
-    pub background: Hsla,
-    pub secondary: Hsla,
-    pub sidebar_bg: Hsla,
-    pub main_bg: Hsla,
-    pub titlebar_bg: Hsla,
+    pub accent: Rgba,
+    pub text: Rgba,
+    pub background: Rgba,
+    pub secondary: Rgba,
+    pub sidebar_bg: Rgba,
+    pub main_bg: Rgba,
+    pub titlebar_bg: Rgba,
 }
 
 impl Theme {
@@ -23,13 +24,13 @@ impl Theme {
         }
     }
     pub fn new(
-        accent: Hsla,
-        text: Hsla,
-        background: Hsla,
-        secondary: Hsla,
-        sidebar_bg: Hsla,
-        main_bg: Hsla,
-        titlebar_bg: Hsla,
+        accent: Rgba,
+        text: Rgba,
+        background: Rgba,
+        secondary: Rgba,
+        sidebar_bg: Rgba,
+        main_bg: Rgba,
+        titlebar_bg: Rgba,
     ) -> Self {
         Self {
             accent,
