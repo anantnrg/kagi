@@ -1,4 +1,4 @@
-use crate::now_playing::NowPlaying;
+use crate::{now_playing::NowPlaying, theme::Theme};
 
 use components::icon::*;
 use gpui::*;
@@ -6,6 +6,7 @@ use prelude::FluentBuilder;
 
 pub struct Titlebar {
     now_playing: Model<NowPlaying>,
+    theme: Theme,
 }
 
 impl Render for Titlebar {
@@ -13,7 +14,7 @@ impl Render for Titlebar {
         div()
             .w_full()
             .h_8()
-            .bg(rgb(0x1e1d2d))
+            .bg(self.theme.titlebar_bg)
             .flex()
             .items_center()
             .justify_between()
@@ -27,7 +28,11 @@ impl Render for Titlebar {
                     .justify_center()
                     .rounded_md()
                     .hover(|this| this.bg(rgb(0x45475a)))
-                    .child(Icon::new(Icons::LeftSidebar).size(18.0).color(0xcdd6f4)),
+                    .child(
+                        Icon::new(Icons::LeftSidebar)
+                            .size(18.0)
+                            .color(self.theme.text.into()),
+                    ),
             )
             .child(
                 div()
@@ -35,7 +40,7 @@ impl Render for Titlebar {
                     .w_auto()
                     .h_full()
                     .items_center()
-                    .child(div().child("Reyvr").text_color(rgb(0xca9ee6)))
+                    .child(div().child("Reyvr").text_color(self.theme.accent))
                     .child({
                         let np = self.now_playing.read(cx);
                         div().when(np.title.len() != 0, |this| {
@@ -96,7 +101,7 @@ impl Render for Titlebar {
 }
 
 impl Titlebar {
-    pub fn new(now_playing: Model<NowPlaying>) -> Titlebar {
-        Titlebar { now_playing }
+    pub fn new(now_playing: Model<NowPlaying>, theme: Theme) -> Titlebar {
+        Titlebar { now_playing, theme }
     }
 }

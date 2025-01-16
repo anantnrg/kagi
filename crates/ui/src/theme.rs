@@ -4,6 +4,7 @@ use gpui::{Rgba, rgb};
 pub struct Theme {
     pub accent: Rgba,
     pub text: Rgba,
+    pub icon: Rgba,
     pub background: Rgba,
     pub secondary: Rgba,
     pub sidebar_bg: Rgba,
@@ -16,6 +17,7 @@ impl Theme {
         Theme {
             accent: rgb(0x8265BB),
             text: rgb(0xcdd6f4),
+            icon: rgb(0xcdd6f4),
             background: rgb(0x181818),
             secondary: rgb(0x45475a),
             sidebar_bg: rgb(0x181818),
@@ -26,6 +28,7 @@ impl Theme {
     pub fn new(
         accent: Rgba,
         text: Rgba,
+        icon: Rgba,
         background: Rgba,
         secondary: Rgba,
         sidebar_bg: Rgba,
@@ -35,6 +38,7 @@ impl Theme {
         Self {
             accent,
             text,
+            icon,
             background,
             secondary,
             sidebar_bg,

@@ -15,6 +15,7 @@ use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
 };
+use theme::Theme;
 
 pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
     let app = App::new().with_assets(Assets {
@@ -42,6 +43,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     volume: Arc::new(Mutex::new(0.5)),
                     layout: Layout::new(),
                     now_playing: NowPlaying::new(),
+                    theme: Theme::default(),
                 })
             },
         )

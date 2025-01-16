@@ -1,5 +1,5 @@
 use super::{now_playing::*, titlebar::Titlebar};
-use crate::layout::Layout;
+use crate::{layout::Layout, theme::Theme};
 use backend::{Backend, playback::Playlist};
 use components::button::Button;
 use gpui::*;
@@ -7,7 +7,6 @@ use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
 };
-use theme::Theme;
 
 #[derive(Clone)]
 pub struct Reyvr {
@@ -22,8 +21,9 @@ pub struct Reyvr {
 impl Render for Reyvr {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         let volume = Arc::clone(&self.volume);
+        let theme = self.theme.clone();
         let now_playing = cx.new_model(|_cx| self.now_playing.clone());
-        let titlebar = cx.new_view(|_| Titlebar::new(now_playing.clone()));
+        let titlebar = cx.new_view(|_| Titlebar::new(now_playing.clone(), theme.clone()));
 
         cx.subscribe(
             &now_playing,
@@ -46,7 +46,7 @@ impl Render for Reyvr {
                 div()
                     .flex()
                     .gap_8()
-                    .bg(rgb(0x1e1e2d))
+                    .bg(theme.background)
                     .size_full()
                     .justify_center()
                     .items_center()
