@@ -2,11 +2,12 @@ pub mod app;
 pub mod assets;
 pub mod layout;
 pub mod now_playing;
+pub mod theme;
 pub mod titlebar;
 
 use app::Reyvr;
 use assets::*;
-use backend::{Backend, playback::Playlist};
+use backend::{playback::Playlist, Backend};
 use gpui::*;
 use layout::Layout;
 use now_playing::NowPlaying;
