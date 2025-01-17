@@ -1,7 +1,7 @@
 use super::{now_playing::*, titlebar::Titlebar};
 use crate::layout::Layout;
 use backend::{Backend, playback::Playlist};
-use components::{button::Button, theme::Theme};
+use components::{button::Button, slider::Slider, theme::Theme};
 use gpui::*;
 use std::{
     path::PathBuf,
@@ -13,6 +13,7 @@ pub struct Reyvr {
     pub backend: Arc<dyn Backend>,
     pub playlist: Arc<Mutex<Playlist>>,
     pub volume: Arc<Mutex<f64>>,
+    pub vol_slider: View<Slider>,
     pub layout: Layout,
     pub now_playing: NowPlaying,
     pub theme: Theme,
@@ -121,6 +122,11 @@ impl Render for Reyvr {
                             println!("Playlist loaded");
                         }
                     }))
+                    .child(self.vol_slider.clone())
+                    .child(format!(
+                        "Volume: {}",
+                        self.volume.lock().expect("Could not lock volume")
+                    ))
                     .child(Button::new().text("+").size(40.0, 40.0).on_click({
                         let app = self.clone();
                         let volume = Arc::clone(&volume);

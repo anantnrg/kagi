@@ -20,7 +20,7 @@ pub struct Slider {
 impl EventEmitter<SliderEvent> for Slider {}
 
 impl Slider {
-    fn new(theme: Theme) -> Self {
+    pub fn new(theme: Theme) -> Self {
         Self {
             min: 0.0,
             max: 100.0,
@@ -43,6 +43,11 @@ impl Slider {
 
     pub fn step(mut self, step: f32) -> Self {
         self.step = step;
+        self
+    }
+
+    pub fn default(mut self, value: f32) -> Self {
+        self.value = value;
         self
     }
 

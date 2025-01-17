@@ -7,7 +7,10 @@ pub mod titlebar;
 use app::Reyvr;
 use assets::*;
 use backend::{Backend, playback::Playlist};
-use components::theme::Theme;
+use components::{
+    slider::{Slider, SliderEvent},
+    theme::Theme,
+};
 use gpui::*;
 use layout::Layout;
 use now_playing::NowPlaying;
@@ -36,13 +39,29 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                 ..Default::default()
             },
             |cx| {
-                cx.new_view(|_cx| Reyvr {
-                    backend,
-                    playlist: Arc::new(Mutex::new(Playlist::default())),
-                    volume: Arc::new(Mutex::new(0.5)),
-                    layout: Layout::new(),
-                    now_playing: NowPlaying::new(),
-                    theme: Theme::default(),
+                cx.new_view(|cx| {
+                    let theme = Theme::default();
+                    let vol_slider = cx
+                        .new_view(|_| Slider::new(theme).min(0.0).max(1.0).step(0.1).default(0.4));
+                    cx.subscribe(
+                        &vol_slider,
+                        |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {
+                            SliderEvent::Change(vol) => {
+                                this.volume = Arc::new(Mutex::new(*vol as f64));
+                                cx.notify();
+                            }
+                        },
+                    )
+                    .detach();
+                    Reyvr {
+                        backend,
+                        playlist: Arc::new(Mutex::new(Playlist::default())),
+                        volume: Arc::new(Mutex::new(0.5)),
+                        layout: Layout::new(),
+                        now_playing: NowPlaying::new(),
+                        theme,
+                        vol_slider,
+                    }
                 })
             },
         )
