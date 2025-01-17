@@ -130,6 +130,7 @@ impl Render for Slider {
             .id("slider")
             .on_mouse_down(MouseButton::Left, cx.listener(Self::on_mouse_down))
             .h_5()
+            .w_20()
             .child(
                 div()
                     .id("bar")

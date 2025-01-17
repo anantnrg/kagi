@@ -47,7 +47,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         &vol_slider,
                         |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {
                             SliderEvent::Change(vol) => {
-                                this.volume = Arc::new(Mutex::new(*vol as f64));
+                                this.volume =
+                                    Arc::new(Mutex::new((vol * 100.0).round() as f64 / 100.0));
                                 cx.notify();
                             }
                         },

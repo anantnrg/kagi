@@ -122,7 +122,15 @@ impl Render for Reyvr {
                             println!("Playlist loaded");
                         }
                     }))
-                    .child(self.vol_slider.clone())
+                    .child(
+                        div()
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .h_auto()
+                            .w_20()
+                            .child(self.vol_slider.clone()),
+                    )
                     .child(format!(
                         "Volume: {}",
                         self.volume.lock().expect("Could not lock volume")

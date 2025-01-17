@@ -18,11 +18,11 @@ impl Theme {
             accent: rgb(0x8265BB),
             text: rgb(0xcdd6f4),
             icon: rgb(0xcdd6f4),
-            background: rgb(0x181818),
+            background: rgb(0x11111B),
             secondary: rgb(0x45475a),
-            sidebar_bg: rgb(0x181818),
-            main_bg: rgb(0x181818),
-            titlebar_bg: rgb(0x181818),
+            sidebar_bg: rgb(0x11111B),
+            main_bg: rgb(0x11111B),
+            titlebar_bg: rgb(0x11111B),
         }
     }
     pub fn new(
