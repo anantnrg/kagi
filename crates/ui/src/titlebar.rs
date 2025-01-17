@@ -1,4 +1,5 @@
-use crate::{now_playing::NowPlaying, theme::Theme};
+use crate::now_playing::NowPlaying;
+use components::theme::Theme;
 
 use components::icon::*;
 use gpui::*;
@@ -31,7 +32,7 @@ impl Render for Titlebar {
                     .child(
                         Icon::new(Icons::LeftSidebar)
                             .size(18.0)
-                            .color(self.theme.text.into()),
+                            .color(self.theme.icon.into()),
                     ),
             )
             .child(
@@ -49,7 +50,7 @@ impl Render for Titlebar {
                                 .text_ellipsis()
                                 .overflow_hidden()
                                 .whitespace_nowrap()
-                                .text_color(rgb(0xcdd6f4))
+                                .text_color(self.theme.text)
                                 .text_sm()
                         })
                     }),
@@ -67,7 +68,7 @@ impl Render for Titlebar {
                             .flex()
                             .items_center()
                             .justify_center()
-                            .hover(|this| this.bg(rgb(0x45475a)))
+                            .hover(|this| this.bg(self.theme.secondary))
                             .child(Icon::new(Icons::Minimize).size(20.0).color(0xffffff)),
                     )
                     .child(
@@ -77,7 +78,7 @@ impl Render for Titlebar {
                             .flex()
                             .items_center()
                             .justify_center()
-                            .hover(|this| this.bg(rgb(0x45475a)))
+                            .hover(|this| this.bg(self.theme.secondary))
                             .child({
                                 if cx.is_maximized() {
                                     Icon::new(Icons::Restore).size(20.0).color(0xffffff)

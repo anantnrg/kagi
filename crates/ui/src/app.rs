@@ -1,7 +1,7 @@
 use super::{now_playing::*, titlebar::Titlebar};
-use crate::{layout::Layout, theme::Theme};
+use crate::layout::Layout;
 use backend::{Backend, playback::Playlist};
-use components::button::Button;
+use components::{button::Button, theme::Theme};
 use gpui::*;
 use std::{
     path::PathBuf,

@@ -2,12 +2,12 @@ pub mod app;
 pub mod assets;
 pub mod layout;
 pub mod now_playing;
-pub mod theme;
 pub mod titlebar;
 
 use app::Reyvr;
 use assets::*;
 use backend::{Backend, playback::Playlist};
+use components::theme::Theme;
 use gpui::*;
 use layout::Layout;
 use now_playing::NowPlaying;
@@ -15,7 +15,6 @@ use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
 };
-use theme::Theme;
 
 pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
     let app = App::new().with_assets(Assets {
