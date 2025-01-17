@@ -12,7 +12,7 @@ use std::{
 pub struct Reyvr {
     pub backend: Arc<dyn Backend>,
     pub playlist: Arc<Mutex<Playlist>>,
-    pub volume: Arc<Mutex<f64>>,
+    pub volume: f64,
     pub vol_slider: View<Slider>,
     pub layout: Layout,
     pub now_playing: NowPlaying,
@@ -21,7 +21,6 @@ pub struct Reyvr {
 
 impl Render for Reyvr {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
-        let volume = Arc::clone(&self.volume);
         let theme = self.theme.clone();
         let now_playing = cx.new_model(|_cx| self.now_playing.clone());
         let titlebar = cx.new_view(|_| Titlebar::new(now_playing.clone(), theme.clone()));
@@ -131,46 +130,7 @@ impl Render for Reyvr {
                             .w_20()
                             .child(self.vol_slider.clone()),
                     )
-                    .child(format!(
-                        "Volume: {}",
-                        self.volume.lock().expect("Could not lock volume")
-                    ))
-                    .child(Button::new().text("+").size(40.0, 40.0).on_click({
-                        let app = self.clone();
-                        let volume = Arc::clone(&volume);
-                        let backend = app.backend.clone();
-                        let playlist = app.playlist.clone();
-
-                        move |_, _| {
-                            if playlist.lock().expect("Could not lock playlist").playing == true {
-                                let mut vol = volume.lock().expect("Could not lock volume");
-                                *vol += 0.2;
-                                if *vol > 1.0 {
-                                    *vol = 1.0;
-                                }
-                                backend.set_volume(*vol).expect("Could not set volume");
-                                println!("volume set to: {}", *vol);
-                            }
-                        }
-                    }))
-                    .child(Button::new().text("-").size(40.0, 40.0).on_click({
-                        let app = self.clone();
-                        let backend = app.backend.clone();
-                        let volume = Arc::clone(&volume);
-                        let playlist = app.playlist.clone();
-
-                        move |_, _| {
-                            if playlist.lock().expect("Could not lock playlist").playing == true {
-                                let mut vol = volume.lock().expect("Could not lock volume");
-                                *vol -= 0.2;
-                                if *vol < 0.0 {
-                                    *vol = 0.0;
-                                }
-                                backend.set_volume(*vol).expect("Could not set volume");
-                                println!("volume set to: {}", *vol);
-                            }
-                        }
-                    })),
+                    .child(format!("Volume: {}", self.volume.clone())),
             )
     }
 }

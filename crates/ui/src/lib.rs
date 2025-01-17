@@ -47,8 +47,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         &vol_slider,
                         |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {
                             SliderEvent::Change(vol) => {
-                                this.volume =
-                                    Arc::new(Mutex::new((vol * 100.0).round() as f64 / 100.0));
+                                this.volume = (vol * 100.0).round() as f64 / 100.0;
                                 let app = this.clone();
                                 let backend = app.backend.clone();
                                 let playlist = app.playlist.clone();
@@ -67,7 +66,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     Reyvr {
                         backend,
                         playlist: Arc::new(Mutex::new(Playlist::default())),
-                        volume: Arc::new(Mutex::new(0.5)),
+                        volume: 0.5,
                         layout: Layout::new(),
                         now_playing: NowPlaying::new(),
                         theme,
