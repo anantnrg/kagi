@@ -130,7 +130,7 @@ impl Render for Reyvr {
                             .w_20()
                             .child(self.vol_slider.clone()),
                     )
-                    .child(format!("Volume: {}", self.volume.clone())),
+                    .child(div().w_4().child(format!("{}", self.volume.clone()))),
             )
     }
 }

@@ -42,7 +42,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                 cx.new_view(|cx| {
                     let theme = Theme::default();
                     let vol_slider = cx
-                        .new_view(|_| Slider::new(theme).min(0.0).max(1.0).step(0.1).default(0.4));
+                        .new_view(|_| Slider::new(theme).min(0.0).max(1.0).step(0.05).default(0.4));
                     cx.subscribe(
                         &vol_slider,
                         |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {

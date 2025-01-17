@@ -92,7 +92,6 @@ impl Slider {
     }
 
     fn render_thumb(&self, cx: &mut ViewContext<Self>) -> impl gpui::IntoElement {
-        let value = self.value;
         let entity_id = cx.entity_id();
 
         div()
@@ -130,7 +129,7 @@ impl Render for Slider {
             .id("slider")
             .on_mouse_down(MouseButton::Left, cx.listener(Self::on_mouse_down))
             .h_5()
-            .w_20()
+            .w_full()
             .child(
                 div()
                     .id("bar")
