@@ -118,3 +118,43 @@ impl Slider {
             .bg(self.theme.accent)
     }
 }
+
+impl Render for Slider {
+    fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
+        div()
+            .id("slider")
+            .on_mouse_down(MouseButton::Left, cx.listener(Self::on_mouse_down))
+            .h_5()
+            .child(
+                div()
+                    .id("bar")
+                    .relative()
+                    .w_full()
+                    .my_1p5()
+                    .h_1p5()
+                    .bg(self.theme.secondary)
+                    .active(|this| this.bg(self.theme.accent))
+                    .rounded(px(3.))
+                    .child(
+                        div()
+                            .absolute()
+                            .top_0()
+                            .left_0()
+                            .h_full()
+                            .w(relative(self.relative_value()))
+                            .bg(self.theme.accent)
+                            .rounded_l(px(3.)),
+                    )
+                    .child(self.render_thumb(cx))
+                    .child({
+                        let view = cx.view().clone();
+                        canvas(
+                            move |bounds, cx| view.update(cx, |r, _| r.bounds = bounds),
+                            |_, _, _| {},
+                        )
+                        .absolute()
+                        .size_full()
+                    }),
+            )
+    }
+}
