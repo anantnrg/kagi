@@ -49,6 +49,16 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             SliderEvent::Change(vol) => {
                                 this.volume =
                                     Arc::new(Mutex::new((vol * 100.0).round() as f64 / 100.0));
+                                let app = this.clone();
+                                let backend = app.backend.clone();
+                                let playlist = app.playlist.clone();
+                                if playlist.lock().expect("Could not lock playlist").playing == true
+                                {
+                                    backend
+                                        .set_volume(*vol as f64)
+                                        .expect("Could not set volume");
+                                    println!("volume set to: {}", *vol);
+                                }
                                 cx.notify();
                             }
                         },
