@@ -15,7 +15,7 @@ pub struct Theme {
 impl Theme {
     pub fn default() -> Self {
         Theme {
-            accent: rgb(0x8265BB),
+            accent: rgb(0xcba6f7),
             text: rgb(0xcdd6f4),
             icon: rgb(0xcdd6f4),
             background: rgb(0x11111B),

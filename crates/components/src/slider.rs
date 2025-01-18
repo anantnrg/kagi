@@ -117,7 +117,7 @@ impl Slider {
             .ml(-px(8.))
             .size_4()
             .rounded_full()
-            .border_1()
+            .border(px(1.5))
             .border_color(self.theme.secondary)
             .bg(self.theme.accent)
     }

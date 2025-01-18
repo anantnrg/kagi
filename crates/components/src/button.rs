@@ -3,8 +3,9 @@ use gpui::{MouseButton, MouseDownEvent, SharedString, WindowContext, div, prelud
 #[derive(IntoElement)]
 pub struct Button {
     text: SharedString,
-    width: f32,
-    height: f32,
+    w: f32,
+    h: f32,
+    px: f32,
     bg_color: u32,
     text_color: u32,
     border_color: u32,
@@ -20,8 +21,9 @@ impl Button {
     pub fn new() -> Self {
         Self {
             text: SharedString::from("Button"),
-            width: 230.0,
-            height: 40.0,
+            w: 0.0,
+            h: 40.0,
+            px: 20.0,
             bg_color: 0x45475a,
             text_color: 0xcdd6f4,
             border_color: 0xcba6f7,
@@ -38,9 +40,9 @@ impl Button {
         self
     }
 
-    pub fn size(mut self, width: f32, height: f32) -> Self {
-        self.width = width;
-        self.height = height;
+    pub fn size(mut self, w: f32, h: f32) -> Self {
+        self.w = w;
+        self.h = h;
         self
     }
 
@@ -78,8 +80,9 @@ impl RenderOnce for Button {
         let on_click = self.on_click;
         div()
             .flex()
-            .w(px(self.width))
-            .h(px(self.height))
+            .h(px(self.h))
+            .when(self.w != 0.0, |this| this.w(px(self.w)))
+            .when(self.w == 0.0, |this| this.w_auto().px(px(self.px)))
             .bg(rgb(self.bg_color))
             .text_color(rgb(self.text_color))
             .border_2()
