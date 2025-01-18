@@ -15,28 +15,15 @@ pub struct Reyvr {
     pub volume: f64,
     pub vol_slider: View<Slider>,
     pub layout: Layout,
-    pub now_playing: NowPlaying,
+    pub now_playing: Model<NowPlaying>,
     pub theme: Theme,
 }
 
 impl Render for Reyvr {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         let theme = self.theme.clone();
-        let now_playing = cx.new_model(|_cx| self.now_playing.clone());
-        let titlebar = cx.new_view(|_| Titlebar::new(now_playing.clone(), theme.clone()));
+        let titlebar = cx.new_view(|_| Titlebar::new(self.now_playing.clone(), theme.clone()));
 
-        cx.subscribe(
-            &now_playing,
-            |this, _, event: &NowPlayingEvent, cx| match event {
-                NowPlayingEvent::Update(title, album, artists) => {
-                    this.now_playing.title = title.clone();
-                    this.now_playing.album = album.clone();
-                    this.now_playing.artists = artists.clone();
-                    cx.notify();
-                }
-            },
-        )
-        .detach();
         div()
             .w_full()
             .h_full()
@@ -52,7 +39,7 @@ impl Render for Reyvr {
                     .items_center()
                     .child(Button::new().text("Play").on_click({
                         let app = self.clone();
-                        let now_playing = now_playing.clone();
+                        let now_playing = self.now_playing.clone();
                         let playlist = app.playlist.clone();
                         move |_, cx| {
                             if playlist

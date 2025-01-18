@@ -13,7 +13,7 @@ use components::{
 };
 use gpui::*;
 use layout::Layout;
-use now_playing::NowPlaying;
+use now_playing::{NowPlaying, NowPlayingEvent};
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -41,6 +41,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             |cx| {
                 cx.new_view(|cx| {
                     let theme = Theme::default();
+                    let now_playing = NowPlaying::new();
+                    let np = cx.new_model(|_| now_playing.clone());
                     let vol_slider = cx.new_view(|_| {
                         Slider::new(theme)
                             .min(0.0)
@@ -68,12 +70,23 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         },
                     )
                     .detach();
+                    cx.subscribe(&np, |this, _, event: &NowPlayingEvent, cx| match event {
+                        NowPlayingEvent::Update(title, album, artists) => {
+                            this.now_playing.update(cx, |this, cx| {
+                                this.title = title.clone();
+                                this.album = album.clone();
+                                this.artists = artists.clone();
+                            });
+                            cx.notify();
+                        }
+                    })
+                    .detach();
                     Reyvr {
                         backend,
                         playlist: Arc::new(Mutex::new(Playlist::default())),
                         volume: 0.5,
                         layout: Layout::new(),
-                        now_playing: NowPlaying::new(),
+                        now_playing: np,
                         theme,
                         vol_slider,
                     }
