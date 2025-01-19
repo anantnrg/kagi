@@ -35,26 +35,43 @@ impl Render for Titlebar {
                             .color(self.theme.icon.into()),
                     ),
             )
-            .child(
+            .child(div().flex().w_auto().h_full().items_center().child({
+                let np = self.now_playing.read(cx);
+                let window_width = cx.window_bounds().get_bounds().size.width.0;
+                let truncate = |text: &str, limit: usize| -> String {
+                    if text.len() > limit {
+                        format!("{}...", &text[..limit])
+                    } else {
+                        text.to_string()
+                    }
+                };
+
                 div()
-                    .flex()
-                    .w_auto()
-                    .h_full()
-                    .items_center()
-                    .child(div().child("Reyvr").text_color(self.theme.accent))
-                    .child({
-                        let np = self.now_playing.read(cx);
-                        div().when(np.title.len() != 0, |this| {
-                            this.child(format!(" - {}", np.title))
-                                .truncate()
-                                .text_ellipsis()
-                                .overflow_hidden()
-                                .whitespace_nowrap()
-                                .text_color(self.theme.text)
-                                .text_sm()
+                    .text_color(self.theme.accent)
+                    .text_sm()
+                    .overflow_hidden()
+                    .when(window_width < 200.0, |this| this.child("Reyvr"))
+                    .when((200.0..400.0).contains(&window_width), |this| {
+                        this.child({
+                            if np.title.is_empty() {
+                                "".to_string()
+                            } else {
+                                format!("{}", truncate(&np.title, 10))
+                            }
                         })
-                    }),
-            )
+                    })
+                    .when((400.0..600.0).contains(&window_width), |this| {
+                        this.child(format!("{} - {}", np.title, np.artists.join("")))
+                    })
+                    .when(window_width >= 600.0, |this| {
+                        this.child(format!(
+                            "{} - {} ({})",
+                            np.title,
+                            np.artists.join(""),
+                            np.album
+                        ))
+                    })
+            }))
             .child(
                 div()
                     .flex()
