@@ -38,6 +38,7 @@ impl Render for Titlebar {
             .child(div().flex().w_auto().h_full().items_center().child({
                 let np = self.now_playing.read(cx);
                 let window_width = cx.window_bounds().get_bounds().size.width.0;
+
                 let truncate = |text: &str, limit: usize| -> String {
                     if text.len() > limit {
                         format!("{}...", &text[..limit])
@@ -54,22 +55,40 @@ impl Render for Titlebar {
                     .when((200.0..400.0).contains(&window_width), |this| {
                         this.child({
                             if np.title.is_empty() {
-                                "".to_string()
+                                "No Song Playing".to_string()
                             } else {
-                                format!("{}", truncate(&np.title, 30))
+                                truncate(&np.title, 30)
                             }
                         })
                     })
                     .when((400.0..600.0).contains(&window_width), |this| {
-                        this.child(format!("{} - {}", np.title, np.artists.join("")))
+                        if np.title.is_empty() {
+                            this.child("No Song Playing".to_string())
+                        } else {
+                            let artists = if np.artists.is_empty() {
+                                "".to_string()
+                            } else {
+                                format!(" - {}", np.artists.join(", "))
+                            };
+                            this.child(format!("{}{}", truncate(&np.title, 30), artists))
+                        }
                     })
                     .when(window_width >= 600.0, |this| {
-                        this.child(format!(
-                            "{} - {} ({})",
-                            np.title,
-                            np.artists.join(""),
-                            np.album
-                        ))
+                        if np.title.is_empty() {
+                            this.child("Reyvr".to_string())
+                        } else {
+                            let artists = if np.artists.is_empty() {
+                                "".to_string()
+                            } else {
+                                format!(" - {}", np.artists.join(", "))
+                            };
+                            let album = if np.album.is_empty() {
+                                "".to_string()
+                            } else {
+                                format!(" ({})", np.album)
+                            };
+                            this.child(format!("{}{}{}", truncate(&np.title, 30), artists, album))
+                        }
                     })
             }))
             .child(
