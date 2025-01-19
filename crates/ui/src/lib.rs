@@ -72,7 +72,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
                     cx.subscribe(&np, |this, _, event: &NowPlayingEvent, cx| match event {
                         NowPlayingEvent::Update(title, album, artists) => {
-                            this.now_playing.update(cx, |this, cx| {
+                            this.now_playing.update(cx, |this, _| {
                                 this.title = title.clone();
                                 this.album = album.clone();
                                 this.artists = artists.clone();

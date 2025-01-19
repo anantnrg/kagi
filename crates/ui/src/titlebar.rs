@@ -56,7 +56,7 @@ impl Render for Titlebar {
                             if np.title.is_empty() {
                                 "".to_string()
                             } else {
-                                format!("{}", truncate(&np.title, 10))
+                                format!("{}", truncate(&np.title, 30))
                             }
                         })
                     })
