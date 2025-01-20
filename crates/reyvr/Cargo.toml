@@ -9,3 +9,4 @@ ui = { path = "../ui" }
 backend = { path = "../backend" }
 gst_backend = { path = "../backends/gstreamer" }
 anyhow.workspace = true
+tokio.workspace = true
