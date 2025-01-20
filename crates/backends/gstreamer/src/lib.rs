@@ -1,4 +1,5 @@
 use anyhow::anyhow;
+use async_trait::async_trait;
 use backend::{Backend, playback::Track};
 use gstreamer::prelude::*;
 use gstreamer_pbutils as gst_pbutils;
@@ -8,12 +9,13 @@ pub struct GstBackend {
     pub playbin: Arc<Mutex<gstreamer::Element>>,
 }
 
+#[async_trait]
 impl Backend for GstBackend {
-    fn init() -> anyhow::Result<()> {
+    async fn init() -> anyhow::Result<()> {
         gstreamer::init().map_err(|e| anyhow!("Failed to initialize Gstreamer backend: {e}"))
     }
 
-    fn load(&self, uri: &str) -> anyhow::Result<()> {
+    async fn load(&self, uri: &str) -> anyhow::Result<()> {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
@@ -22,7 +24,7 @@ impl Backend for GstBackend {
         Ok(())
     }
 
-    fn play(&self) -> anyhow::Result<()> {
+    async fn play(&self) -> anyhow::Result<()> {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
@@ -32,7 +34,7 @@ impl Backend for GstBackend {
         Ok(())
     }
 
-    fn pause(&self) -> anyhow::Result<()> {
+    async fn pause(&self) -> anyhow::Result<()> {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
@@ -42,7 +44,7 @@ impl Backend for GstBackend {
         Ok(())
     }
 
-    fn stop(&self) -> anyhow::Result<()> {
+    async fn stop(&self) -> anyhow::Result<()> {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
@@ -52,7 +54,7 @@ impl Backend for GstBackend {
         Ok(())
     }
 
-    fn set_volume(&self, volume: f64) -> anyhow::Result<()> {
+    async fn set_volume(&self, volume: f64) -> anyhow::Result<()> {
         let playbin = Arc::clone(&self.playbin);
         playbin
             .lock()
@@ -61,7 +63,7 @@ impl Backend for GstBackend {
         Ok(())
     }
 
-    fn get_volume(&self) -> anyhow::Result<f32> {
+    async fn get_volume(&self) -> anyhow::Result<f32> {
         let playbin = Arc::clone(&self.playbin);
         let volume: f32 = playbin
             .lock()
@@ -70,10 +72,10 @@ impl Backend for GstBackend {
         Ok(volume)
     }
 
-    fn get_state(&self) -> anyhow::Result<backend::PlaybackState> {
+    async fn get_state(&self) -> anyhow::Result<backend::PlaybackState> {
         let playbin = Arc::clone(&self.playbin);
 
-        match playbin
+        let state = match playbin
             .lock()
             .map_err(|e| anyhow::anyhow!("Could not lock playbin: {e}"))?
             .current_state()
@@ -81,9 +83,10 @@ impl Backend for GstBackend {
             gstreamer::State::Playing => Ok(backend::PlaybackState::Playing),
             gstreamer::State::Paused => Ok(backend::PlaybackState::Paused),
             _ => Ok(backend::PlaybackState::Stopped),
-        }
+        };
+        state
     }
-    fn get_meta(&self, uri: &str) -> anyhow::Result<Track> {
+    async fn get_meta(&self, uri: &str) -> anyhow::Result<Track> {
         let discoverer = gst_pbutils::Discoverer::new(gstreamer::ClockTime::from_seconds(10))?;
         let info = discoverer.discover_uri(uri)?;
 

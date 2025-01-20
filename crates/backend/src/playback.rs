@@ -44,7 +44,7 @@ impl Playlist {
             playing: false,
         }
     }
-    pub fn from_dir(backend: &Arc<dyn Backend>, dir: PathBuf) -> Self {
+    pub async fn from_dir(backend: &Arc<dyn Backend>, dir: PathBuf) -> Self {
         let mut playlist = Playlist {
             name: dir
                 .file_name()
@@ -67,7 +67,7 @@ impl Playlist {
                             let uri =
                                 format!("file:///{}", path.to_string_lossy().replace("\\", "/"));
 
-                            let track = match backend.get_meta(&uri) {
+                            let track = match backend.get_meta(&uri).await {
                                 Ok(t) => t,
                                 Err(_) => {
                                     eprintln!("Failed to load metadata for {:?}", uri);
@@ -89,25 +89,25 @@ impl Playlist {
         }
         playlist
     }
-    pub fn load(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
+    pub async fn load(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
         let current_song = &self.tracks[self.current_index];
         self.loaded = true;
-        backend.load(&current_song.uri)?;
+        backend.load(&current_song.uri).await?;
         Ok(())
     }
 
-    pub fn play_next(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
+    pub async fn play_next(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
         if self.current_index + 1 < self.tracks.len() {
             self.current_index += 1;
-            self.load(backend)?;
+            self.load(backend).await?;
         }
         Ok(())
     }
 
-    pub fn play_previous(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
+    pub async fn play_previous(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
         if self.current_index > 0 {
             self.current_index -= 1;
-            self.load(backend)?;
+            self.load(backend).await?;
         }
         Ok(())
     }
