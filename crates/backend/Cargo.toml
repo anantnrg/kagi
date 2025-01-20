@@ -5,5 +5,4 @@ edition = "2024"
 
 [dependencies]
 anyhow.workspace = true
-tokio.workspace = true
 async-trait.workspace = true
