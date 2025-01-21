@@ -3,6 +3,7 @@ use playback::Track;
 
 pub mod gstreamer;
 pub mod playback;
+pub mod player;
 
 /// Common backend trait. Can be used to implement multple backends.
 #[async_trait]
