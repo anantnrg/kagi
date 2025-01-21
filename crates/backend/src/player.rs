@@ -54,5 +54,15 @@ impl Player {
             },
         )
     }
-    pub async fn run() {}
+
+    pub async fn run(&mut self) {
+        while let Ok(Command) = self.rx.try_recv() {
+            match Command {
+                Command::Play => {}
+                Command::Pause => {}
+                Command::GetMeta => {}
+                Command::Volume(vol) => {}
+            }
+        }
+    }
 }
