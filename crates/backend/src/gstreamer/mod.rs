@@ -1,6 +1,6 @@
+use super::{Backend, playback::Track};
 use anyhow::anyhow;
 use async_trait::async_trait;
-use backend::{Backend, playback::Track};
 use gstreamer::prelude::*;
 use gstreamer_pbutils as gst_pbutils;
 use std::sync::{Arc, Mutex};
@@ -72,7 +72,7 @@ impl Backend for GstBackend {
         Ok(volume)
     }
 
-    async fn get_state(&self) -> anyhow::Result<backend::PlaybackState> {
+    async fn get_state(&self) -> anyhow::Result<super::PlaybackState> {
         let playbin = Arc::clone(&self.playbin);
 
         let state = match playbin
@@ -80,9 +80,9 @@ impl Backend for GstBackend {
             .map_err(|e| anyhow::anyhow!("Could not lock playbin: {e}"))?
             .current_state()
         {
-            gstreamer::State::Playing => Ok(backend::PlaybackState::Playing),
-            gstreamer::State::Paused => Ok(backend::PlaybackState::Paused),
-            _ => Ok(backend::PlaybackState::Stopped),
+            gstreamer::State::Playing => Ok(super::PlaybackState::Playing),
+            gstreamer::State::Paused => Ok(super::PlaybackState::Paused),
+            _ => Ok(super::PlaybackState::Stopped),
         };
         state
     }

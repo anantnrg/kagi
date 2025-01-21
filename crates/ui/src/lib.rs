@@ -60,9 +60,9 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 let playlist = app.playlist.clone();
                                 if playlist.lock().expect("Could not lock playlist").playing == true
                                 {
-                                    backend
-                                        .set_volume(*vol as f64)
-                                        .expect("Could not set volume");
+                                    // backend
+                                    //     .set_volume(*vol as f64)
+                                    //     .expect("Could not set volume");
                                     println!("volume set to: {}", *vol);
                                 }
                                 cx.notify();

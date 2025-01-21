@@ -55,14 +55,14 @@ impl Render for Reyvr {
                                     if playlist.lock().expect("Could not lock playlist").loaded
                                         == false
                                     {
-                                        playlist
-                                            .lock()
-                                            .expect("Could not lock playlist")
-                                            .load(&app.backend.clone())
-                                            .expect("Could not load current track.");
-                                        app.backend.play().expect("Could not play");
+                                        // playlist
+                                        //     .lock()
+                                        //     .expect("Could not lock playlist")
+                                        //     .load(&app.backend.clone())
+                                        //     .expect("Could not load current track.");
+                                        // app.backend.play().expect("Could not play");
                                     } else {
-                                        app.backend.play().expect("Could not play");
+                                        // app.backend.play().expect("Could not play");
                                     }
                                     playlist.lock().expect("Could not lock playlist").playing =
                                         true;
@@ -91,7 +91,7 @@ impl Render for Reyvr {
 
                         move |_, _| {
                             if playlist.lock().expect("Could not lock playlist").playing == true {
-                                app.backend.pause().expect("Could not pause playback");
+                                // app.backend.pause().expect("Could not pause playback");
                             }
                         }
                     }))
@@ -100,11 +100,11 @@ impl Render for Reyvr {
                         let playlist = app.playlist.clone();
 
                         move |_, _| {
-                            let new_playlist = Playlist::from_dir(
-                                &app.backend.clone(),
-                                PathBuf::from("E:\\music\\PSYCHX - Kordhell, Scarlxrd"),
-                            );
-                            *playlist.lock().expect("Could not lock playlist") = new_playlist;
+                            // let new_playlist = Playlist::from_dir(
+                            //     &app.backend.clone(),
+                            //     PathBuf::from("E:\\music\\PSYCHX - Kordhell, Scarlxrd"),
+                            // );
+                            // *playlist.lock().expect("Could not lock playlist") = new_playlist;
                             println!("Playlist loaded");
                         }
                     }))
