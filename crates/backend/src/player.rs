@@ -21,7 +21,7 @@ pub enum Response {
 }
 
 pub struct Player {
-    pub backend: Arc<Box<dyn Backend>>,
+    pub backend: Arc<dyn Backend>,
     pub playlist: Arc<Mutex<Playlist>>,
     pub volume: f64,
     pub tx: Sender<Response>,
@@ -34,10 +34,7 @@ pub struct Controller {
 }
 
 impl Player {
-    pub fn new(
-        backend: Arc<Box<dyn Backend>>,
-        playlist: Arc<Mutex<Playlist>>,
-    ) -> (Player, Controller) {
+    pub fn new(backend: Arc<dyn Backend>, playlist: Arc<Mutex<Playlist>>) -> (Player, Controller) {
         let (cmd_tx, cmd_rx) = smol::channel::bounded(128);
         let (res_tx, res_rx) = smol::channel::bounded(128);
         (
@@ -58,8 +55,41 @@ impl Player {
     pub async fn run(&mut self) {
         while let Ok(Command) = self.rx.try_recv() {
             match Command {
-                Command::Play => {}
-                Command::Pause => {}
+                Command::Play => {
+                    let playlist = self.playlist.clone();
+                    let backend = self.backend.clone();
+                    if playlist
+                        .lock()
+                        .expect("Could not lock playlist")
+                        .tracks
+                        .len()
+                        != 0
+                    {
+                        if playlist.lock().expect("Could not lock playlist").playing == false {
+                            if playlist.lock().expect("Could not lock playlist").loaded == false {
+                                playlist
+                                    .lock()
+                                    .expect("Could not lock playlist")
+                                    .load(&backend.clone())
+                                    .await
+                                    .map_err(|e| self.tx.send(Response::Error(e.to_string())));
+                                backend.play().await.expect("Could not play");
+                            } else {
+                                backend.play().await.expect("Could not play");
+                            }
+                            playlist.lock().expect("Could not lock playlist").playing = true;
+                        }
+                    } else {
+                        println!("Playlist is not loaded.");
+                    }
+                }
+                Command::Pause => {
+                    let playlist = self.playlist.clone();
+                    let backend = self.backend.clone();
+                    if playlist.lock().expect("Could not lock playlist").playing == true {
+                        backend.pause().await.expect("Could not pause playback");
+                    }
+                }
                 Command::GetMeta => {}
                 Command::Volume(vol) => {}
             }
