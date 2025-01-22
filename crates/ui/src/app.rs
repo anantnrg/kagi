@@ -3,10 +3,6 @@ use crate::layout::Layout;
 use backend::player::Controller;
 use components::{button::Button, slider::Slider, theme::Theme};
 use gpui::*;
-use std::{
-    path::PathBuf,
-    sync::{Arc, Mutex},
-};
 
 #[derive(Clone)]
 pub struct Reyvr {
@@ -35,31 +31,20 @@ impl Render for Reyvr {
                     .justify_center()
                     .items_center()
                     .child(Button::new().text("Play").on_click({
-                        let now_playing = self.now_playing.clone();
-                        let controller = cx.global::<Controller>();
-                        move |_, cx| {}
+                        // let now_playing = self.now_playing.clone();
+                        move |_, cx| {
+                            cx.global::<Controller>().play();
+                        }
                     }))
                     .child(Button::new().text("Pause").on_click({
-                        let app = self.clone();
-                        let playlist = app.playlist.clone();
-
-                        move |_, _| {
-                            if playlist.lock().expect("Could not lock playlist").playing == true {
-                                // app.backend.pause().expect("Could not pause playback");
-                            }
+                        move |_, cx| {
+                            cx.global::<Controller>().pause();
                         }
                     }))
                     .child(Button::new().text("Load Playlist").on_click({
-                        let app = self.clone();
-                        let playlist = app.playlist.clone();
-
-                        move |_, _| {
-                            // let new_playlist = Playlist::from_dir(
-                            //     &app.backend.clone(),
-                            //     PathBuf::from("E:\\music\\PSYCHX - Kordhell, Scarlxrd"),
-                            // );
-                            // *playlist.lock().expect("Could not lock playlist") = new_playlist;
-                            println!("Playlist loaded");
+                        move |_, cx| {
+                            cx.global::<Controller>()
+                                .load("E:\\music\\PSYCHX - Kordhell, Scarlxrd");
                         }
                     }))
                     .child(
@@ -70,8 +55,7 @@ impl Render for Reyvr {
                             .h_auto()
                             .w_20()
                             .child(self.vol_slider.clone()),
-                    )
-                    .child(div().w_10().child(format!("{}", self.volume.clone()))),
+                    ), // .child(div().w_10().child(format!("{}", self.volume.clone()))),
             )
     }
 }

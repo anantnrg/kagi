@@ -1,6 +1,9 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    path::PathBuf,
+    sync::{Arc, Mutex},
+};
 
-use smol::channel::{Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender};
 
 use crate::{
     Backend,
@@ -12,6 +15,9 @@ pub enum Command {
     Pause,
     Volume(f64),
     GetMeta,
+    Next,
+    Previous,
+    LoadFromFolder(String),
 }
 
 #[derive(Debug, Clone)]
@@ -40,8 +46,8 @@ impl gpui::Global for Controller {}
 
 impl Player {
     pub fn new(backend: Arc<dyn Backend>, playlist: Arc<Mutex<Playlist>>) -> (Player, Controller) {
-        let (cmd_tx, cmd_rx) = smol::channel::bounded(128);
-        let (res_tx, res_rx) = smol::channel::bounded(128);
+        let (cmd_tx, cmd_rx) = crossbeam_channel::bounded(128);
+        let (res_tx, res_rx) = crossbeam_channel::bounded(128);
         (
             Player {
                 backend,
@@ -58,99 +64,158 @@ impl Player {
     }
 
     pub async fn run(&mut self) {
-        while let Ok(command) = self.rx.try_recv() {
-            match command {
-                Command::Play => {
-                    let mut playlist = {
-                        let guard = self.playlist.lock().expect("Could not lock playlist");
-                        guard.clone()
-                    };
-                    let backend = self.backend.clone();
+        loop {
+            while let Ok(command) = self.rx.try_recv() {
+                match command {
+                    Command::Play => {
+                        let mut playlist = {
+                            let guard = self.playlist.lock().expect("Could not lock playlist");
+                            guard.clone()
+                        };
+                        let backend = self.backend.clone();
 
-                    if !playlist.tracks.is_empty() {
-                        if !playlist.playing {
-                            if !playlist.loaded {
-                                playlist
-                                    .load(&backend)
-                                    .await
-                                    .map_err(|e| self.tx.send(Response::Error(e.to_string())))
-                                    .expect("Could not load track.");
-                                backend
-                                    .play()
-                                    .await
-                                    .map_err(|e| self.tx.send(Response::Error(e.to_string())))
-                                    .expect("Could not play");
-                            } else {
-                                backend
-                                    .play()
-                                    .await
-                                    .map_err(|e| self.tx.send(Response::Error(e.to_string())))
-                                    .expect("Could not play");
+                        if !playlist.tracks.is_empty() {
+                            if !playlist.playing {
+                                if !playlist.loaded {
+                                    playlist
+                                        .load(&backend)
+                                        .await
+                                        .map_err(|e| self.tx.send(Response::Error(e.to_string())))
+                                        .expect("Could not load track.");
+                                    backend
+                                        .play()
+                                        .await
+                                        .map_err(|e| self.tx.send(Response::Error(e.to_string())))
+                                        .expect("Could not play");
+                                } else {
+                                    backend
+                                        .play()
+                                        .await
+                                        .map_err(|e| self.tx.send(Response::Error(e.to_string())))
+                                        .expect("Could not play");
+                                }
+                                self.tx
+                                    .send(Response::Success("Playback started.".to_string()))
+                                    .expect("Could not send message");
                             }
+                        } else {
+                            println!("Playlist is not loaded.");
                             self.tx
-                                .send(Response::Success("Playback started.".to_string()))
-                                .await
+                                .send(Response::Error("Playlist is not loaded.".to_string()))
                                 .expect("Could not send message");
                         }
-                    } else {
-                        println!("Playlist is not loaded.");
+                    }
+                    Command::Pause => {
+                        let playlist = {
+                            let guard = self.playlist.lock().expect("Could not lock playlist");
+                            guard.clone()
+                        };
+                        let backend = self.backend.clone();
+
+                        if playlist.playing {
+                            backend
+                                .pause()
+                                .await
+                                .map_err(|e| self.tx.send(Response::Error(e.to_string())))
+                                .expect("Could not pause playback");
+                        }
                         self.tx
-                            .send(Response::Error("Playlist is not loaded.".to_string()))
-                            .await
+                            .send(Response::Success("Playback paused.".to_string()))
                             .expect("Could not send message");
                     }
-                }
-                Command::Pause => {
-                    let playlist = {
-                        let guard = self.playlist.lock().expect("Could not lock playlist");
-                        guard.clone()
-                    };
-                    let backend = self.backend.clone();
+                    Command::GetMeta => {
+                        let playlist = {
+                            let guard = self.playlist.lock().expect("Could not lock playlist");
+                            guard.clone()
+                        };
 
-                    if playlist.playing {
-                        backend
-                            .pause()
-                            .await
-                            .map_err(|e| self.tx.send(Response::Error(e.to_string())))
-                            .expect("Could not pause playback");
+                        if playlist.loaded {
+                            let track = playlist.tracks[playlist.current_index].clone();
+                            self.tx
+                                .send(Response::Metadata(track))
+                                .expect("Could not send message");
+                        }
                     }
-                    self.tx
-                        .send(Response::Success("Playback paused.".to_string()))
-                        .await
-                        .expect("Could not send message");
-                }
-                Command::GetMeta => {
-                    let playlist = {
-                        let guard = self.playlist.lock().expect("Could not lock playlist");
-                        guard.clone()
-                    };
+                    Command::Volume(vol) => {
+                        let playlist = {
+                            let guard = self.playlist.lock().expect("Could not lock playlist");
+                            guard.clone()
+                        };
+                        let backend = self.backend.clone();
 
-                    if playlist.loaded {
-                        let track = playlist.tracks[playlist.current_index].clone();
-                        self.tx
-                            .send(Response::Metadata(track))
-                            .await
-                            .expect("Could not send message");
+                        if playlist.loaded {
+                            backend.set_volume(vol).await.expect("Could not set volume");
+                            self.tx
+                                .send(Response::Success(
+                                    format!("Volume set to {vol}").to_string(),
+                                ))
+                                .expect("Could not send message");
+                        }
                     }
-                }
-                Command::Volume(vol) => {
-                    let playlist = {
-                        let guard = self.playlist.lock().expect("Could not lock playlist");
-                        guard.clone()
-                    };
-                    let backend = self.backend.clone();
+                    Command::Next => {
+                        let mut playlist = {
+                            let guard = self.playlist.lock().expect("Could not lock playlist");
+                            guard.clone()
+                        };
+                        let backend = self.backend.clone();
 
-                    if playlist.loaded {
-                        backend.set_volume(vol).await.expect("Could not set volume");
-                        self.tx
-                            .send(Response::Success(
-                                format!("Volume set to {vol}").to_string(),
-                            ))
-                            .await
-                            .expect("Could not send message");
+                        if playlist.loaded {
+                            playlist
+                                .play_next(&backend)
+                                .await
+                                .expect("Could not play next.");
+                        }
+                    }
+                    Command::Previous => {
+                        let mut playlist = {
+                            let guard = self.playlist.lock().expect("Could not lock playlist");
+                            guard.clone()
+                        };
+                        let backend = self.backend.clone();
+
+                        if playlist.loaded {
+                            playlist
+                                .play_previous(&backend)
+                                .await
+                                .expect("Could not play previous.");
+                        }
+                    }
+                    Command::LoadFromFolder(path) => {
+                        let backend = self.backend.clone();
+                        self.playlist = Arc::new(Mutex::new(
+                            Playlist::from_dir(&backend, PathBuf::from(path)).await,
+                        ));
                     }
                 }
             }
         }
+    }
+}
+
+impl Controller {
+    pub fn load(&self, path: &'static str) {
+        self.tx
+            .send(Command::LoadFromFolder(path.to_string()))
+            .expect("Could not send command");
+    }
+
+    pub fn play(&self) {
+        self.tx.send(Command::Play).expect("Could not send command");
+    }
+
+    pub fn pause(&self) {
+        self.tx
+            .send(Command::Pause)
+            .expect("Could not send command");
+    }
+
+    pub fn next(&self) {
+        self.tx.send(Command::Next).expect("Could not send command");
+    }
+
+    pub fn prev(&self) {
+        self.tx
+            .send(Command::Previous)
+            .expect("Could not send command");
     }
 }

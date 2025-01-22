@@ -8,4 +8,3 @@ gpui.workspace = true
 anyhow.workspace = true
 components = { path = "../components" }
 backend = { path = "../backend" }
-smol.workspace = true
