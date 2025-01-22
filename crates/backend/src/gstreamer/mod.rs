@@ -5,6 +5,7 @@ use gstreamer::prelude::*;
 use gstreamer_pbutils as gst_pbutils;
 use std::sync::{Arc, Mutex};
 
+#[derive(Debug)]
 pub struct GstBackend {
     pub playbin: Arc<Mutex<gstreamer::Element>>,
 }

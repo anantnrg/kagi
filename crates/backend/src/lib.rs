@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use async_trait::async_trait;
 use playback::Track;
 
@@ -7,7 +9,7 @@ pub mod player;
 
 /// Common backend trait. Can be used to implement multple backends.
 #[async_trait]
-pub trait Backend: Send + Sync {
+pub trait Backend: Send + Sync + Debug {
     /// Initialize the backend.
     async fn init() -> anyhow::Result<()>
     where

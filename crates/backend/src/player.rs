@@ -14,12 +14,14 @@ pub enum Command {
     GetMeta,
 }
 
+#[derive(Debug)]
 pub enum Response {
     Error(String),
     Success(String),
     Metadata(Track),
 }
 
+#[derive(Debug)]
 pub struct Player {
     pub backend: Arc<dyn Backend>,
     pub playlist: Arc<Mutex<Playlist>>,
@@ -28,6 +30,7 @@ pub struct Player {
     pub rx: Receiver<Command>,
 }
 
+#[derive(Debug)]
 pub struct Controller {
     pub tx: Sender<Command>,
     pub rx: Receiver<Response>,
@@ -72,10 +75,19 @@ impl Player {
                                     .expect("Could not lock playlist")
                                     .load(&backend.clone())
                                     .await
-                                    .map_err(|e| self.tx.send(Response::Error(e.to_string())));
-                                backend.play().await.expect("Could not play");
+                                    .map_err(|e| self.tx.send(Response::Error(e.to_string())))
+                                    .expect("Could not load track.");
+                                backend
+                                    .play()
+                                    .await
+                                    .map_err(|e| self.tx.send(Response::Error(e.to_string())))
+                                    .expect("Could not play");
                             } else {
-                                backend.play().await.expect("Could not play");
+                                backend
+                                    .play()
+                                    .await
+                                    .map_err(|e| self.tx.send(Response::Error(e.to_string())))
+                                    .expect("Could not play");
                             }
                             playlist.lock().expect("Could not lock playlist").playing = true;
                         }
@@ -87,7 +99,11 @@ impl Player {
                     let playlist = self.playlist.clone();
                     let backend = self.backend.clone();
                     if playlist.lock().expect("Could not lock playlist").playing == true {
-                        backend.pause().await.expect("Could not pause playback");
+                        backend
+                            .pause()
+                            .await
+                            .map_err(|e| self.tx.send(Response::Error(e.to_string())))
+                            .expect("Could not pause playback");
                     }
                 }
                 Command::GetMeta => {}
