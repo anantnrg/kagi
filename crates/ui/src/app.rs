@@ -1,6 +1,5 @@
 use super::{now_playing::*, titlebar::Titlebar};
 use crate::layout::Layout;
-use backend::{Backend, playback::Playlist};
 use components::{button::Button, slider::Slider, theme::Theme};
 use gpui::*;
 use std::{
@@ -10,9 +9,6 @@ use std::{
 
 #[derive(Clone)]
 pub struct Reyvr {
-    pub backend: Arc<dyn Backend>,
-    pub playlist: Arc<Mutex<Playlist>>,
-    pub volume: f64,
     pub vol_slider: View<Slider>,
     pub layout: Layout,
     pub now_playing: Model<NowPlaying>,

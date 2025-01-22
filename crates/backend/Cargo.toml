@@ -9,3 +9,4 @@ async-trait.workspace = true
 smol.workspace = true
 gstreamer.workspace = true
 gstreamer-pbutils = "0.23.4"
+gpui.workspace = true

@@ -414,6 +414,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
+ "gpui",
  "gstreamer",
  "gstreamer-pbutils",
  "smol 2.0.2",

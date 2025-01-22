@@ -14,14 +14,14 @@ pub enum Command {
     GetMeta,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Response {
     Error(String),
     Success(String),
     Metadata(Track),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Player {
     pub backend: Arc<dyn Backend>,
     pub playlist: Arc<Mutex<Playlist>>,
@@ -30,11 +30,13 @@ pub struct Player {
     pub rx: Receiver<Command>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Controller {
     pub tx: Sender<Command>,
     pub rx: Receiver<Response>,
 }
+
+impl gpui::Global for Controller {}
 
 impl Player {
     pub fn new(backend: Arc<dyn Backend>, playlist: Arc<Mutex<Playlist>>) -> (Player, Controller) {
@@ -90,9 +92,17 @@ impl Player {
                                     .expect("Could not play");
                             }
                             playlist.lock().expect("Could not lock playlist").playing = true;
+                            self.tx
+                                .send(Response::Success("Playback started.".to_string()))
+                                .await
+                                .expect("Could not send message");
                         }
                     } else {
                         println!("Playlist is not loaded.");
+                        self.tx
+                            .send(Response::Error("Playlist is not loaded.".to_string()))
+                            .await
+                            .expect("Could not send message");
                     }
                 }
                 Command::Pause => {
@@ -105,9 +115,41 @@ impl Player {
                             .map_err(|e| self.tx.send(Response::Error(e.to_string())))
                             .expect("Could not pause playback");
                     }
+                    self.tx
+                        .send(Response::Success("Playback paused.".to_string()))
+                        .await
+                        .expect("Could not send message");
                 }
-                Command::GetMeta => {}
-                Command::Volume(vol) => {}
+                Command::GetMeta => {
+                    let playlist = self.playlist.clone();
+
+                    if playlist.lock().expect("Could not lock playlist").loaded == true {
+                        self.tx
+                            .send(Response::Metadata(
+                                playlist.lock().expect("Could not lock playlist").tracks[playlist
+                                    .lock()
+                                    .expect("Could not lock playlist")
+                                    .current_index]
+                                    .clone(),
+                            ))
+                            .await
+                            .expect("Could not send message");
+                    }
+                }
+                Command::Volume(vol) => {
+                    let playlist = self.playlist.clone();
+                    let backend = self.backend.clone();
+
+                    if playlist.lock().expect("Could not lock playlist").loaded == true {
+                        backend.set_volume(vol).await.expect("Could not set volume");
+                        self.tx
+                            .send(Response::Success(
+                                format!("Volume set to {vol}").to_string(),
+                            ))
+                            .await
+                            .expect("Could not send message");
+                    }
+                }
             }
         }
     }
