@@ -58,24 +58,20 @@ impl Player {
     }
 
     pub async fn run(&mut self) {
-        while let Ok(Command) = self.rx.try_recv() {
-            match Command {
+        while let Ok(command) = self.rx.try_recv() {
+            match command {
                 Command::Play => {
-                    let playlist = self.playlist.clone();
+                    let mut playlist = {
+                        let guard = self.playlist.lock().expect("Could not lock playlist");
+                        guard.clone()
+                    };
                     let backend = self.backend.clone();
-                    if playlist
-                        .lock()
-                        .expect("Could not lock playlist")
-                        .tracks
-                        .len()
-                        != 0
-                    {
-                        if playlist.lock().expect("Could not lock playlist").playing == false {
-                            if playlist.lock().expect("Could not lock playlist").loaded == false {
+
+                    if !playlist.tracks.is_empty() {
+                        if !playlist.playing {
+                            if !playlist.loaded {
                                 playlist
-                                    .lock()
-                                    .expect("Could not lock playlist")
-                                    .load(&backend.clone())
+                                    .load(&backend)
                                     .await
                                     .map_err(|e| self.tx.send(Response::Error(e.to_string())))
                                     .expect("Could not load track.");
@@ -91,7 +87,6 @@ impl Player {
                                     .map_err(|e| self.tx.send(Response::Error(e.to_string())))
                                     .expect("Could not play");
                             }
-                            playlist.lock().expect("Could not lock playlist").playing = true;
                             self.tx
                                 .send(Response::Success("Playback started.".to_string()))
                                 .await
@@ -106,9 +101,13 @@ impl Player {
                     }
                 }
                 Command::Pause => {
-                    let playlist = self.playlist.clone();
+                    let playlist = {
+                        let guard = self.playlist.lock().expect("Could not lock playlist");
+                        guard.clone()
+                    };
                     let backend = self.backend.clone();
-                    if playlist.lock().expect("Could not lock playlist").playing == true {
+
+                    if playlist.playing {
                         backend
                             .pause()
                             .await
@@ -121,26 +120,27 @@ impl Player {
                         .expect("Could not send message");
                 }
                 Command::GetMeta => {
-                    let playlist = self.playlist.clone();
+                    let playlist = {
+                        let guard = self.playlist.lock().expect("Could not lock playlist");
+                        guard.clone()
+                    };
 
-                    if playlist.lock().expect("Could not lock playlist").loaded == true {
+                    if playlist.loaded {
+                        let track = playlist.tracks[playlist.current_index].clone();
                         self.tx
-                            .send(Response::Metadata(
-                                playlist.lock().expect("Could not lock playlist").tracks[playlist
-                                    .lock()
-                                    .expect("Could not lock playlist")
-                                    .current_index]
-                                    .clone(),
-                            ))
+                            .send(Response::Metadata(track))
                             .await
                             .expect("Could not send message");
                     }
                 }
                 Command::Volume(vol) => {
-                    let playlist = self.playlist.clone();
+                    let playlist = {
+                        let guard = self.playlist.lock().expect("Could not lock playlist");
+                        guard.clone()
+                    };
                     let backend = self.backend.clone();
 
-                    if playlist.lock().expect("Could not lock playlist").loaded == true {
+                    if playlist.loaded {
                         backend.set_volume(vol).await.expect("Could not set volume");
                         self.tx
                             .send(Response::Success(

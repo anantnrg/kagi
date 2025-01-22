@@ -48,7 +48,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let theme = Theme::default();
                     let now_playing = NowPlaying::new();
                     let np = cx.new_model(|_| now_playing.clone());
-                    let (_, controller) =
+                    let (mut player, controller) =
                         Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
                     let vol_slider = cx.new_view(|_| {
                         Slider::new(theme)
@@ -58,6 +58,9 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .default(0.4)
                     });
                     cx.set_global(controller);
+                    cx.background_executor().spawn(async move {
+                        player.run().await;
+                    });
                     // cx.subscribe(
                     //     &vol_slider,
                     //     |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {
