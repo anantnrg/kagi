@@ -165,6 +165,7 @@ impl Player {
 
                         if playlist.loaded {
                             backend.set_volume(vol).await.expect("Could not set volume");
+                            println!("Volume set to {vol}");
                             self.tx
                                 .send(Response::Success(
                                     format!("Volume set to {vol}").to_string(),
@@ -237,5 +238,12 @@ impl Controller {
         self.tx
             .send(Command::Previous)
             .expect("Could not send command");
+    }
+
+    pub fn volume(&self, vol: f64) {
+        self.tx
+            .send(Command::Volume(vol))
+            .expect("Could not send command");
+        // println!("Volume set to {vol}");
     }
 }

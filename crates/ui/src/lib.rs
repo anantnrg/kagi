@@ -45,64 +45,53 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             },
             |cx| {
                 cx.new_view(|cx| {
-                    {
-                        let theme = Theme::default();
-                        let now_playing = NowPlaying::new();
-                        let np = cx.new_model(|_| now_playing.clone());
-                        let (mut player, controller) =
-                            Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
-                        let vol_slider = cx.new_view(|_| {
-                            Slider::new(theme)
-                                .min(0.0)
-                                .max(1.0)
-                                .step(0.005)
-                                .default(0.4)
-                        });
-                        cx.set_global(controller);
-                        cx.background_executor()
-                            .spawn(async move {
-                                player.run().await;
-                            })
-                            .detach();
-                        // cx.subscribe(
-                        //     &vol_slider,
-                        //     |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {
-                        //         SliderEvent::Change(vol) => {
-                        //             this.volume = (vol * 100.0).round() as f64 / 100.0;
-                        //             let app = this.clone();
-                        //             let backend = app.backend.clone();
-                        //             let playlist = app.playlist.clone();
-                        //             if playlist.lock().expect("Could not lock playlist").playing == true
-                        //             {
-                        //                 // backend
-                        //                 //     .set_volume(*vol as f64)
-                        //                 //     .expect("Could not set volume");
-                        //                 println!("volume set to: {}", *vol);
-                        //             }
-                        //             cx.notify();
-                        //         }
-                        //     },
-                        // )
-                        // .detach();
-                        cx.subscribe(&np, |this: &mut Reyvr, _, event: &NowPlayingEvent, cx| {
-                            match event {
-                                NowPlayingEvent::Update(title, album, artists) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.title = title.clone();
-                                        this.album = album.clone();
-                                        this.artists = artists.clone();
-                                    });
-                                    cx.notify();
-                                }
-                            }
+                    let theme = Theme::default();
+                    let now_playing = NowPlaying::new();
+                    let np = cx.new_model(|_| now_playing.clone());
+                    let (mut player, controller) =
+                        Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
+                    let vol_slider = cx.new_view(|_| {
+                        Slider::new(theme)
+                            .min(0.0)
+                            .max(1.0)
+                            .step(0.005)
+                            .default(0.4)
+                    });
+                    cx.set_global(controller);
+                    cx.background_executor()
+                        .spawn(async move {
+                            player.run().await;
                         })
                         .detach();
-                        Reyvr {
-                            layout: Layout::new(),
-                            now_playing: np,
-                            theme,
-                            vol_slider,
+                    cx.subscribe(&vol_slider, |_, _, event: &SliderEvent, cx| match event {
+                        SliderEvent::Change(vol) => {
+                            let volume = (vol * 100.0).round() as f64 / 100.0;
+                            cx.global::<Controller>().volume(volume);
+                            // println!("Volume set to {volume}");
+
+                            cx.notify();
                         }
+                    })
+                    .detach();
+                    cx.subscribe(
+                        &np,
+                        |this: &mut Reyvr, _, event: &NowPlayingEvent, cx| match event {
+                            NowPlayingEvent::Update(title, album, artists) => {
+                                this.now_playing.update(cx, |this, _| {
+                                    this.title = title.clone();
+                                    this.album = album.clone();
+                                    this.artists = artists.clone();
+                                });
+                                cx.notify();
+                            }
+                        },
+                    )
+                    .detach();
+                    Reyvr {
+                        layout: Layout::new(),
+                        now_playing: np,
+                        theme,
+                        vol_slider,
                     }
                 })
             },
