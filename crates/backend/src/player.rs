@@ -95,8 +95,10 @@ impl Player {
                                         }
                                     })
                                     .detach();
+                                    self.playlist.lock().expect("").set_playing();
                                 } else {
                                     let tx = self.tx.clone();
+
                                     smol::spawn({
                                         async move {
                                             backend
@@ -109,6 +111,7 @@ impl Player {
                                         }
                                     })
                                     .detach();
+                                    self.playlist.lock().expect("").set_playing();
                                 }
                                 self.tx
                                     .send(Response::Success("Playback started.".to_string()))
@@ -134,6 +137,7 @@ impl Player {
                                 .await
                                 .map_err(|e| self.tx.send(Response::Error(e.to_string())))
                                 .expect("Could not pause playback");
+                            self.playlist.lock().expect("").set_playing();
                         }
                         self.tx
                             .send(Response::Success("Playback paused.".to_string()))

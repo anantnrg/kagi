@@ -89,6 +89,11 @@ impl Playlist {
         }
         playlist
     }
+
+    pub fn set_playing(&mut self) {
+        self.playing = !self.playing;
+    }
+
     pub async fn load(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
         let current_song = &self.tracks[self.current_index];
         self.loaded = true;
