@@ -82,17 +82,33 @@ impl Player {
                                         .await
                                         .map_err(|e| self.tx.send(Response::Error(e.to_string())))
                                         .expect("Could not load track.");
-                                    backend
-                                        .play()
-                                        .await
-                                        .map_err(|e| self.tx.send(Response::Error(e.to_string())))
-                                        .expect("Could not play");
+                                    let tx = self.tx.clone();
+                                    smol::spawn({
+                                        async move {
+                                            backend
+                                                .play()
+                                                .await
+                                                .map_err(|e| {
+                                                    tx.send(Response::Error(e.to_string()))
+                                                })
+                                                .expect("Could not play");
+                                        }
+                                    })
+                                    .detach();
                                 } else {
-                                    backend
-                                        .play()
-                                        .await
-                                        .map_err(|e| self.tx.send(Response::Error(e.to_string())))
-                                        .expect("Could not play");
+                                    let tx = self.tx.clone();
+                                    smol::spawn({
+                                        async move {
+                                            backend
+                                                .play()
+                                                .await
+                                                .map_err(|e| {
+                                                    tx.send(Response::Error(e.to_string()))
+                                                })
+                                                .expect("Could not play");
+                                        }
+                                    })
+                                    .detach();
                                 }
                                 self.tx
                                     .send(Response::Success("Playback started.".to_string()))

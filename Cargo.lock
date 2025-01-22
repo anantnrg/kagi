@@ -418,6 +418,7 @@ dependencies = [
  "gpui",
  "gstreamer",
  "gstreamer-pbutils",
+ "smol 2.0.2",
 ]
 
 [[package]]
