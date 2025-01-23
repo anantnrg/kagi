@@ -1,9 +1,10 @@
 use std::{
+    num::NonZeroUsize,
     path::PathBuf,
     sync::{Arc, Mutex},
 };
 
-use crossbeam_channel::{Receiver, Sender};
+use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 
 use crate::{
     Backend,
@@ -46,8 +47,8 @@ impl gpui::Global for Controller {}
 
 impl Player {
     pub fn new(backend: Arc<dyn Backend>, playlist: Arc<Mutex<Playlist>>) -> (Player, Controller) {
-        let (cmd_tx, cmd_rx) = crossbeam_channel::bounded(128);
-        let (res_tx, res_rx) = crossbeam_channel::bounded(128);
+        let (cmd_tx, cmd_rx) = ring_channel::ring_channel(NonZeroUsize::new(128).unwrap());
+        let (res_tx, res_rx) = ring_channel::ring_channel(NonZeroUsize::new(128).unwrap());
         (
             Player {
                 backend,
@@ -95,10 +96,7 @@ impl Player {
                                         }
                                     })
                                     .detach();
-                                    self.playlist
-                                        .lock()
-                                        .expect("Could not lock playlist")
-                                        .set_playing();
+                                    playlist.playing = true;
                                 } else {
                                     let tx = self.tx.clone();
 
@@ -114,7 +112,7 @@ impl Player {
                                         }
                                     })
                                     .detach();
-                                    playlist.set_playing();
+                                    playlist.playing = true;
                                 }
                                 self.tx
                                     .send(Response::Success("Playback started.".to_string()))
@@ -141,7 +139,7 @@ impl Player {
                                 .await
                                 .map_err(|e| self.tx.send(Response::Error(e.to_string())))
                                 .expect("Could not pause playback");
-                            playlist.set_playing();
+                            playlist.playing = false;
                         }
                         self.tx
                             .send(Response::Success("Playback paused.".to_string()))
