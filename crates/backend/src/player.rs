@@ -77,12 +77,7 @@ impl Player {
 
                         if !playlist.tracks.is_empty() {
                             if !playlist.playing {
-                                if !playlist.loaded {
-                                    playlist
-                                        .load(&backend)
-                                        .await
-                                        .map_err(|e| self.tx.send(Response::Error(e.to_string())))
-                                        .expect("Could not load track.");
+                                if playlist.loaded {
                                     let tx = self.tx.clone();
 
                                     backend
@@ -93,25 +88,17 @@ impl Player {
 
                                     playlist.playing = true;
                                 } else {
-                                    let tx = self.tx.clone();
-
-                                    backend
-                                        .play()
-                                        .await
-                                        .map_err(|e| tx.send(Response::Error(e.to_string())))
-                                        .expect("Could not play");
-
-                                    playlist.playing = true;
+                                    println!("Playlist is not loaded.");
+                                    self.tx
+                                        .send(Response::Error(
+                                            "Playlist is not loaded.".to_string(),
+                                        ))
+                                        .expect("Could not send message");
                                 }
                                 self.tx
                                     .send(Response::Success("Playback started.".to_string()))
                                     .expect("Could not send message");
                             }
-                        } else {
-                            println!("Playlist is not loaded.");
-                            self.tx
-                                .send(Response::Error("Playlist is not loaded.".to_string()))
-                                .expect("Could not send message");
                         }
                         self.playlist = Arc::new(Mutex::new(playlist));
                     }
@@ -158,6 +145,7 @@ impl Player {
                         if playlist.loaded {
                             backend.set_volume(vol).await.expect("Could not set volume");
                             println!("Volume set to {vol}");
+                            self.volume = vol;
                             self.tx
                                 .send(Response::Success(
                                     format!("Volume set to {vol}").to_string(),
@@ -174,20 +162,26 @@ impl Player {
 
                         if playlist.loaded {
                             if playlist.playing {
-                                println!("index was: {}", playlist.current_index);
-                                backend.pause().await.expect("Could not pause");
+                                backend.stop().await.expect("Could not pause");
                                 playlist
                                     .play_next(&backend)
                                     .await
                                     .expect("Could not play next.");
-                                println!("index is: {}", playlist.current_index);
                                 backend.play().await.expect("Could not pause");
+                                backend
+                                    .set_volume(self.volume)
+                                    .await
+                                    .expect("Could not set volume");
                             } else {
                                 playlist
                                     .play_next(&backend)
                                     .await
                                     .expect("Could not play next.");
                                 backend.play().await.expect("Could not pause");
+                                backend
+                                    .set_volume(self.volume)
+                                    .await
+                                    .expect("Could not set volume");
                             }
                         }
                         self.playlist = Arc::new(Mutex::new(playlist));
@@ -199,18 +193,40 @@ impl Player {
                         };
                         let backend = self.backend.clone();
                         if playlist.loaded {
-                            playlist
-                                .play_previous(&backend)
-                                .await
-                                .expect("Could not play previous.");
+                            if playlist.playing {
+                                backend.stop().await.expect("Could not pause");
+                                playlist
+                                    .play_previous(&backend)
+                                    .await
+                                    .expect("Could not play next.");
+                                backend.play().await.expect("Could not pause");
+                                backend
+                                    .set_volume(self.volume)
+                                    .await
+                                    .expect("Could not set volume");
+                            } else {
+                                playlist
+                                    .play_previous(&backend)
+                                    .await
+                                    .expect("Could not play next.");
+                                backend.play().await.expect("Could not pause");
+                                backend
+                                    .set_volume(self.volume)
+                                    .await
+                                    .expect("Could not set volume");
+                            }
                         }
                         self.playlist = Arc::new(Mutex::new(playlist));
                     }
                     Command::LoadFromFolder(path) => {
                         let backend = self.backend.clone();
-                        self.playlist = Arc::new(Mutex::new(
-                            Playlist::from_dir(&backend, PathBuf::from(path)).await,
-                        ));
+                        let mut playlist = Playlist::from_dir(&backend, PathBuf::from(path)).await;
+
+                        playlist
+                            .load(&backend)
+                            .await
+                            .expect("Could not load first item");
+                        self.playlist = Arc::new(Mutex::new(playlist));
                     }
                 }
             }

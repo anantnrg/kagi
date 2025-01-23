@@ -87,7 +87,7 @@ impl Playlist {
                 }
             }
         }
-        // playlist.loaded = true;
+        playlist.loaded = true;
         playlist
     }
 
@@ -97,7 +97,6 @@ impl Playlist {
 
     pub async fn load(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
         let current_song = &self.tracks[self.current_index];
-        self.loaded = true;
         backend.load(&current_song.uri).await?;
         Ok(())
     }
