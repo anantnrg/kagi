@@ -95,7 +95,10 @@ impl Player {
                                         }
                                     })
                                     .detach();
-                                    self.playlist.lock().expect("").set_playing();
+                                    self.playlist
+                                        .lock()
+                                        .expect("Could not lock playlist")
+                                        .set_playing();
                                 } else {
                                     let tx = self.tx.clone();
 
@@ -111,7 +114,7 @@ impl Player {
                                         }
                                     })
                                     .detach();
-                                    self.playlist.lock().expect("").set_playing();
+                                    playlist.set_playing();
                                 }
                                 self.tx
                                     .send(Response::Success("Playback started.".to_string()))
@@ -123,9 +126,10 @@ impl Player {
                                 .send(Response::Error("Playlist is not loaded.".to_string()))
                                 .expect("Could not send message");
                         }
+                        self.playlist = Arc::new(Mutex::new(playlist));
                     }
                     Command::Pause => {
-                        let playlist = {
+                        let mut playlist = {
                             let guard = self.playlist.lock().expect("Could not lock playlist");
                             guard.clone()
                         };
@@ -137,11 +141,12 @@ impl Player {
                                 .await
                                 .map_err(|e| self.tx.send(Response::Error(e.to_string())))
                                 .expect("Could not pause playback");
-                            self.playlist.lock().expect("").set_playing();
+                            playlist.set_playing();
                         }
                         self.tx
                             .send(Response::Success("Playback paused.".to_string()))
                             .expect("Could not send message");
+                        self.playlist = Arc::new(Mutex::new(playlist));
                     }
                     Command::GetMeta => {
                         let playlist = {
@@ -186,6 +191,7 @@ impl Player {
                                 .await
                                 .expect("Could not play next.");
                         }
+                        self.playlist = Arc::new(Mutex::new(playlist));
                     }
                     Command::Previous => {
                         let mut playlist = {
@@ -193,13 +199,13 @@ impl Player {
                             guard.clone()
                         };
                         let backend = self.backend.clone();
-
                         if playlist.loaded {
                             playlist
                                 .play_previous(&backend)
                                 .await
                                 .expect("Could not play previous.");
                         }
+                        self.playlist = Arc::new(Mutex::new(playlist));
                     }
                     Command::LoadFromFolder(path) => {
                         let backend = self.backend.clone();
