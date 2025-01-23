@@ -1,3 +1,5 @@
+use crate::player::Response;
+
 use super::{Backend, playback::Track};
 use anyhow::anyhow;
 use async_trait::async_trait;
@@ -87,6 +89,7 @@ impl Backend for GstBackend {
         };
         state
     }
+
     async fn get_meta(&self, uri: &str) -> anyhow::Result<Track> {
         let discoverer = gst_pbutils::Discoverer::new(gstreamer::ClockTime::from_seconds(10))?;
         let info = discoverer.discover_uri(uri)?;
@@ -111,6 +114,18 @@ impl Backend for GstBackend {
             duration: info.duration().map(|d| d.seconds() as f64),
             album_art_uri: None,
         })
+    }
+
+    async fn monitor(&self) -> Option<Response> {
+        let playbin = self.playbin.lock().expect("Could not lock playbin");
+        if let Some(bus) = playbin.bus() {
+            for msg in bus.iter_timed(gstreamer::ClockTime::NONE) {
+                match msg.view() {
+                    _ => {}
+                }
+            }
+        }
+        Some(Response::Success("".to_string()))
     }
 }
 

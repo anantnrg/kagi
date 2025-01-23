@@ -177,7 +177,7 @@ impl Player {
                                     .play_next(&backend)
                                     .await
                                     .expect("Could not play next.");
-                                backend.play().await.expect("Could not pause");
+                                backend.play().await.expect("Could not stop");
                                 backend
                                     .set_volume(self.volume)
                                     .await
@@ -194,7 +194,7 @@ impl Player {
                         let backend = self.backend.clone();
                         if playlist.loaded {
                             if playlist.playing {
-                                backend.stop().await.expect("Could not pause");
+                                backend.stop().await.expect("Could not stop");
                                 playlist
                                     .play_previous(&backend)
                                     .await
