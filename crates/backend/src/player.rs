@@ -84,34 +84,23 @@ impl Player {
                                         .map_err(|e| self.tx.send(Response::Error(e.to_string())))
                                         .expect("Could not load track.");
                                     let tx = self.tx.clone();
-                                    smol::spawn({
-                                        async move {
-                                            backend
-                                                .play()
-                                                .await
-                                                .map_err(|e| {
-                                                    tx.send(Response::Error(e.to_string()))
-                                                })
-                                                .expect("Could not play");
-                                        }
-                                    })
-                                    .detach();
+
+                                    backend
+                                        .play()
+                                        .await
+                                        .map_err(|e| tx.send(Response::Error(e.to_string())))
+                                        .expect("Could not play");
+
                                     playlist.playing = true;
                                 } else {
                                     let tx = self.tx.clone();
 
-                                    smol::spawn({
-                                        async move {
-                                            backend
-                                                .play()
-                                                .await
-                                                .map_err(|e| {
-                                                    tx.send(Response::Error(e.to_string()))
-                                                })
-                                                .expect("Could not play");
-                                        }
-                                    })
-                                    .detach();
+                                    backend
+                                        .play()
+                                        .await
+                                        .map_err(|e| tx.send(Response::Error(e.to_string())))
+                                        .expect("Could not play");
+
                                     playlist.playing = true;
                                 }
                                 self.tx
@@ -184,10 +173,22 @@ impl Player {
                         let backend = self.backend.clone();
 
                         if playlist.loaded {
-                            playlist
-                                .play_next(&backend)
-                                .await
-                                .expect("Could not play next.");
+                            if playlist.playing {
+                                println!("index was: {}", playlist.current_index);
+                                backend.pause().await.expect("Could not pause");
+                                playlist
+                                    .play_next(&backend)
+                                    .await
+                                    .expect("Could not play next.");
+                                println!("index is: {}", playlist.current_index);
+                                backend.play().await.expect("Could not pause");
+                            } else {
+                                playlist
+                                    .play_next(&backend)
+                                    .await
+                                    .expect("Could not play next.");
+                                backend.play().await.expect("Could not pause");
+                            }
                         }
                         self.playlist = Arc::new(Mutex::new(playlist));
                     }

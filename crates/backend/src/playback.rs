@@ -87,6 +87,7 @@ impl Playlist {
                 }
             }
         }
+        // playlist.loaded = true;
         playlist
     }
 
