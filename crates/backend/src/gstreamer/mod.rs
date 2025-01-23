@@ -3,7 +3,7 @@ use crate::player::Response;
 use super::{Backend, playback::Track};
 use anyhow::anyhow;
 use async_trait::async_trait;
-use gstreamer::prelude::*;
+use gstreamer::{MessageView, prelude::*};
 use gstreamer_pbutils as gst_pbutils;
 use std::sync::{Arc, Mutex};
 
@@ -120,12 +120,20 @@ impl Backend for GstBackend {
         let playbin = self.playbin.lock().expect("Could not lock playbin");
         if let Some(bus) = playbin.bus() {
             for msg in bus.iter_timed(gstreamer::ClockTime::NONE) {
-                match msg.view() {
-                    _ => {}
-                }
+                return match msg.view() {
+                    MessageView::StateChanged(state) => {
+                        Some(Response::StateChanged(state.current()))
+                    }
+                    MessageView::Eos(_) => Some(Response::Eos),
+                    MessageView::StreamStart(_) => Some(Response::StreamStart),
+                    MessageView::Error(e) => Some(Response::Error(e.to_string())),
+                    MessageView::Warning(w) => Some(Response::Warning(w.to_string())),
+                    MessageView::Info(i) => Some(Response::Info(i.to_string())),
+                    _ => None,
+                };
             }
         }
-        Some(Response::Success("".to_string()))
+        None
     }
 }
 

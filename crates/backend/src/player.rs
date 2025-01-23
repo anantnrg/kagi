@@ -4,10 +4,11 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use gstreamer::State;
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 
 use crate::{
-    Backend,
+    Backend, PlaybackState,
     playback::{Playlist, Track},
 };
 
@@ -24,8 +25,12 @@ pub enum Command {
 #[derive(Debug, Clone)]
 pub enum Response {
     Error(String),
-    Success(String),
+    Warning(String),
+    Info(String),
     Metadata(Track),
+    StateChanged(State),
+    Eos,
+    StreamStart,
 }
 
 #[derive(Debug, Clone)]
@@ -96,7 +101,7 @@ impl Player {
                                         .expect("Could not send message");
                                 }
                                 self.tx
-                                    .send(Response::Success("Playback started.".to_string()))
+                                    .send(Response::Info("Playback started.".to_string()))
                                     .expect("Could not send message");
                             }
                         }
@@ -118,7 +123,7 @@ impl Player {
                             playlist.playing = false;
                         }
                         self.tx
-                            .send(Response::Success("Playback paused.".to_string()))
+                            .send(Response::Info("Playback paused.".to_string()))
                             .expect("Could not send message");
                         self.playlist = Arc::new(Mutex::new(playlist));
                     }
@@ -147,9 +152,7 @@ impl Player {
                             println!("Volume set to {vol}");
                             self.volume = vol;
                             self.tx
-                                .send(Response::Success(
-                                    format!("Volume set to {vol}").to_string(),
-                                ))
+                                .send(Response::Info(format!("Volume set to {vol}").to_string()))
                                 .expect("Could not send message");
                         }
                     }
