@@ -9,7 +9,7 @@ use assets::*;
 use backend::{
     Backend,
     playback::Playlist,
-    player::{Controller, Player},
+    player::{Controller, Player, Response},
 };
 use components::{
     slider::{Slider, SliderEvent},
@@ -57,12 +57,27 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .step(0.005)
                             .default(0.4)
                     });
+                    let recv_controller = controller.clone();
+
                     cx.set_global(controller);
                     cx.background_executor()
                         .spawn(async move {
                             player.run().await;
                         })
                         .detach();
+                    cx.spawn(async move |_, _| {
+                        loop {
+                            if let Ok(res) = recv_controller.rx.try_recv() {
+                                match res {
+                                    Response::Eos => {
+                                        println!("End of stream")
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
+                    })
+                    .detach();
                     cx.subscribe(&vol_slider, |_, _, event: &SliderEvent, cx| match event {
                         SliderEvent::Change(vol) => {
                             let volume = (vol * 100.0).round() as f64 / 100.0;

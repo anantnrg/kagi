@@ -233,6 +233,9 @@ impl Player {
                     }
                 }
             }
+            if let Some(res) = self.backend.monitor().await {
+                self.tx.send(res).expect("Could not send message.");
+            }
         }
     }
 }
