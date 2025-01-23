@@ -41,6 +41,16 @@ impl Render for Reyvr {
                             cx.global::<Controller>().pause();
                         }
                     }))
+                    .child(Button::new().text("Previous").on_click({
+                        move |_, cx| {
+                            cx.global::<Controller>().prev();
+                        }
+                    }))
+                    .child(Button::new().text("Next").on_click({
+                        move |_, cx| {
+                            cx.global::<Controller>().next();
+                        }
+                    }))
                     .child(Button::new().text("Load Playlist").on_click({
                         move |_, cx| {
                             cx.global::<Controller>()
