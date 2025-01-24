@@ -1,4 +1,4 @@
-use super::{now_playing::*, titlebar::Titlebar};
+use super::{now_playing::*, res_handler::*, titlebar::Titlebar};
 use crate::layout::Layout;
 use backend::player::Controller;
 use components::{button::Button, slider::Slider, theme::Theme};
@@ -10,6 +10,7 @@ pub struct Reyvr {
     pub layout: Layout,
     pub now_playing: Model<NowPlaying>,
     pub theme: Theme,
+    pub res_handler: Model<ResHandler>,
 }
 
 impl Render for Reyvr {

@@ -2,6 +2,7 @@ pub mod app;
 pub mod assets;
 pub mod layout;
 pub mod now_playing;
+pub mod res_handler;
 pub mod titlebar;
 
 use app::Reyvr;
@@ -18,6 +19,7 @@ use components::{
 use gpui::*;
 use layout::Layout;
 use now_playing::{NowPlaying, NowPlayingEvent};
+use res_handler::ResHandler;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -49,6 +51,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let theme = Theme::default();
                     let now_playing = NowPlaying::new();
                     let np = cx.new_model(|_| now_playing.clone());
+                    let res_handler = cx.new_model(|_| ResHandler {});
+                    let arc_res = Arc::new(res_handler.clone());
                     let (mut player, controller) =
                         Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
                     let vol_slider = cx.new_view(|_| {
@@ -66,21 +70,28 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             player.run().await;
                         })
                         .detach();
-                    cx.background_executor()
-                        .spawn(async move {
-                            loop {
-                                if let Ok(res) = recv_controller.rx.recv() {
-                                    match res {
-                                        Response::Eos => {
-                                            println!("End of stream")
-                                        }
-                                        _ => {}
+                    cx.spawn(|_, cx| async move {
+                        let res_handler = arc_res.clone();
+                        loop {
+                            while let Ok(res) = recv_controller.rx.try_recv() {
+                                match res {
+                                    Response::Eos => {
+                                        println!("End of stream");
+                                        res_handler
+                                            .update(&mut cx.clone(), |res_handler, cx| {
+                                                res_handler.update(cx, res);
+                                            })
+                                            .expect("Could not update");
                                     }
+                                    _ => {}
                                 }
-                                std::thread::sleep(Duration::from_millis(10));
                             }
-                        })
-                        .detach();
+                            cx.background_executor()
+                                .timer(Duration::from_millis(10))
+                                .await;
+                        }
+                    })
+                    .detach();
                     cx.subscribe(&vol_slider, |_, _, event: &SliderEvent, cx| match event {
                         SliderEvent::Change(vol) => {
                             let volume = (vol * 100.0).round() as f64 / 100.0;
@@ -110,6 +121,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         now_playing: np,
                         theme,
                         vol_slider,
+                        res_handler,
                     }
                 })
             },
