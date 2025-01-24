@@ -2,14 +2,13 @@ use std::{
     num::NonZeroUsize,
     path::PathBuf,
     sync::{Arc, Mutex},
-    time::Instant,
 };
 
 use gstreamer::State;
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 
 use crate::{
-    Backend, PlaybackState,
+    Backend,
     playback::{Playlist, Track},
 };
 
@@ -169,28 +168,16 @@ impl Player {
                         let backend = self.backend.clone();
 
                         if playlist.loaded {
-                            if playlist.playing {
-                                backend.stop().await.expect("Could not pause");
-                                playlist
-                                    .play_next(&backend)
-                                    .await
-                                    .expect("Could not play next.");
-                                backend.play().await.expect("Could not pause");
-                                backend
-                                    .set_volume(self.volume)
-                                    .await
-                                    .expect("Could not set volume");
-                            } else {
-                                playlist
-                                    .play_next(&backend)
-                                    .await
-                                    .expect("Could not play next.");
-                                backend.play().await.expect("Could not stop");
-                                backend
-                                    .set_volume(self.volume)
-                                    .await
-                                    .expect("Could not set volume");
-                            }
+                            backend.stop().await.expect("Could not pause");
+                            playlist
+                                .play_next(&backend)
+                                .await
+                                .expect("Could not play next.");
+                            backend.play().await.expect("Could not pause");
+                            backend
+                                .set_volume(self.volume)
+                                .await
+                                .expect("Could not set volume");
                         }
                         self.playlist = Arc::new(Mutex::new(playlist));
                     }
@@ -201,28 +188,16 @@ impl Player {
                         };
                         let backend = self.backend.clone();
                         if playlist.loaded {
-                            if playlist.playing {
-                                backend.stop().await.expect("Could not stop");
-                                playlist
-                                    .play_previous(&backend)
-                                    .await
-                                    .expect("Could not play next.");
-                                backend.play().await.expect("Could not pause");
-                                backend
-                                    .set_volume(self.volume)
-                                    .await
-                                    .expect("Could not set volume");
-                            } else {
-                                playlist
-                                    .play_previous(&backend)
-                                    .await
-                                    .expect("Could not play next.");
-                                backend.play().await.expect("Could not pause");
-                                backend
-                                    .set_volume(self.volume)
-                                    .await
-                                    .expect("Could not set volume");
-                            }
+                            backend.stop().await.expect("Could not stop");
+                            playlist
+                                .play_previous(&backend)
+                                .await
+                                .expect("Could not play next.");
+                            backend.play().await.expect("Could not pause");
+                            backend
+                                .set_volume(self.volume)
+                                .await
+                                .expect("Could not set volume");
                         }
                         self.playlist = Arc::new(Mutex::new(playlist));
                     }
@@ -281,10 +256,15 @@ impl Controller {
             .expect("Could not send command");
     }
 
+    pub fn get_meta(&self) {
+        self.tx
+            .send(Command::GetMeta)
+            .expect("Could not send command");
+    }
+
     pub fn volume(&self, vol: f64) {
         self.tx
             .send(Command::Volume(vol))
             .expect("Could not send command");
-        // println!("Volume set to {vol}");
     }
 }

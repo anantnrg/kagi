@@ -5,10 +5,13 @@ pub struct NowPlaying {
     pub title: SharedString,
     pub album: SharedString,
     pub artists: Vec<SharedString>,
+    pub position: u64,
+    pub duration: u64,
 }
 
 pub enum NowPlayingEvent {
-    Update(SharedString, SharedString, Vec<SharedString>),
+    Meta(SharedString, SharedString, Vec<SharedString>, u64),
+    Position(u64),
 }
 
 impl NowPlaying {
@@ -17,17 +20,25 @@ impl NowPlaying {
             title: "".into(),
             artists: vec!["".into()],
             album: "".into(),
+            position: 0,
+            duration: 0,
         }
     }
 
-    pub fn update(
+    pub fn update_meta(
         &mut self,
         cx: &mut ModelContext<Self>,
         title: SharedString,
         album: SharedString,
         artists: Vec<SharedString>,
+        duration: u64,
     ) {
-        cx.emit(NowPlayingEvent::Update(title, album, artists));
+        cx.emit(NowPlayingEvent::Meta(title, album, artists, duration));
+        cx.notify();
+    }
+
+    pub fn update_pos(&mut self, cx: &mut ModelContext<Self>, pos: u64) {
+        cx.emit(NowPlayingEvent::Position(pos));
         cx.notify();
     }
 }

@@ -111,7 +111,10 @@ impl Backend for GstBackend {
                 .and_then(|v| Some(v.get().to_string()))
                 .unwrap_or_else(|| "Unknown Album".into()),
             uri: uri.to_string(),
-            duration: info.duration().map(|d| d.seconds() as f64),
+            duration: info
+                .duration()
+                .unwrap_or(ClockTime::from_seconds(0))
+                .seconds(),
             album_art_uri: None,
         })
     }

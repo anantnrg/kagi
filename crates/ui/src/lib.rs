@@ -76,7 +76,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             while let Ok(res) = recv_controller.rx.try_recv() {
                                 res_handler
                                     .update(&mut cx.clone(), |res_handler, cx| {
-                                        res_handler.update(cx, res);
+                                        res_handler.handle(cx, res);
                                     })
                                     .expect("Could not update");
                             }
@@ -90,7 +90,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         SliderEvent::Change(vol) => {
                             let volume = (vol * 100.0).round() as f64 / 100.0;
                             cx.global::<Controller>().volume(volume);
-                            // println!("Volume set to {volume}");
 
                             cx.notify();
                         }
@@ -99,29 +98,50 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     cx.subscribe(
                         &np,
                         |this: &mut Reyvr, _, event: &NowPlayingEvent, cx| match event {
-                            NowPlayingEvent::Update(title, album, artists) => {
+                            NowPlayingEvent::Meta(title, album, artists, duration) => {
                                 this.now_playing.update(cx, |this, _| {
                                     this.title = title.clone();
                                     this.album = album.clone();
                                     this.artists = artists.clone();
+                                    this.duration = duration.clone();
+                                });
+                                cx.notify();
+                            }
+                            NowPlayingEvent::Position(pos) => {
+                                this.now_playing.update(cx, |this, _| {
+                                    this.position = *pos;
                                 });
                                 cx.notify();
                             }
                         },
                     )
                     .detach();
-                    cx.subscribe(&res_handler, |this: &mut Reyvr, _, event: &Response, cx| {
-                        match event {
+                    cx.subscribe(
+                        &res_handler,
+                        move |this: &mut Reyvr, _, event: &Response, cx| match event {
                             Response::Eos => {
                                 println!("End of stream");
                                 cx.global::<Controller>().next();
                             }
-                            Response::Position(pos) => {
-                                println!("position: {}", pos);
+                            Response::Position(pos) => this.now_playing.update(cx, |np, cx| {
+                                np.update_pos(cx, *pos);
+                            }),
+                            Response::StreamStart => cx.global::<Controller>().get_meta(),
+                            Response::Metadata(track) => {
+                                this.now_playing.update(cx, |np, cx| {
+                                    let track = track.clone();
+                                    np.update_meta(
+                                        cx,
+                                        track.title.into(),
+                                        track.album.into(),
+                                        track.artists.iter().map(|s| s.clone().into()).collect(),
+                                        track.duration,
+                                    );
+                                });
                             }
                             _ => {}
-                        }
-                    })
+                        },
+                    )
                     .detach();
                     Reyvr {
                         layout: Layout::new(),
