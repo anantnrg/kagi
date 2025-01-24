@@ -74,16 +74,11 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         let res_handler = arc_res.clone();
                         loop {
                             while let Ok(res) = recv_controller.rx.try_recv() {
-                                match res {
-                                    Response::Eos => {
-                                        res_handler
-                                            .update(&mut cx.clone(), |res_handler, cx| {
-                                                res_handler.update(cx, res);
-                                            })
-                                            .expect("Could not update");
-                                    }
-                                    _ => {}
-                                }
+                                res_handler
+                                    .update(&mut cx.clone(), |res_handler, cx| {
+                                        res_handler.update(cx, res);
+                                    })
+                                    .expect("Could not update");
                             }
                             cx.background_executor()
                                 .timer(Duration::from_millis(10))
