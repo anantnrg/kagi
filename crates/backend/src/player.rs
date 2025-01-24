@@ -173,7 +173,8 @@ impl Player {
                                 .play_next(&backend)
                                 .await
                                 .expect("Could not play next.");
-                            backend.play().await.expect("Could not pause");
+                            backend.play().await.expect("Could not play");
+                            playlist.playing = true;
                             backend
                                 .set_volume(self.volume)
                                 .await
@@ -193,7 +194,8 @@ impl Player {
                                 .play_previous(&backend)
                                 .await
                                 .expect("Could not play next.");
-                            backend.play().await.expect("Could not pause");
+                            backend.play().await.expect("Could not play");
+                            playlist.playing = true;
                             backend
                                 .set_volume(self.volume)
                                 .await
