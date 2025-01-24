@@ -70,6 +70,7 @@ impl Player {
     }
 
     pub async fn run(&mut self) {
+        self.tx.send(Response::Eos).unwrap();
         loop {
             while let Ok(command) = self.rx.try_recv() {
                 match command {
@@ -234,7 +235,9 @@ impl Player {
                 }
             }
             if let Some(res) = self.backend.monitor().await {
-                self.tx.send(res).expect("Could not send message.");
+                println!("response from gstreamer: {:#?}", res);
+                self.tx.send(res).unwrap();
+                // self.tx.send(res).expect("Could not send message.");
             }
         }
     }

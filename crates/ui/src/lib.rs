@@ -21,6 +21,7 @@ use now_playing::{NowPlaying, NowPlayingEvent};
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
+    time::Duration,
 };
 
 pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
@@ -65,19 +66,21 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             player.run().await;
                         })
                         .detach();
-                    cx.spawn(async move |_, _| {
-                        loop {
-                            if let Ok(res) = recv_controller.rx.try_recv() {
-                                match res {
-                                    Response::Eos => {
-                                        println!("End of stream")
+                    cx.background_executor()
+                        .spawn(async move {
+                            loop {
+                                if let Ok(res) = recv_controller.rx.recv() {
+                                    match res {
+                                        Response::Eos => {
+                                            println!("End of stream")
+                                        }
+                                        _ => {}
                                     }
-                                    _ => {}
                                 }
+                                std::thread::sleep(Duration::from_millis(10));
                             }
-                        }
-                    })
-                    .detach();
+                        })
+                        .detach();
                     cx.subscribe(&vol_slider, |_, _, event: &SliderEvent, cx| match event {
                         SliderEvent::Change(vol) => {
                             let volume = (vol * 100.0).round() as f64 / 100.0;

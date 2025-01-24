@@ -119,7 +119,7 @@ impl Backend for GstBackend {
     async fn monitor(&self) -> Option<Response> {
         let playbin = self.playbin.lock().expect("Could not lock playbin");
         if let Some(bus) = playbin.bus() {
-            for msg in bus.iter_timed(gstreamer::ClockTime::NONE) {
+            while let Some(msg) = bus.pop() {
                 return match msg.view() {
                     MessageView::StateChanged(state) => {
                         Some(Response::StateChanged(state.current()))
