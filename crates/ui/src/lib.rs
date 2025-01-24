@@ -116,6 +116,9 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 println!("End of stream");
                                 cx.global::<Controller>().next();
                             }
+                            Response::Position(pos) => {
+                                println!("position: {}", pos);
+                            }
                             _ => {}
                         }
                     })

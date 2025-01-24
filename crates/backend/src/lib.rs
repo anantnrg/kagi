@@ -3,7 +3,6 @@ use std::fmt::Debug;
 use async_trait::async_trait;
 use playback::Track;
 use player::Response;
-use ring_channel::RingSender;
 
 pub mod gstreamer;
 pub mod playback;
@@ -43,6 +42,9 @@ pub trait Backend: Send + Sync + Debug {
 
     /// Monitor
     async fn monitor(&self) -> Option<Response>;
+
+    /// Current playback postion
+    async fn get_position(&self) -> u64;
 }
 
 /// Playback state representation.

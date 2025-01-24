@@ -2,6 +2,7 @@ use std::{
     num::NonZeroUsize,
     path::PathBuf,
     sync::{Arc, Mutex},
+    time::Instant,
 };
 
 use gstreamer::State;
@@ -31,6 +32,7 @@ pub enum Response {
     StateChanged(State),
     Eos,
     StreamStart,
+    Position(u64),
 }
 
 #[derive(Debug, Clone)]
@@ -38,6 +40,7 @@ pub struct Player {
     pub backend: Arc<dyn Backend>,
     pub playlist: Arc<Mutex<Playlist>>,
     pub volume: f64,
+    pub position: u64,
     pub tx: Sender<Response>,
     pub rx: Receiver<Command>,
 }
@@ -59,6 +62,7 @@ impl Player {
                 backend,
                 playlist,
                 volume: 0.5,
+                position: 0,
                 tx: res_tx,
                 rx: cmd_rx,
             },
@@ -237,7 +241,14 @@ impl Player {
             if let Some(res) = self.backend.monitor().await {
                 println!("response from gstreamer: {:#?}", res);
                 self.tx.send(res).unwrap();
-                // self.tx.send(res).expect("Could not send message.");
+            }
+            let curr_pos = self.backend.get_position().await;
+            if self.position != curr_pos {
+                self.tx
+                    .send(Response::Position(curr_pos))
+                    .expect("Could not send message.");
+
+                self.position = curr_pos;
             }
         }
     }
