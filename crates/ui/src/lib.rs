@@ -76,7 +76,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             while let Ok(res) = recv_controller.rx.try_recv() {
                                 match res {
                                     Response::Eos => {
-                                        println!("End of stream");
                                         res_handler
                                             .update(&mut cx.clone(), |res_handler, cx| {
                                                 res_handler.update(cx, res);
@@ -115,6 +114,16 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             }
                         },
                     )
+                    .detach();
+                    cx.subscribe(&res_handler, |this: &mut Reyvr, _, event: &Response, cx| {
+                        match event {
+                            Response::Eos => {
+                                println!("End of stream");
+                                cx.global::<Controller>().next();
+                            }
+                            _ => {}
+                        }
+                    })
                     .detach();
                     Reyvr {
                         layout: Layout::new(),
