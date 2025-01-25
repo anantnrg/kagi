@@ -119,6 +119,7 @@ impl Backend for GstBackend {
             album_art_uri: Some(tags.get::<gstreamer::tags::Image>().and_then(|v| {
                 let tag = v.get();
                 let bytes = tag.buffer().unwrap().map_readable().unwrap();
+                println!("{:#?}", bytes.as_bytes());
 
                 Some(retrieve_thumbnail(bytes.as_bytes().into()).unwrap())
             }))

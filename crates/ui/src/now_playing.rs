@@ -11,9 +11,14 @@ pub struct NowPlaying {
 }
 
 pub enum NowPlayingEvent {
-    Meta(SharedString, SharedString, Vec<SharedString>, u64),
+    Meta(
+        SharedString,
+        SharedString,
+        Vec<SharedString>,
+        u64,
+        Option<ImageSource>,
+    ),
     Position(u64),
-    Thumbnail(ImageSource),
 }
 
 impl NowPlaying {
@@ -35,18 +40,16 @@ impl NowPlaying {
         album: SharedString,
         artists: Vec<SharedString>,
         duration: u64,
+        thumnail: Option<ImageSource>,
     ) {
-        cx.emit(NowPlayingEvent::Meta(title, album, artists, duration));
+        cx.emit(NowPlayingEvent::Meta(
+            title, album, artists, duration, thumnail,
+        ));
         cx.notify();
     }
 
     pub fn update_pos(&mut self, cx: &mut ModelContext<Self>, pos: u64) {
         cx.emit(NowPlayingEvent::Position(pos));
-        cx.notify();
-    }
-
-    pub fn update_thumbnail(&mut self, cx: &mut ModelContext<Self>, image: ImageSource) {
-        cx.emit(NowPlayingEvent::Thumbnail(image));
         cx.notify();
     }
 }

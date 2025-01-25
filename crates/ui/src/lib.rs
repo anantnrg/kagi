@@ -98,24 +98,19 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     cx.subscribe(
                         &np,
                         |this: &mut Reyvr, _, event: &NowPlayingEvent, cx| match event {
-                            NowPlayingEvent::Meta(title, album, artists, duration) => {
+                            NowPlayingEvent::Meta(title, album, artists, duration, thumbnail) => {
                                 this.now_playing.update(cx, |this, _| {
                                     this.title = title.clone();
                                     this.album = album.clone();
                                     this.artists = artists.clone();
                                     this.duration = duration.clone();
+                                    this.thumbnail = thumbnail.clone();
                                 });
                                 cx.notify();
                             }
                             NowPlayingEvent::Position(pos) => {
                                 this.now_playing.update(cx, |this, _| {
                                     this.position = *pos;
-                                });
-                                cx.notify();
-                            }
-                            NowPlayingEvent::Thumbnail(thumbnail) => {
-                                this.now_playing.update(cx, |this, _| {
-                                    this.thumbnail = Some(thumbnail.clone());
                                 });
                                 cx.notify();
                             }
@@ -142,6 +137,15 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                         track.album.into(),
                                         track.artists.iter().map(|s| s.clone().into()).collect(),
                                         track.duration,
+                                        {
+                                            if let Some(art) = track.album_art_uri {
+                                                Some(ImageSource::Render(
+                                                    RenderImage::new(art).into(),
+                                                ))
+                                            } else {
+                                                None
+                                            }
+                                        },
                                     );
                                 });
                             }

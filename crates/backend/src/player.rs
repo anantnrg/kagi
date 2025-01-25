@@ -90,11 +90,10 @@ impl Player {
                                 if playlist.loaded {
                                     let tx = self.tx.clone();
 
-                                    backend
+                                    let _ = backend
                                         .play()
                                         .await
-                                        .map_err(|e| tx.send(Response::Error(e.to_string())))
-                                        .map_err(|e| "Could not send message");
+                                        .map_err(|e| tx.send(Response::Error(e.to_string())));
 
                                     playlist.playing = true;
                                 } else {
@@ -120,11 +119,10 @@ impl Player {
                         let backend = self.backend.clone();
 
                         if playlist.playing {
-                            backend
+                            let _ = backend
                                 .pause()
                                 .await
-                                .map_err(|e| self.tx.send(Response::Error(e.to_string())))
-                                .map_err(|e| "Could not send message");
+                                .map_err(|e| self.tx.send(Response::Error(e.to_string())));
                             playlist.playing = false;
                         }
                         self.tx

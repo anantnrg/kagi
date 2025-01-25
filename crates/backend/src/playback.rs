@@ -1,4 +1,4 @@
-use image::{Frame, imageops::thumbnail};
+use image::Frame;
 use smallvec::SmallVec;
 use std::{path::PathBuf, sync::Arc};
 
