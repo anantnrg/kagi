@@ -3,7 +3,7 @@ use crate::player::Response;
 use super::{Backend, playback::Track};
 use anyhow::anyhow;
 use async_trait::async_trait;
-use gstreamer::{ClockTime, MessageView, prelude::*};
+use gstreamer::{ClockTime, MessageView, SeekFlags, prelude::*};
 use gstreamer_pbutils as gst_pbutils;
 use std::sync::{Arc, Mutex};
 
@@ -149,6 +149,14 @@ impl Backend for GstBackend {
             return pos.seconds();
         }
         0
+    }
+
+    async fn seek(&self, time: u64) -> anyhow::Result<()> {
+        let playbin = self.playbin.lock().expect("Could not lock playbin");
+        playbin
+            .seek_simple(SeekFlags::all(), ClockTime::from_seconds(time))
+            .expect("Could not seek");
+        Ok(())
     }
 }
 

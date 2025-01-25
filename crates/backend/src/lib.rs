@@ -45,12 +45,7 @@ pub trait Backend: Send + Sync + Debug {
 
     /// Current playback postion
     async fn get_position(&self) -> u64;
-}
 
-/// Playback state representation.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum PlaybackState {
-    Playing,
-    Paused,
-    Stopped,
+    /// Seek
+    async fn seek(&self, time: u64) -> anyhow::Result<()>;
 }
