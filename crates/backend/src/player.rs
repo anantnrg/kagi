@@ -23,7 +23,7 @@ pub enum Command {
     Seek(u64),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Response {
     Error(String),
     Warning(String),
@@ -35,7 +35,7 @@ pub enum Response {
     Position(u64),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Player {
     pub backend: Arc<dyn Backend>,
     pub playlist: Arc<Mutex<Playlist>>,
@@ -94,7 +94,7 @@ impl Player {
                                         .play()
                                         .await
                                         .map_err(|e| tx.send(Response::Error(e.to_string())))
-                                        .expect("Could not play");
+                                        .map_err(|e| "Could not send message");
 
                                     playlist.playing = true;
                                 } else {
@@ -124,7 +124,7 @@ impl Player {
                                 .pause()
                                 .await
                                 .map_err(|e| self.tx.send(Response::Error(e.to_string())))
-                                .expect("Could not pause playback");
+                                .map_err(|e| "Could not send message");
                             playlist.playing = false;
                         }
                         self.tx
@@ -228,7 +228,6 @@ impl Player {
                 }
             }
             if let Some(res) = self.backend.monitor().await {
-                println!("response from gstreamer: {:#?}", res);
                 self.tx.send(res).unwrap();
             }
             let curr_pos = self.backend.get_position().await;

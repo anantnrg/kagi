@@ -26,6 +26,7 @@ impl Render for Reyvr {
             .child(
                 div()
                     .flex()
+                    .flex_wrap()
                     .gap_8()
                     .bg(theme.background)
                     .size_full()
@@ -66,7 +67,14 @@ impl Render for Reyvr {
                             .h_auto()
                             .w_20()
                             .child(self.vol_slider.clone()),
-                    ), // .child(div().w_10().child(format!("{}", self.volume.clone()))),
+                    )
+                    .child({
+                        if let Some(thumbnail) = self.now_playing.read(cx).thumbnail.clone() {
+                            div().size_32().child(img(thumbnail).size_full())
+                        } else {
+                            div().size_32()
+                        }
+                    }),
             )
     }
 }

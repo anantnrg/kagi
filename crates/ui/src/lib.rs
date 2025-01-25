@@ -113,6 +113,12 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 });
                                 cx.notify();
                             }
+                            NowPlayingEvent::Thumbnail(thumbnail) => {
+                                this.now_playing.update(cx, |this, _| {
+                                    this.thumbnail = Some(thumbnail.clone());
+                                });
+                                cx.notify();
+                            }
                         },
                     )
                     .detach();

@@ -1,18 +1,20 @@
+use image::{Frame, imageops::thumbnail};
+use smallvec::SmallVec;
 use std::{path::PathBuf, sync::Arc};
 
 use crate::Backend;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Track {
     pub title: String,
     pub artists: Vec<String>,
     pub album: String,
     pub uri: String,
     pub duration: u64,
-    pub album_art_uri: Option<String>,
+    pub album_art_uri: Option<SmallVec<[Frame; 1]>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Playlist {
     pub name: String,
     pub tracks: Vec<Track>,

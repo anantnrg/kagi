@@ -417,7 +417,9 @@ dependencies = [
  "gpui",
  "gstreamer",
  "gstreamer-pbutils",
+ "image",
  "ring-channel",
+ "smallvec",
  "smol 2.0.2",
 ]
 

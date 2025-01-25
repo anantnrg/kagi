@@ -5,7 +5,12 @@ use anyhow::anyhow;
 use async_trait::async_trait;
 use gstreamer::{ClockTime, MessageView, SeekFlags, State, prelude::*};
 use gstreamer_pbutils as gst_pbutils;
-use std::sync::{Arc, Mutex};
+use image::{EncodableLayout, Frame, ImageReader, imageops::thumbnail};
+use smallvec::SmallVec;
+use std::{
+    io::Cursor,
+    sync::{Arc, Mutex},
+};
 
 #[derive(Debug)]
 pub struct GstBackend {
@@ -111,7 +116,13 @@ impl Backend for GstBackend {
                 .duration()
                 .unwrap_or(ClockTime::from_seconds(0))
                 .seconds(),
-            album_art_uri: None,
+            album_art_uri: Some(tags.get::<gstreamer::tags::Image>().and_then(|v| {
+                let tag = v.get();
+                let bytes = tag.buffer().unwrap().map_readable().unwrap();
+
+                Some(retrieve_thumbnail(bytes.as_bytes().into()).unwrap())
+            }))
+            .unwrap_or(None),
         })
     }
 
@@ -171,4 +182,15 @@ impl GstBackend {
             playbin: Arc::new(Mutex::new(playbin)),
         })
     }
+}
+
+fn retrieve_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<SmallVec<[Frame; 1]>> {
+    let img = ImageReader::new(Cursor::new(bytes.clone()))
+        .with_guessed_format()?
+        .decode()?
+        .into_rgba8();
+
+    Ok(SmallVec::from_vec(vec![Frame::new(thumbnail(
+        &img, 128, 128,
+    ))]))
 }
