@@ -20,6 +20,7 @@ pub enum Command {
     Next,
     Previous,
     LoadFromFolder(String),
+    Seek(u64),
 }
 
 #[derive(Debug, Clone)]
@@ -212,6 +213,17 @@ impl Player {
                             .await
                             .expect("Could not load first item");
                         self.playlist = Arc::new(Mutex::new(playlist));
+                    }
+                    Command::Seek(time) => {
+                        let playlist = {
+                            let guard = self.playlist.lock().expect("Could not lock playlist");
+                            guard.clone()
+                        };
+                        let backend = self.backend.clone();
+
+                        if playlist.playing {
+                            backend.seek(time).await.expect("Could not seek");
+                        }
                     }
                 }
             }

@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 
+use ::gstreamer::State;
 use async_trait::async_trait;
 use playback::Track;
 use player::Response;
@@ -35,7 +36,7 @@ pub trait Backend: Send + Sync + Debug {
     async fn get_volume(&self) -> anyhow::Result<f32>;
 
     /// Get the current playback state.
-    async fn get_state(&self) -> anyhow::Result<PlaybackState>;
+    async fn get_state(&self) -> anyhow::Result<State>;
 
     /// Get metadata
     async fn get_meta(&self, uri: &str) -> anyhow::Result<Track>;

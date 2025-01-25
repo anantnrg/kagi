@@ -3,7 +3,7 @@ use crate::player::Response;
 use super::{Backend, playback::Track};
 use anyhow::anyhow;
 use async_trait::async_trait;
-use gstreamer::{ClockTime, MessageView, SeekFlags, prelude::*};
+use gstreamer::{ClockTime, MessageView, SeekFlags, State, prelude::*};
 use gstreamer_pbutils as gst_pbutils;
 use std::sync::{Arc, Mutex};
 
@@ -75,19 +75,15 @@ impl Backend for GstBackend {
         Ok(volume)
     }
 
-    async fn get_state(&self) -> anyhow::Result<super::PlaybackState> {
-        let playbin = Arc::clone(&self.playbin);
-
-        let state = match playbin
+    async fn get_state(&self) -> anyhow::Result<State> {
+        let state = self
+            .playbin
+            .clone()
             .lock()
             .map_err(|e| anyhow::anyhow!("Could not lock playbin: {e}"))?
-            .current_state()
-        {
-            gstreamer::State::Playing => Ok(super::PlaybackState::Playing),
-            gstreamer::State::Paused => Ok(super::PlaybackState::Paused),
-            _ => Ok(super::PlaybackState::Stopped),
-        };
-        state
+            .current_state();
+
+        Ok(state)
     }
 
     async fn get_meta(&self, uri: &str) -> anyhow::Result<Track> {
@@ -154,7 +150,10 @@ impl Backend for GstBackend {
     async fn seek(&self, time: u64) -> anyhow::Result<()> {
         let playbin = self.playbin.lock().expect("Could not lock playbin");
         playbin
-            .seek_simple(SeekFlags::all(), ClockTime::from_seconds(time))
+            .seek_simple(
+                SeekFlags::FLUSH | SeekFlags::KEY_UNIT,
+                ClockTime::from_seconds(time),
+            )
             .expect("Could not seek");
         Ok(())
     }
