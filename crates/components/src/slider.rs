@@ -1,7 +1,7 @@
 use crate::theme::Theme;
 use gpui::*;
 
-#[derive(Clone, Render)]
+#[derive(Clone)]
 pub struct Thumb(EntityId);
 
 pub enum SliderEvent {
@@ -87,7 +87,7 @@ impl Slider {
         cx.notify();
     }
 
-    fn on_mouse_down(&mut self, event: &MouseDownEvent, cx: &mut Context<Self>) {
+    fn on_mouse_down(&mut self, event: &MouseDownEvent, _: &mut Window, cx: &mut Context<Self>) {
         self.on_drag(event.position, cx);
     }
 
@@ -96,12 +96,12 @@ impl Slider {
 
         div()
             .id("thumb")
-            .on_drag(Thumb(entity_id), |drag, _, cx| {
+            .on_drag(Thumb(entity_id), |drag, _, _, cx| {
                 cx.stop_propagation();
-                cx.new_view(|_| drag.clone())
+                cx.new(|_| drag.clone())
             })
-            .on_drag_move(
-                cx.listener(move |view, e: &DragMoveEvent<Thumb>, cx| match e.drag(cx) {
+            .on_drag_move(cx.listener(
+                move |view, e: &DragMoveEvent<Thumb>, _, cx| match e.drag(cx) {
                     Thumb(id) => {
                         if *id != entity_id {
                             return;
@@ -109,8 +109,8 @@ impl Slider {
 
                         view.on_drag(e.event.position, cx)
                     }
-                }),
-            )
+                },
+            ))
             .absolute()
             .top(px(-5.))
             .left(relative(self.relative_value()))
@@ -124,7 +124,7 @@ impl Slider {
 }
 
 impl Render for Slider {
-    fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
             .id("slider")
             .on_mouse_down(MouseButton::Left, cx.listener(Self::on_mouse_down))
@@ -152,10 +152,10 @@ impl Render for Slider {
                     )
                     .child(self.render_thumb(cx))
                     .child({
-                        let view = cx.view().clone();
+                        let view = cx.model();
                         canvas(
-                            move |bounds, cx| view.update(cx, |r, _| r.bounds = bounds),
-                            |_, _, _| {},
+                            move |bounds, _, cx| view.update(cx, |r, _| r.bounds = bounds),
+                            |_, _, _, _| {},
                         )
                         .absolute()
                         .size_full()
