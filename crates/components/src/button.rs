@@ -1,4 +1,4 @@
-use gpui::{MouseButton, MouseDownEvent, SharedString, WindowContext, div, prelude::*, px, rgb};
+use gpui::{App, MouseButton, MouseDownEvent, SharedString, Window, div, prelude::*, px, rgb};
 
 #[derive(IntoElement)]
 pub struct Button {
@@ -13,7 +13,7 @@ pub struct Button {
     hover_text_color: u32,
     hover_border_color: u32,
     rounded: f32,
-    on_click: Box<dyn Fn(MouseDownEvent, &mut WindowContext) + 'static>,
+    on_click: Box<dyn Fn(MouseDownEvent, &mut Window, &mut App) + 'static>,
 }
 
 #[allow(dead_code)]
@@ -31,7 +31,7 @@ impl Button {
             hover_text_color: 0x1e1e2d,
             hover_border_color: 0xcba6f7,
             rounded: 8.0,
-            on_click: Box::new(|_, _| println!("Clicked!")),
+            on_click: Box::new(|_, _, _| println!("Clicked!")),
         }
     }
 
@@ -68,7 +68,7 @@ impl Button {
 
     pub fn on_click<F>(mut self, callback: F) -> Self
     where
-        F: Fn(MouseDownEvent, &mut WindowContext) + 'static,
+        F: Fn(MouseDownEvent, &mut Window, &mut App) + 'static,
     {
         self.on_click = Box::new(callback);
         self
@@ -76,7 +76,7 @@ impl Button {
 }
 
 impl RenderOnce for Button {
-    fn render(self, _cx: &mut WindowContext) -> impl IntoElement {
+    fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
         let on_click = self.on_click;
         div()
             .flex()
@@ -97,8 +97,8 @@ impl RenderOnce for Button {
                     .text_color(rgb(self.hover_text_color))
                     .border_color(rgb(self.hover_border_color))
             })
-            .on_mouse_down(MouseButton::Left, move |event, context| {
-                (on_click)(event.clone(), context);
+            .on_mouse_down(MouseButton::Left, move |event, win, cx| {
+                (on_click)(event.clone(), win, cx);
             })
             .into_element()
     }
