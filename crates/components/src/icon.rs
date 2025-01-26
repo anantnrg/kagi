@@ -51,7 +51,7 @@ impl Icon {
 }
 
 impl RenderOnce for Icon {
-    fn render(self, _cx: &mut WindowContext) -> impl IntoElement {
+    fn render(self, _win: &mut Window, _cx: &mut App) -> impl IntoElement {
         svg()
             .size(px(self.size))
             .text_color(rgb(self.color))

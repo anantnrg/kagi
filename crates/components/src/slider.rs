@@ -51,7 +51,7 @@ impl Slider {
         self
     }
 
-    pub fn value(&mut self, value: f32, cx: &mut ViewContext<Self>) {
+    pub fn value(&mut self, value: f32, cx: &mut Context<Self>) {
         self.value = value;
         cx.notify();
     }
@@ -69,7 +69,7 @@ impl Slider {
         relative_value.clamp(0.0, 1.0)
     }
 
-    fn on_drag(&mut self, position: Point<Pixels>, cx: &mut gpui::ViewContext<Self>) {
+    fn on_drag(&mut self, position: Point<Pixels>, cx: &mut Context<Self>) {
         let bounds = self.bounds;
         let min = self.min;
         let max = self.max;
@@ -87,11 +87,11 @@ impl Slider {
         cx.notify();
     }
 
-    fn on_mouse_down(&mut self, event: &MouseDownEvent, cx: &mut gpui::ViewContext<Self>) {
+    fn on_mouse_down(&mut self, event: &MouseDownEvent, cx: &mut Context<Self>) {
         self.on_drag(event.position, cx);
     }
 
-    fn render_thumb(&self, cx: &mut ViewContext<Self>) -> impl gpui::IntoElement {
+    fn render_thumb(&self, cx: &mut Context<Self>) -> impl gpui::IntoElement {
         let entity_id = cx.entity_id();
 
         div()
@@ -124,7 +124,7 @@ impl Slider {
 }
 
 impl Render for Slider {
-    fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
+    fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
             .id("slider")
             .on_mouse_down(MouseButton::Left, cx.listener(Self::on_mouse_down))
