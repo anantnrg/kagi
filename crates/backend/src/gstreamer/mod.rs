@@ -6,7 +6,7 @@ use anyhow::anyhow;
 use async_trait::async_trait;
 use gstreamer::{ClockTime, MessageView, SeekFlags, State, prelude::*};
 use gstreamer_pbutils as gst_pbutils;
-use image::{Frame, ImageReader, Rgba, RgbaImage, imageops::thumbnail};
+use image::{EncodableLayout, Frame, ImageReader, Rgba, RgbaImage, imageops::thumbnail};
 use smallvec::SmallVec;
 use std::{
     io::Cursor,
@@ -130,7 +130,8 @@ impl Backend for GstBackend {
                     }
                     MessageView::Tag(msg) => {
                         if let Some(image) = msg.tags().get::<gstreamer::tags::Image>() {
-                            let buffer = image.get().buffer().unwrap().map_readable().unwrap();
+                            let bytes = image.get();
+                            let buffer = bytes.buffer().unwrap().map_readable().unwrap();
                             Some(Response::Thumbnail(
                                 retrieve_thumbnail(buffer.as_bytes().into()).unwrap(),
                             ))
@@ -171,15 +172,6 @@ impl Backend for GstBackend {
             )
             .expect("Could not seek");
         Ok(())
-    }
-
-    async fn get_thumbnail(&self) -> anyhow::Result<RenderImage> {
-        if let Some(tags) = self
-            .playbin
-            .lock()
-            .expect("Could not lock playbin")
-            .query_tag()
-        {}
     }
 }
 

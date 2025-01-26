@@ -42,9 +42,6 @@ pub trait Backend: Send + Sync + Debug {
     /// Get metadata
     async fn get_meta(&self, uri: &str) -> anyhow::Result<Track>;
 
-    /// Get thumbnail
-    async fn get_thumbnail(&self) -> anyhow::Result<RenderImage>;
-
     /// Monitor
     async fn monitor(&self) -> Option<Response>;
 
