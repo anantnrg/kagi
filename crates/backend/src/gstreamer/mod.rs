@@ -5,7 +5,10 @@ use anyhow::anyhow;
 use async_trait::async_trait;
 use gstreamer::{ClockTime, MessageView, SeekFlags, State, prelude::*};
 use gstreamer_pbutils as gst_pbutils;
-use image::{EncodableLayout, Frame, ImageReader, imageops::thumbnail};
+use image::{
+    EncodableLayout, Frame, ImageReader, Rgba, RgbaImage,
+    imageops::{resize, thumbnail},
+};
 use smallvec::SmallVec;
 use std::{
     io::Cursor,
@@ -119,7 +122,6 @@ impl Backend for GstBackend {
             album_art_uri: Some(tags.get::<gstreamer::tags::Image>().and_then(|v| {
                 let tag = v.get();
                 let bytes = tag.buffer().unwrap().map_readable().unwrap();
-                println!("{:#?}", bytes.as_bytes());
 
                 Some(retrieve_thumbnail(bytes.as_bytes().into()).unwrap())
             }))
@@ -190,8 +192,15 @@ fn retrieve_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<SmallVec<[Frame; 1]>> 
         .with_guessed_format()?
         .decode()?
         .into_rgba8();
+    // let resized = resize(&img, 1024, 1024, image::imageops::FilterType::Lanczos3);
+    // let (width, height) = resized.dimensions();
+    // let mut bgra_image = RgbaImage::new(width, height);
+    // for (x, y, pixel) in resized.enumerate_pixels() {
+    //     let [r, g, b, a] = pixel.0;
+    //     bgra_image.put_pixel(x, y, Rgba([b, g, r, a]));
+    // }
 
     Ok(SmallVec::from_vec(vec![Frame::new(thumbnail(
-        &img, 128, 128,
+        &img, 1024, 1024,
     ))]))
 }

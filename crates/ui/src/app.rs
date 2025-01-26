@@ -70,9 +70,9 @@ impl Render for Reyvr {
                     )
                     .child({
                         if let Some(thumbnail) = self.now_playing.read(cx).thumbnail.clone() {
-                            div().size_32().child(img(thumbnail).size_full())
+                            div().size_128().child(img(thumbnail).size_full())
                         } else {
-                            div().size_32()
+                            div().size_128()
                         }
                     }),
             )
