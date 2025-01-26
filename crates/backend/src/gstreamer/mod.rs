@@ -1,14 +1,12 @@
 use crate::player::Response;
+use gpui::RenderImage;
 
 use super::{Backend, playback::Track};
 use anyhow::anyhow;
 use async_trait::async_trait;
 use gstreamer::{ClockTime, MessageView, SeekFlags, State, prelude::*};
 use gstreamer_pbutils as gst_pbutils;
-use image::{
-    EncodableLayout, Frame, ImageReader, Rgba, RgbaImage,
-    imageops::{resize, thumbnail},
-};
+use image::{Frame, ImageReader, Rgba, RgbaImage, imageops::thumbnail};
 use smallvec::SmallVec;
 use std::{
     io::Cursor,
@@ -119,13 +117,6 @@ impl Backend for GstBackend {
                 .duration()
                 .unwrap_or(ClockTime::from_seconds(0))
                 .seconds(),
-            album_art_uri: Some(tags.get::<gstreamer::tags::Image>().and_then(|v| {
-                let tag = v.get();
-                let bytes = tag.buffer().unwrap().map_readable().unwrap();
-
-                Some(retrieve_thumbnail(bytes.as_bytes().into()).unwrap())
-            }))
-            .unwrap_or(None),
         })
     }
 
@@ -136,6 +127,16 @@ impl Backend for GstBackend {
                 return match msg.view() {
                     MessageView::StateChanged(state) => {
                         Some(Response::StateChanged(state.current()))
+                    }
+                    MessageView::Tag(msg) => {
+                        if let Some(image) = msg.tags().get::<gstreamer::tags::Image>() {
+                            let buffer = image.get().buffer().unwrap().map_readable().unwrap();
+                            Some(Response::Thumbnail(
+                                retrieve_thumbnail(buffer.as_bytes().into()).unwrap(),
+                            ))
+                        } else {
+                            Some(Response::Error("Could not get thumbnail".to_string()))
+                        }
                     }
                     MessageView::Eos(_) => Some(Response::Eos),
                     MessageView::StreamStart(_) => Some(Response::StreamStart),
@@ -171,6 +172,15 @@ impl Backend for GstBackend {
             .expect("Could not seek");
         Ok(())
     }
+
+    async fn get_thumbnail(&self) -> anyhow::Result<RenderImage> {
+        if let Some(tags) = self
+            .playbin
+            .lock()
+            .expect("Could not lock playbin")
+            .query_tag()
+        {}
+    }
 }
 
 impl GstBackend {
@@ -193,14 +203,16 @@ fn retrieve_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<SmallVec<[Frame; 1]>> 
         .decode()?
         .into_rgba8();
     // let resized = resize(&img, 1024, 1024, image::imageops::FilterType::Lanczos3);
-    // let (width, height) = resized.dimensions();
-    // let mut bgra_image = RgbaImage::new(width, height);
-    // for (x, y, pixel) in resized.enumerate_pixels() {
-    //     let [r, g, b, a] = pixel.0;
-    //     bgra_image.put_pixel(x, y, Rgba([b, g, r, a]));
-    // }
+    let (width, height) = img.dimensions();
+    let mut bgra_image = RgbaImage::new(width, height);
+    for (x, y, pixel) in img.enumerate_pixels() {
+        let [r, g, b, a] = pixel.0;
+        bgra_image.put_pixel(x, y, Rgba([b, g, r, a]));
+    }
 
     Ok(SmallVec::from_vec(vec![Frame::new(thumbnail(
-        &img, 1024, 1024,
+        &bgra_image,
+        width,
+        height,
     ))]))
 }

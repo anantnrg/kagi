@@ -1,5 +1,3 @@
-use image::Frame;
-use smallvec::SmallVec;
 use std::{path::PathBuf, sync::Arc};
 
 use crate::Backend;
@@ -11,7 +9,6 @@ pub struct Track {
     pub album: String,
     pub uri: String,
     pub duration: u64,
-    pub album_art_uri: Option<SmallVec<[Frame; 1]>>,
 }
 
 #[derive(Clone)]
@@ -27,7 +24,6 @@ impl Track {
     pub fn default() -> Self {
         Track {
             album: "Unknown Album".into(),
-            album_art_uri: None,
             artists: vec!["Unknown Artist".into()],
             duration: 0,
             title: "Unknown Track".into(),

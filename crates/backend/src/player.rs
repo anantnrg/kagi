@@ -5,7 +5,9 @@ use std::{
 };
 
 use gstreamer::State;
+use image::Frame;
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
+use smallvec::SmallVec;
 
 use crate::{
     Backend,
@@ -33,6 +35,7 @@ pub enum Response {
     Eos,
     StreamStart,
     Position(u64),
+    Thumbnail(SmallVec<[Frame; 1]>),
 }
 
 #[derive(Clone)]
@@ -74,7 +77,6 @@ impl Player {
     }
 
     pub async fn run(&mut self) {
-        self.tx.send(Response::Eos).unwrap();
         loop {
             while let Ok(command) = self.rx.try_recv() {
                 match command {

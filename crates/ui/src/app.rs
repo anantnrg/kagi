@@ -56,7 +56,7 @@ impl Render for Reyvr {
                     .child(Button::new().text("Load Playlist").on_click({
                         move |_, cx| {
                             cx.global::<Controller>()
-                                .load("E:\\music\\PSYCHX - Kordhell, Scarlxrd");
+                                .load("E:\\music\\straight up liquid fire");
                         }
                     }))
                     .child(
