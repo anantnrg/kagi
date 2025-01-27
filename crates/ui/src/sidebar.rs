@@ -3,7 +3,7 @@ use gpui::*;
 
 #[derive(Clone)]
 pub struct LeftSidebar {
-    pub playlists: Vec<(String, String)>,
+    pub playlists: Entity<Vec<(String, String)>>,
 }
 
 impl Render for LeftSidebar {
@@ -20,17 +20,20 @@ impl Render for LeftSidebar {
                 .min_w(px(150.0))
                 .border_r_1()
                 .border_color(theme.secondary)
+            // .children(self.playlists.read_with(cx, |this, cx| this.it))
         }
     }
 }
 
 impl LeftSidebar {
-    pub fn new() -> Self {
+    pub fn new(cx: &mut App) -> Self {
         LeftSidebar {
-            playlists: vec![(
-                "straight up liquid fire".to_string(),
-                "E:\\music\\straight up liquid fire".to_string(),
-            )],
+            playlists: cx.new(|_| {
+                vec![(
+                    "straight up liquid fire".to_string(),
+                    "E:\\music\\straight up liquid fire".to_string(),
+                )]
+            }),
         }
     }
 }
