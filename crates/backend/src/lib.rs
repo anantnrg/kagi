@@ -2,7 +2,6 @@ use std::fmt::Debug;
 
 use ::gstreamer::State;
 use async_trait::async_trait;
-use gpui::RenderImage;
 use playback::Track;
 use player::Response;
 

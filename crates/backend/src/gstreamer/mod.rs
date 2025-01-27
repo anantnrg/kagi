@@ -1,5 +1,4 @@
 use crate::player::Response;
-use gpui::RenderImage;
 
 use super::{Backend, playback::Track};
 use anyhow::anyhow;

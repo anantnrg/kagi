@@ -76,7 +76,7 @@ impl Button {
 }
 
 impl RenderOnce for Button {
-    fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement {
+    fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement {
         let on_click = self.on_click;
         div()
             .flex()

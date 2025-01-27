@@ -46,7 +46,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                 }),
                 ..Default::default()
             },
-            |win, cx| {
+            |_, cx| {
                 cx.new(|cx| {
                     let theme = Theme::default();
                     let now_playing = NowPlaying::new();
