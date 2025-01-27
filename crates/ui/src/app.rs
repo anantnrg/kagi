@@ -6,17 +6,17 @@ use gpui::*;
 
 #[derive(Clone)]
 pub struct Reyvr {
-    pub vol_slider: View<Slider>,
+    pub vol_slider: Entity<Slider>,
     pub layout: Layout,
-    pub now_playing: Model<NowPlaying>,
+    pub now_playing: Entity<NowPlaying>,
     pub theme: Theme,
-    pub res_handler: Model<ResHandler>,
+    pub res_handler: Entity<ResHandler>,
 }
 
 impl Render for Reyvr {
-    fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = self.theme.clone();
-        let titlebar = cx.new_view(|_| Titlebar::new(self.now_playing.clone(), theme.clone()));
+        let titlebar = cx.new(|_| Titlebar::new(self.now_playing.clone(), theme.clone()));
 
         div()
             .w_full()
@@ -34,27 +34,27 @@ impl Render for Reyvr {
                     .items_center()
                     .child(Button::new().text("Play").on_click({
                         // let now_playing = self.now_playing.clone();
-                        move |_, cx| {
+                        move |_, _, cx| {
                             cx.global::<Controller>().play();
                         }
                     }))
                     .child(Button::new().text("Pause").on_click({
-                        move |_, cx| {
+                        move |_, _, cx| {
                             cx.global::<Controller>().pause();
                         }
                     }))
                     .child(Button::new().text("Previous").on_click({
-                        move |_, cx| {
+                        move |_, _, cx| {
                             cx.global::<Controller>().prev();
                         }
                     }))
                     .child(Button::new().text("Next").on_click({
-                        move |_, cx| {
+                        move |_, _, cx| {
                             cx.global::<Controller>().next();
                         }
                     }))
                     .child(Button::new().text("Load Playlist").on_click({
-                        move |_, cx| {
+                        move |_, _, cx| {
                             cx.global::<Controller>()
                                 .load("E:\\music\\straight up liquid fire");
                         }

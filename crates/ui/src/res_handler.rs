@@ -5,7 +5,7 @@ use gpui::*;
 pub struct ResHandler {}
 
 impl ResHandler {
-    pub fn handle(&mut self, cx: &mut ModelContext<Self>, res: Response) {
+    pub fn handle(&mut self, cx: &mut Context<Self>, res: Response) {
         cx.emit(res);
         cx.notify();
     }

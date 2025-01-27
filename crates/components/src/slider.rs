@@ -1,7 +1,7 @@
 use crate::theme::Theme;
 use gpui::*;
 
-#[derive(Clone)]
+#[derive(Clone, Render)]
 pub struct Thumb(EntityId);
 
 pub enum SliderEvent {

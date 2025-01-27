@@ -30,7 +30,7 @@ impl NowPlaying {
 
     pub fn update_meta(
         &mut self,
-        cx: &mut ModelContext<Self>,
+        cx: &mut Context<Self>,
         title: SharedString,
         album: SharedString,
         artists: Vec<SharedString>,
@@ -40,12 +40,12 @@ impl NowPlaying {
         cx.notify();
     }
 
-    pub fn update_pos(&mut self, cx: &mut ModelContext<Self>, pos: u64) {
+    pub fn update_pos(&mut self, cx: &mut Context<Self>, pos: u64) {
         cx.emit(NowPlayingEvent::Position(pos));
         cx.notify();
     }
 
-    pub fn update_thumbnail(&mut self, cx: &mut ModelContext<Self>, image: ImageSource) {
+    pub fn update_thumbnail(&mut self, cx: &mut Context<Self>, image: ImageSource) {
         cx.emit(NowPlayingEvent::Thumbnail(image));
         cx.notify();
     }

@@ -31,7 +31,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
         base: PathBuf::from("assets"),
     });
 
-    app.run(move |cx: &mut AppContext| {
+    app.run(move |cx: &mut App| {
         let bounds = Bounds::centered(None, size(px(500.0), px(500.0)), cx);
 
         cx.open_window(
@@ -46,16 +46,16 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                 }),
                 ..Default::default()
             },
-            |cx| {
-                cx.new_view(|cx| {
+            |win, cx| {
+                cx.new(|cx| {
                     let theme = Theme::default();
                     let now_playing = NowPlaying::new();
-                    let np = cx.new_model(|_| now_playing.clone());
-                    let res_handler = cx.new_model(|_| ResHandler {});
+                    let np = cx.new(|_| now_playing.clone());
+                    let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
                     let (mut player, controller) =
                         Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
-                    let vol_slider = cx.new_view(|_| {
+                    let vol_slider = cx.new(|_| {
                         Slider::new(theme)
                             .min(0.0)
                             .max(1.0)
@@ -70,7 +70,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             player.run().await;
                         })
                         .detach();
-                    cx.spawn(|_, cx| async move {
+                    cx.spawn(|_, cx: AsyncApp| async move {
                         let res_handler = arc_res.clone();
                         loop {
                             while let Ok(res) = recv_controller.rx.try_recv() {
@@ -97,27 +97,29 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
                     cx.subscribe(
                         &np,
-                        |this: &mut Reyvr, _, event: &NowPlayingEvent, cx| match event {
-                            NowPlayingEvent::Meta(title, album, artists, duration) => {
-                                this.now_playing.update(cx, |this, _| {
-                                    this.title = title.clone();
-                                    this.album = album.clone();
-                                    this.artists = artists.clone();
-                                    this.duration = duration.clone();
-                                });
-                                cx.notify();
-                            }
-                            NowPlayingEvent::Position(pos) => {
-                                this.now_playing.update(cx, |this, _| {
-                                    this.position = *pos;
-                                });
-                                cx.notify();
-                            }
-                            NowPlayingEvent::Thumbnail(img) => {
-                                this.now_playing.update(cx, |this, _| {
-                                    this.thumbnail = Some(img.clone());
-                                });
-                                cx.notify();
+                        |this: &mut Reyvr, _, event: &NowPlayingEvent, cx: &mut Context<Reyvr>| {
+                            match event {
+                                NowPlayingEvent::Meta(title, album, artists, duration) => {
+                                    this.now_playing.update(cx, |this, _| {
+                                        this.title = title.clone();
+                                        this.album = album.clone();
+                                        this.artists = artists.clone();
+                                        this.duration = duration.clone();
+                                    });
+                                    cx.notify();
+                                }
+                                NowPlayingEvent::Position(pos) => {
+                                    this.now_playing.update(cx, |this, _| {
+                                        this.position = *pos;
+                                    });
+                                    cx.notify();
+                                }
+                                NowPlayingEvent::Thumbnail(img) => {
+                                    this.now_playing.update(cx, |this, _| {
+                                        this.thumbnail = Some(img.clone());
+                                    });
+                                    cx.notify();
+                                }
                             }
                         },
                     )

@@ -6,12 +6,12 @@ use gpui::*;
 use prelude::FluentBuilder;
 
 pub struct Titlebar {
-    now_playing: Model<NowPlaying>,
+    now_playing: Entity<NowPlaying>,
     theme: Theme,
 }
 
 impl Render for Titlebar {
-    fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
+    fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
             .w_full()
             .h_8()
@@ -37,7 +37,7 @@ impl Render for Titlebar {
             )
             .child(div().flex().w_auto().h_full().items_center().child({
                 let np = self.now_playing.read(cx);
-                let window_width = cx.window_bounds().get_bounds().size.width.0;
+                let window_width = win.window_bounds().get_bounds().size.width.0;
 
                 let truncate = |text: &str, limit: usize| -> String {
                     if text.len() > limit {
@@ -116,7 +116,7 @@ impl Render for Titlebar {
                             .justify_center()
                             .hover(|this| this.bg(self.theme.secondary))
                             .child({
-                                if cx.is_maximized() {
+                                if win.is_maximized() {
                                     Icon::new(Icons::Restore).size(20.0).color(0xffffff)
                                 } else {
                                     Icon::new(Icons::Maximize).size(20.0).color(0xffffff)
@@ -138,7 +138,7 @@ impl Render for Titlebar {
 }
 
 impl Titlebar {
-    pub fn new(now_playing: Model<NowPlaying>, theme: Theme) -> Titlebar {
+    pub fn new(now_playing: Entity<NowPlaying>, theme: Theme) -> Titlebar {
         Titlebar { now_playing, theme }
     }
 }
