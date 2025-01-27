@@ -5,6 +5,7 @@ use components::icon::*;
 use gpui::*;
 use prelude::FluentBuilder;
 
+#[derive(Clone)]
 pub struct Titlebar {
     now_playing: Entity<NowPlaying>,
     theme: Theme,

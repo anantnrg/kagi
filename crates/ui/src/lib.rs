@@ -26,6 +26,7 @@ use std::{
     sync::{Arc, Mutex},
     time::Duration,
 };
+use titlebar::Titlebar;
 
 pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
     let app = Application::new().with_assets(Assets {
@@ -64,8 +65,10 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .default(0.2)
                     });
                     let recv_controller = controller.clone();
+                    let titlebar = Titlebar::new(np.clone(), theme.clone());
 
                     cx.set_global(controller);
+                    cx.set_global(theme);
                     cx.background_executor()
                         .spawn(async move {
                             player.run().await;
@@ -163,7 +166,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     Reyvr {
                         layout: Layout::new(),
                         now_playing: np,
-                        theme,
+                        titlebar,
                         vol_slider,
                         res_handler,
                     }

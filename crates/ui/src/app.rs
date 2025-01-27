@@ -7,16 +7,16 @@ use gpui::*;
 #[derive(Clone)]
 pub struct Reyvr {
     pub vol_slider: Entity<Slider>,
+    pub titlebar: Titlebar,
     pub layout: Layout,
     pub now_playing: Entity<NowPlaying>,
-    pub theme: Theme,
     pub res_handler: Entity<ResHandler>,
 }
 
 impl Render for Reyvr {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let theme = self.theme.clone();
-        let titlebar = cx.new(|_| Titlebar::new(self.now_playing.clone(), theme.clone()));
+        let titlebar = cx.new(|_| self.clone().titlebar);
+        let theme = cx.global::<Theme>();
 
         div()
             .w_full()
