@@ -33,7 +33,6 @@ impl Render for Reyvr {
                     .justify_center()
                     .items_center()
                     .child(Button::new().text("Play").on_click({
-                        // let now_playing = self.now_playing.clone();
                         move |_, _, cx| {
                             cx.global::<Controller>().play();
                         }

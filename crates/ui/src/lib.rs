@@ -3,6 +3,7 @@ pub mod assets;
 pub mod layout;
 pub mod now_playing;
 pub mod res_handler;
+pub mod sidebar;
 pub mod titlebar;
 
 use app::Reyvr;
@@ -60,7 +61,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .min(0.0)
                             .max(1.0)
                             .step(0.005)
-                            .default(0.4)
+                            .default(0.2)
                     });
                     let recv_controller = controller.clone();
 
