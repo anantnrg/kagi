@@ -66,7 +66,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .default(0.2)
                     });
                     let recv_controller = controller.clone();
-                    let titlebar = Titlebar::new(np.clone(), theme.clone());
+                    let titlebar = Titlebar::new(np.clone());
 
                     cx.set_global(controller);
                     cx.set_global(theme);

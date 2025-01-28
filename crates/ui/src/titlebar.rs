@@ -8,15 +8,17 @@ use prelude::FluentBuilder;
 #[derive(Clone)]
 pub struct Titlebar {
     now_playing: Entity<NowPlaying>,
-    theme: Theme,
 }
 
 impl Render for Titlebar {
     fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let theme = cx.global::<Theme>();
         div()
             .w_full()
             .h_8()
-            .bg(self.theme.titlebar_bg)
+            .bg(theme.titlebar_bg)
+            .border_b_1()
+            .border_color(theme.secondary)
             .flex()
             .items_center()
             .justify_between()
@@ -33,7 +35,7 @@ impl Render for Titlebar {
                     .child(
                         Icon::new(Icons::LeftSidebar)
                             .size(18.0)
-                            .color(self.theme.icon.into()),
+                            .color(theme.icon.into()),
                     ),
             )
             .child(div().flex().w_auto().h_full().items_center().child({
@@ -49,7 +51,7 @@ impl Render for Titlebar {
                 };
 
                 div()
-                    .text_color(self.theme.accent)
+                    .text_color(theme.accent)
                     .text_sm()
                     .overflow_hidden()
                     .when(window_width < 200.0, |this| this.child("Reyvr"))
@@ -105,7 +107,7 @@ impl Render for Titlebar {
                             .flex()
                             .items_center()
                             .justify_center()
-                            .hover(|this| this.bg(self.theme.secondary))
+                            .hover(|this| this.bg(theme.secondary))
                             .child(Icon::new(Icons::Minimize).size(20.0).color(0xffffff)),
                     )
                     .child(
@@ -115,7 +117,7 @@ impl Render for Titlebar {
                             .flex()
                             .items_center()
                             .justify_center()
-                            .hover(|this| this.bg(self.theme.secondary))
+                            .hover(|this| this.bg(theme.secondary))
                             .child({
                                 if win.is_maximized() {
                                     Icon::new(Icons::Restore).size(20.0).color(0xffffff)
@@ -139,7 +141,7 @@ impl Render for Titlebar {
 }
 
 impl Titlebar {
-    pub fn new(now_playing: Entity<NowPlaying>, theme: Theme) -> Titlebar {
-        Titlebar { now_playing, theme }
+    pub fn new(now_playing: Entity<NowPlaying>) -> Titlebar {
+        Titlebar { now_playing }
     }
 }
