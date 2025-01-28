@@ -25,8 +25,8 @@ impl Icons {
             Self::RightSidebar => "icons/right_sidebar.svg",
             Self::Play => "icons/play.svg",
             Self::Pause => "icons/pause.svg",
-            Self::Next => "icons/play next.svg",
-            Self::Previous => "icons/play previous.svg",
+            Self::Next => "icons/next.svg",
+            Self::Previous => "icons/previous.svg",
             Self::Stopped => "icons/stopped.svg",
         }
         .into()

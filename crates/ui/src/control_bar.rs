@@ -14,7 +14,7 @@ pub struct ControlBar {
 }
 
 impl Render for ControlBar {
-    fn render(&mut self, win: &mut Window, cx: &mut Context<'_, Self>) -> impl IntoElement {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<'_, Self>) -> impl IntoElement {
         let theme = cx.global::<Theme>();
         let controller = cx.global::<Controller>();
         let np = self.now_playing.read(cx);
@@ -64,7 +64,7 @@ impl Render for ControlBar {
                         this.child(Icon::new(Icons::Pause).size(24.0).color(theme.text.into()))
                     })
                     .when(np.state == State::Paused, |this| {
-                        this.child(Icon::new(Icons::Play).size(24.0).color(theme.text.into()))
+                        this.child(Icon::new(Icons::Play).size(32.0).color(theme.text.into()))
                     })
                     .on_mouse_down(MouseButton::Left, {
                         {
@@ -86,11 +86,11 @@ impl Render for ControlBar {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .child(Icon::new(Icons::Next).size(24.0).color(theme.text.into()))
+                    .child(Icon::new(Icons::Next).size(32.0).color(theme.text.into()))
                     .on_mouse_down(MouseButton::Left, {
                         {
                             let controller = controller.clone();
-                            move |_, _, cx| {
+                            move |_, _, _| {
                                 controller.next();
                             }
                         }
