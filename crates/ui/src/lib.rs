@@ -125,6 +125,12 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     });
                                     cx.notify();
                                 }
+                                NowPlayingEvent::State(state) => {
+                                    this.now_playing.update(cx, |this, _| {
+                                        this.state = state.clone();
+                                    });
+                                    cx.notify();
+                                }
                             }
                         },
                     )
@@ -160,7 +166,11 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     );
                                 });
                             }
-                            Response::StateChanged(state) => {}
+                            Response::StateChanged(state) => {
+                                this.now_playing.update(cx, |np, cx| {
+                                    np.update_state(cx, state.clone());
+                                });
+                            }
                             _ => {}
                         },
                     )

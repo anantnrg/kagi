@@ -1,4 +1,5 @@
 use gpui::*;
+use gstreamer::State;
 
 #[derive(Clone)]
 pub struct NowPlaying {
@@ -8,12 +9,14 @@ pub struct NowPlaying {
     pub position: u64,
     pub duration: u64,
     pub thumbnail: Option<ImageSource>,
+    pub state: State,
 }
 
 pub enum NowPlayingEvent {
     Meta(SharedString, SharedString, Vec<SharedString>, u64),
     Position(u64),
     Thumbnail(ImageSource),
+    State(State),
 }
 
 impl NowPlaying {
@@ -25,6 +28,7 @@ impl NowPlaying {
             position: 0,
             duration: 0,
             thumbnail: None,
+            state: State::Null,
         }
     }
 
@@ -47,6 +51,11 @@ impl NowPlaying {
 
     pub fn update_thumbnail(&mut self, cx: &mut Context<Self>, image: ImageSource) {
         cx.emit(NowPlayingEvent::Thumbnail(image));
+        cx.notify();
+    }
+
+    pub fn update_state(&mut self, cx: &mut Context<Self>, state: State) {
+        cx.emit(NowPlayingEvent::State(state));
         cx.notify();
     }
 }
