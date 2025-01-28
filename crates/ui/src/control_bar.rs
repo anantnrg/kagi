@@ -17,6 +17,10 @@ impl Render for ControlBar {
             .border_t_1()
             .bg(theme.background)
             .border_color(theme.secondary)
+            .flex()
+            .items_center()
+            .justify_center()
+            .child(div().size_5().child(svg().path("assets/")))
     }
 }
 
