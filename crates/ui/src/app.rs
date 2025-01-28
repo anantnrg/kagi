@@ -84,6 +84,6 @@ impl Render for Reyvr {
                     .overflow_hidden()
                     .child(cx.new(|cx| LeftSidebar::new(cx))),
             )
-            .child(cx.new(|_| ControlBar::new()))
+            .child(cx.new(|cx| ControlBar::new(self.now_playing.read(cx).clone())))
     }
 }
