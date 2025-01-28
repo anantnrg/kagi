@@ -243,9 +243,9 @@ impl Player {
 }
 
 impl Controller {
-    pub fn load(&self, path: &'static str) {
+    pub fn load(&self, path: String) {
         self.tx
-            .send(Command::LoadFromFolder(path.to_string()))
+            .send(Command::LoadFromFolder(path))
             .expect("Could not send command");
     }
 
