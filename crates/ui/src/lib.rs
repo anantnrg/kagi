@@ -1,5 +1,6 @@
 pub mod app;
 pub mod assets;
+pub mod control_bar;
 pub mod layout;
 pub mod now_playing;
 pub mod res_handler;
@@ -159,6 +160,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     );
                                 });
                             }
+                            Response::StateChanged(state) => {}
                             _ => {}
                         },
                     )

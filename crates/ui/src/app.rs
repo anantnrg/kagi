@@ -1,5 +1,5 @@
 use super::{now_playing::*, res_handler::*, titlebar::Titlebar};
-use crate::{layout::Layout, sidebar::*};
+use crate::{control_bar::ControlBar, layout::Layout, sidebar::*};
 use backend::player::Controller;
 use components::{button::Button, slider::Slider, theme::Theme};
 use gpui::*;
@@ -84,5 +84,6 @@ impl Render for Reyvr {
                     .overflow_hidden()
                     .child(cx.new(|cx| LeftSidebar::new(cx))),
             )
+            .child(cx.new(|_| ControlBar::new()))
     }
 }
