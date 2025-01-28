@@ -4,8 +4,8 @@ use gpui::{prelude::FluentBuilder, *};
 
 #[derive(Clone)]
 pub struct LeftSidebar {
-    pub playlists: Entity<Vec<(String, String, bool)>>,
-     pub active_index: Entity<u32>
+    pub playlists: Entity<Vec<(String, String)>>,
+    pub active_index: Entity<usize>,
 }
 
 impl Render for LeftSidebar {
@@ -14,43 +14,47 @@ impl Render for LeftSidebar {
         let theme = cx.global::<Theme>();
         let controller = cx.global::<Controller>().clone();
         let playlists = self.playlists.read(cx).clone();
+        let current_index = *self.active_index.clone().read(cx);
+
         if window_width < 400.0 {
             div()
         } else {
             div()
                 .bg(theme.background)
                 .h_full()
-                .w(px(window_width * (24.0 / 100.0)))
+                .w(px(window_width * 0.24))
                 .min_w(px(240.0))
                 .border_r_1()
                 .border_color(theme.secondary)
                 .px_3()
-                .children({
-                    playlists.into_iter().map(|(name, path, current)| {
-                        let controller = controller.clone();
-                        let path = path.clone();
+                .children(
+                    playlists
+                        .into_iter()
+                        .enumerate()
+                        .map(|(index, (name, path))| {
+                            let controller = controller.clone();
+                            let path = path.clone();
 
-                        div()
-                            .when(current.clone(), |this| this.bg(theme.secondary))
-                            .bg(theme.background)
-                            .text_color(theme.text)
-                            .font_weight(FontWeight::MEDIUM)
-                            .w_full()
-                            .rounded_lg()
-                            .h_10()
-                            .flex()
-                            .items_center()
-                            .justify_start()
-                            .px_2()
-                            .child(name.clone())
-                            .on_mouse_down(MouseButton::Left, move |_, _, _| {
-                                controller.clone().load(path.clone());
-                                self.playlists.update(cx, |this, cx| {
-                                    this.
+                            div()
+                                .when(current_index == index, |this| this.bg(theme.secondary))
+                                .bg(theme.background)
+                                .text_color(theme.text)
+                                .font_weight(FontWeight::MEDIUM)
+                                .w_full()
+                                .rounded_lg()
+                                .h_10()
+                                .flex()
+                                .items_center()
+                                .justify_start()
+                                .px_2()
+                                .child(name.clone())
+                                .on_mouse_down(MouseButton::Left, {
+                                    move |_, _, _| {
+                                        controller.clone().load(path.clone());
+                                    }
                                 })
-                            })
-                    })
-                })
+                        }),
+                )
         }
     }
 }
@@ -62,9 +66,9 @@ impl LeftSidebar {
                 vec![(
                     "straight up liquid fire".to_string(),
                     "E:\\music\\straight up liquid fire".to_string(),
-                    false,
                 )]
             }),
+            active_index: cx.new(|_| 0),
         }
     }
 }
