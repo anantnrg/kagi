@@ -1,5 +1,8 @@
 use backend::player::Controller;
-use components::theme::Theme;
+use components::{
+    icon::{Icon, Icons},
+    theme::Theme,
+};
 use gpui::{prelude::FluentBuilder, *};
 use gstreamer::State;
 
@@ -7,13 +10,14 @@ use crate::now_playing::NowPlaying;
 
 #[derive(Clone)]
 pub struct ControlBar {
-    now_playing: NowPlaying,
+    now_playing: Entity<NowPlaying>,
 }
 
 impl Render for ControlBar {
     fn render(&mut self, win: &mut Window, cx: &mut Context<'_, Self>) -> impl IntoElement {
         let theme = cx.global::<Theme>();
         let controller = cx.global::<Controller>();
+        let np = self.now_playing.read(cx);
         div()
             .w_full()
             .h(px(72.0))
@@ -29,7 +33,11 @@ impl Render for ControlBar {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .child(svg().path("assets/play previous.svg").size_4())
+                    .child(
+                        Icon::new(Icons::Previous)
+                            .size(16.0)
+                            .color(theme.text.into()),
+                    )
                     .on_mouse_down(MouseButton::Left, {
                         {
                             let controller = controller.clone();
@@ -45,24 +53,27 @@ impl Render for ControlBar {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .child(
-                        svg()
-                            .when(self.now_playing.state == State::Playing, |this| {
-                                this.path("assets/pause.svg")
-                            })
-                            .when(self.now_playing.state == State::Paused, |this| {
-                                this.path("assets/play.svg")
-                            })
-                            .size_4(),
-                    )
+                    .when(np.state == State::Null, |this| {
+                        this.child(
+                            Icon::new(Icons::Stopped)
+                                .size(24.0)
+                                .color(theme.text.into()),
+                        )
+                    })
+                    .when(np.state == State::Playing, |this| {
+                        this.child(Icon::new(Icons::Pause).size(24.0).color(theme.text.into()))
+                    })
+                    .when(np.state == State::Paused, |this| {
+                        this.child(Icon::new(Icons::Play).size(24.0).color(theme.text.into()))
+                    })
                     .on_mouse_down(MouseButton::Left, {
                         {
                             let controller = controller.clone();
-                            let np = self.now_playing.clone();
+                            let np = np.clone();
                             move |_, _, _| {
                                 if np.state == State::Playing {
                                     controller.pause();
-                                } else {
+                                } else if np.state == State::Null || np.state == State::Paused {
                                     controller.play();
                                 }
                             }
@@ -75,7 +86,7 @@ impl Render for ControlBar {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .child(svg().path("assets/play next.svg").size_4())
+                    .child(Icon::new(Icons::Next).size(16.0).color(theme.text.into()))
                     .on_mouse_down(MouseButton::Left, {
                         {
                             let controller = controller.clone();
@@ -89,7 +100,7 @@ impl Render for ControlBar {
 }
 
 impl ControlBar {
-    pub fn new(now_playing: NowPlaying) -> Self {
+    pub fn new(now_playing: Entity<NowPlaying>) -> Self {
         ControlBar { now_playing }
     }
 }

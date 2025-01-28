@@ -7,6 +7,11 @@ pub enum Icons {
     Restore,
     LeftSidebar,
     RightSidebar,
+    Play,
+    Pause,
+    Next,
+    Previous,
+    Stopped,
 }
 
 impl Icons {
@@ -18,6 +23,11 @@ impl Icons {
             Self::Restore => "icons/restore.svg",
             Self::LeftSidebar => "icons/left_sidebar.svg",
             Self::RightSidebar => "icons/right_sidebar.svg",
+            Self::Play => "icons/play.svg",
+            Self::Pause => "icons/pause.svg",
+            Self::Next => "icons/play next.svg",
+            Self::Previous => "icons/play previous.svg",
+            Self::Stopped => "icons/stopped.svg",
         }
         .into()
     }
