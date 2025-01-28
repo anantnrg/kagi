@@ -20,7 +20,15 @@ impl Render for LeftSidebar {
                 .min_w(px(150.0))
                 .border_r_1()
                 .border_color(theme.secondary)
-            // .children(self.playlists.read_with(cx, |this, cx| this.it))
+                .children(self.playlists.read(cx).into_iter().map(|(name, _)| {
+                    div()
+                        .w_full()
+                        .mx_4()
+                        .rounded_lg()
+                        .h_10()
+                        .flex()
+                        .child(name.clone())
+                }))
         }
     }
 }
