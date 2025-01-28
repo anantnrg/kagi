@@ -14,7 +14,7 @@ pub struct Reyvr {
 }
 
 impl Render for Reyvr {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let titlebar = cx.new(|_| self.clone().titlebar);
         let theme = cx.global::<Theme>();
 
@@ -78,7 +78,10 @@ impl Render for Reyvr {
                 //         }
                 //     }),
                 div()
-                    .size_full()
+                    .w_full()
+                    .h(px(
+                        win.window_bounds().get_bounds().size.height.0 - (32.0 + 72.0)
+                    ))
                     .bg(theme.background)
                     .flex()
                     .overflow_hidden()

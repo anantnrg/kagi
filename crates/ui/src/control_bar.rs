@@ -13,8 +13,9 @@ impl Render for ControlBar {
         let theme = cx.global::<Theme>();
         div()
             .w_full()
-            .h_24()
+            .h(px(72.0))
             .border_t_1()
+            .bg(theme.accent)
             .border_color(theme.secondary)
     }
 }
