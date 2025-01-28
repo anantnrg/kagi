@@ -35,7 +35,7 @@ impl Render for ControlBar {
                     .justify_center()
                     .child(
                         Icon::new(Icons::Previous)
-                            .size(16.0)
+                            .size(24.0)
                             .color(theme.text.into()),
                     )
                     .on_mouse_down(MouseButton::Left, {
@@ -86,11 +86,11 @@ impl Render for ControlBar {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .child(Icon::new(Icons::Next).size(16.0).color(theme.text.into()))
+                    .child(Icon::new(Icons::Next).size(24.0).color(theme.text.into()))
                     .on_mouse_down(MouseButton::Left, {
                         {
                             let controller = controller.clone();
-                            move |_, _, _| {
+                            move |_, _, cx| {
                                 controller.next();
                             }
                         }

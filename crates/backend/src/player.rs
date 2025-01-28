@@ -107,7 +107,7 @@ impl Player {
                                         .expect("Could not send message");
                                 }
                                 self.tx
-                                    .send(Response::Info("Playback started.".to_string()))
+                                    .send(Response::StateChanged(State::Playing))
                                     .expect("Could not send message");
                             }
                         }
@@ -128,7 +128,7 @@ impl Player {
                             playlist.playing = false;
                         }
                         self.tx
-                            .send(Response::Info("Playback paused.".to_string()))
+                            .send(Response::StateChanged(State::Paused))
                             .expect("Could not send message");
                         self.playlist = Arc::new(Mutex::new(playlist));
                     }

@@ -124,9 +124,6 @@ impl Backend for GstBackend {
         if let Some(bus) = playbin.bus() {
             while let Some(msg) = bus.pop() {
                 return match msg.view() {
-                    MessageView::StateChanged(state) => {
-                        Some(Response::StateChanged(state.current()))
-                    }
                     MessageView::Tag(msg) => {
                         if let Some(image) = msg.tags().get::<gstreamer::tags::Image>() {
                             let bytes = image.get();
