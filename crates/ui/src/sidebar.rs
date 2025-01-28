@@ -5,6 +5,7 @@ use gpui::{prelude::FluentBuilder, *};
 #[derive(Clone)]
 pub struct LeftSidebar {
     pub playlists: Entity<Vec<(String, String, bool)>>,
+     pub active_index: Entity<u32>
 }
 
 impl Render for LeftSidebar {
@@ -27,7 +28,7 @@ impl Render for LeftSidebar {
                 .children({
                     playlists.into_iter().map(|(name, path, current)| {
                         let controller = controller.clone();
-                        let path = path.clone(); // Clone `path` here to move it into the closure
+                        let path = path.clone();
 
                         div()
                             .when(current.clone(), |this| this.bg(theme.secondary))
@@ -44,6 +45,9 @@ impl Render for LeftSidebar {
                             .child(name.clone())
                             .on_mouse_down(MouseButton::Left, move |_, _, _| {
                                 controller.clone().load(path.clone());
+                                self.playlists.update(cx, |this, cx| {
+                                    this.
+                                })
                             })
                     })
                 })
