@@ -22,6 +22,7 @@ use gpui::*;
 use layout::Layout;
 use now_playing::{NowPlaying, NowPlayingEvent};
 use res_handler::ResHandler;
+use sidebar::LeftSidebar;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -66,7 +67,9 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .default(0.2)
                     });
                     let recv_controller = controller.clone();
-                    let titlebar = Titlebar::new(np.clone());
+                    let titlebar = cx.new(|_| Titlebar::new(np.clone()));
+                    let sidebar = cx.new(|_| LeftSidebar::new(np.clone()));
+                    let titlebar = cx.new(|_| Titlebar::new(np.clone()));
 
                     cx.set_global(controller);
                     cx.set_global(theme);

@@ -8,6 +8,8 @@ use gpui::*;
 pub struct Reyvr {
     pub vol_slider: Entity<Slider>,
     pub titlebar: Entity<Titlebar>,
+    pub left_sidebar: Entity<LeftSidebar>,
+    pub control_bar: Entity<ControlBar>,
     pub layout: Layout,
     pub now_playing: Entity<NowPlaying>,
     pub res_handler: Entity<ResHandler>,
@@ -16,6 +18,8 @@ pub struct Reyvr {
 impl Render for Reyvr {
     fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let titlebar = self.clone().titlebar;
+        let sidebar = self.clone().left_sidebar;
+        let control_bar = self.clone().control_bar;
         let theme = cx.global::<Theme>();
 
         div()
@@ -77,8 +81,8 @@ impl Render for Reyvr {
                     .bg(theme.background)
                     .flex()
                     .overflow_hidden()
-                    .child(cx.new(|cx| LeftSidebar::new(cx))),
+                    .child(sidebar),
             )
-            .child(cx.new(|_| ControlBar::new(self.now_playing.clone(), self.vol_slider.clone())))
+            .child(self.control_bar.clone())
     }
 }
