@@ -7,7 +7,7 @@ use gpui::*;
 #[derive(Clone)]
 pub struct Reyvr {
     pub vol_slider: Entity<Slider>,
-    pub titlebar: Titlebar,
+    pub titlebar: Entity<Titlebar>,
     pub layout: Layout,
     pub now_playing: Entity<NowPlaying>,
     pub res_handler: Entity<ResHandler>,
@@ -15,7 +15,7 @@ pub struct Reyvr {
 
 impl Render for Reyvr {
     fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let titlebar = cx.new(|_| self.clone().titlebar);
+        let titlebar = self.clone().titlebar;
         let theme = cx.global::<Theme>();
 
         div()
@@ -58,15 +58,7 @@ impl Render for Reyvr {
                 //                 .load("E:\\music\\straight up liquid fire");
                 //         }
                 //     }))
-                //     .child(
-                //         div()
-                //             .flex()
-                //             .items_center()
-                //             .justify_center()
-                //             .h_auto()
-                //             .w_20()
-                //             .child(self.vol_slider.clone()),
-                //     )
+
                 //     .child({
                 //         if let Some(thumbnail) = self.now_playing.read(cx).thumbnail.clone() {
                 //             div()
@@ -87,6 +79,6 @@ impl Render for Reyvr {
                     .overflow_hidden()
                     .child(cx.new(|cx| LeftSidebar::new(cx))),
             )
-            .child(cx.new(|_| ControlBar::new(self.now_playing.clone())))
+            .child(cx.new(|_| ControlBar::new(self.now_playing.clone(), self.vol_slider.clone())))
     }
 }

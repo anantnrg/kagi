@@ -91,14 +91,19 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         }
                     })
                     .detach();
-                    cx.subscribe(&vol_slider, |_, _, event: &SliderEvent, cx| match event {
-                        SliderEvent::Change(vol) => {
-                            let volume = (vol * 100.0).round() as f64 / 100.0;
-                            cx.global::<Controller>().volume(volume);
-
-                            cx.notify();
-                        }
-                    })
+                    cx.subscribe(
+                        &vol_slider,
+                        move |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {
+                            SliderEvent::Change(vol) => {
+                                let volume = (vol * 100.0).round() as f64 / 100.0;
+                                cx.global::<Controller>().volume(volume);
+                                this.now_playing.update(cx, |this, cx| {
+                                    this.update_vol(cx, volume.clone());
+                                });
+                                cx.notify();
+                            }
+                        },
+                    )
                     .detach();
                     cx.subscribe(
                         &np,
@@ -128,6 +133,12 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 NowPlayingEvent::State(state) => {
                                     this.now_playing.update(cx, |this, _| {
                                         this.state = state.clone();
+                                    });
+                                    cx.notify();
+                                }
+                                NowPlayingEvent::Volume(vol) => {
+                                    this.now_playing.update(cx, |this, _| {
+                                        this.volume = vol.clone();
                                     });
                                     cx.notify();
                                 }

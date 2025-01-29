@@ -10,6 +10,7 @@ pub struct NowPlaying {
     pub duration: u64,
     pub thumbnail: Option<ImageSource>,
     pub state: State,
+    pub volume: f64,
 }
 
 pub enum NowPlayingEvent {
@@ -17,6 +18,7 @@ pub enum NowPlayingEvent {
     Position(u64),
     Thumbnail(ImageSource),
     State(State),
+    Volume(f64),
 }
 
 impl NowPlaying {
@@ -29,6 +31,7 @@ impl NowPlaying {
             duration: 0,
             thumbnail: None,
             state: State::Null,
+            volume: 0.2,
         }
     }
 
@@ -58,6 +61,12 @@ impl NowPlaying {
         cx.emit(NowPlayingEvent::State(state));
         cx.notify();
     }
+
+    pub fn update_vol(&mut self, cx: &mut Context<Self>, vol: f64) {
+        cx.emit(NowPlayingEvent::Volume(vol));
+        cx.notify();
+    }
 }
 
 impl EventEmitter<NowPlayingEvent> for NowPlaying {}
+impl Global for NowPlaying {}
