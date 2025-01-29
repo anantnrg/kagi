@@ -194,7 +194,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         layout: Layout::new(),
                         now_playing: np,
                         titlebar,
-                        vol_slider,
                         res_handler,
                         left_sidebar,
                         control_bar,

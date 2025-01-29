@@ -1,12 +1,10 @@
 use super::{now_playing::*, res_handler::*, titlebar::Titlebar};
 use crate::{control_bar::ControlBar, layout::Layout, sidebar::*};
-use backend::player::Controller;
-use components::{button::Button, slider::Slider, theme::Theme};
+use components::theme::Theme;
 use gpui::*;
 
 #[derive(Clone)]
 pub struct Reyvr {
-    pub vol_slider: Entity<Slider>,
     pub titlebar: Entity<Titlebar>,
     pub left_sidebar: Entity<LeftSidebar>,
     pub control_bar: Entity<ControlBar>,
@@ -83,6 +81,6 @@ impl Render for Reyvr {
                     .overflow_hidden()
                     .child(sidebar),
             )
-            .child(self.control_bar.clone())
+            .child(control_bar)
     }
 }
