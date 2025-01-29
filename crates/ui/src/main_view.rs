@@ -17,11 +17,13 @@ impl Render for MainView {
             .items_center()
             .justify_center()
             .flex_col()
+            .overflow_hidden()
             .child({
                 if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
                     div()
-                        .w(px(1280.))
-                        .h(px(768.0))
+                        .size_full()
+                        .max_w(px(1280.))
+                        .max_h(px(768.0))
                         .child(img(thumbnail).size_full())
                 } else {
                     div()
