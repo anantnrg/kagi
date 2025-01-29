@@ -18,6 +18,7 @@ use components::{
     slider::{Slider, SliderEvent},
     theme::Theme,
 };
+use control_bar::ControlBar;
 use gpui::*;
 use layout::Layout;
 use now_playing::{NowPlaying, NowPlayingEvent};
@@ -67,9 +68,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .default(0.2)
                     });
                     let recv_controller = controller.clone();
-                    let titlebar = cx.new(|_| Titlebar::new(np.clone()));
-                    let sidebar = cx.new(|_| LeftSidebar::new(np.clone()));
-                    let titlebar = cx.new(|_| Titlebar::new(np.clone()));
 
                     cx.set_global(controller);
                     cx.set_global(theme);
@@ -189,12 +187,17 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         },
                     )
                     .detach();
+                    let titlebar = cx.new(|_| Titlebar::new(np.clone()));
+                    let left_sidebar = cx.new(|cx| LeftSidebar::new(cx));
+                    let control_bar = cx.new(|_| ControlBar::new(np.clone(), vol_slider.clone()));
                     Reyvr {
                         layout: Layout::new(),
                         now_playing: np,
                         titlebar,
                         vol_slider,
                         res_handler,
+                        left_sidebar,
+                        control_bar,
                     }
                 })
             },
