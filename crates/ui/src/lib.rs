@@ -2,6 +2,7 @@ pub mod app;
 pub mod assets;
 pub mod control_bar;
 pub mod layout;
+pub mod main_view;
 pub mod now_playing;
 pub mod res_handler;
 pub mod sidebar;
