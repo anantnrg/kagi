@@ -27,15 +27,16 @@ impl Render for ControlBar {
             .flex()
             .items_center()
             .justify_center()
+            .gap_3()
             .child(
                 div()
-                    .size_5()
+                    .size_6()
                     .flex()
                     .items_center()
                     .justify_center()
                     .child(
                         Icon::new(Icons::Previous)
-                            .size(24.0)
+                            .size(32.0)
                             .color(theme.text.into()),
                     )
                     .on_mouse_down(MouseButton::Left, {
@@ -49,19 +50,19 @@ impl Render for ControlBar {
             )
             .child(
                 div()
-                    .size_5()
+                    .size_6()
                     .flex()
                     .items_center()
                     .justify_center()
                     .when(np.state == State::Null, |this| {
                         this.child(
                             Icon::new(Icons::Stopped)
-                                .size(24.0)
+                                .size(32.0)
                                 .color(theme.text.into()),
                         )
                     })
                     .when(np.state == State::Playing, |this| {
-                        this.child(Icon::new(Icons::Pause).size(24.0).color(theme.text.into()))
+                        this.child(Icon::new(Icons::Pause).size(32.0).color(theme.text.into()))
                     })
                     .when(np.state == State::Paused, |this| {
                         this.child(Icon::new(Icons::Play).size(32.0).color(theme.text.into()))
@@ -82,7 +83,7 @@ impl Render for ControlBar {
             )
             .child(
                 div()
-                    .size_5()
+                    .size_6()
                     .flex()
                     .items_center()
                     .justify_center()
