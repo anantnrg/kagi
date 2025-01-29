@@ -176,6 +176,9 @@ impl Player {
                                 .expect("Could not play next.");
                             backend.play().await.expect("Could not play");
                             playlist.playing = true;
+                            self.tx
+                                .send(Response::StateChanged(State::Playing))
+                                .expect("Could not send message");
                             backend
                                 .set_volume(self.volume)
                                 .await
@@ -197,6 +200,9 @@ impl Player {
                                 .expect("Could not play next.");
                             backend.play().await.expect("Could not play");
                             playlist.playing = true;
+                            self.tx
+                                .send(Response::StateChanged(State::Playing))
+                                .expect("Could not send message");
                             backend
                                 .set_volume(self.volume)
                                 .await
