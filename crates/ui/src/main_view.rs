@@ -8,7 +8,7 @@ pub struct MainView {
 }
 
 impl Render for MainView {
-    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let np = self.now_playing.clone();
         div()
             .w_full()
@@ -20,14 +20,18 @@ impl Render for MainView {
             .child({
                 if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
                     div()
-                        .w_auto()
-                        .h_auto()
-                        .max_w(px(1280.))
-                        .max_h(px(768.0))
+                        .w(px(1280.))
+                        .h(px(768.0))
                         .child(img(thumbnail).size_full())
                 } else {
                     div()
                 }
             })
+    }
+}
+
+impl MainView {
+    pub fn new(now_playing: Entity<NowPlaying>) -> Self {
+        MainView { now_playing }
     }
 }

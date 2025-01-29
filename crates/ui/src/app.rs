@@ -1,5 +1,5 @@
 use super::{now_playing::*, res_handler::*, titlebar::Titlebar};
-use crate::{control_bar::ControlBar, layout::Layout, sidebar::*};
+use crate::{control_bar::ControlBar, layout::Layout, main_view::MainView, sidebar::*};
 use components::theme::Theme;
 use gpui::*;
 
@@ -8,6 +8,7 @@ pub struct Reyvr {
     pub titlebar: Entity<Titlebar>,
     pub left_sidebar: Entity<LeftSidebar>,
     pub control_bar: Entity<ControlBar>,
+    pub main_view: Entity<MainView>,
     pub layout: Layout,
     pub now_playing: Entity<NowPlaying>,
     pub res_handler: Entity<ResHandler>,
@@ -18,6 +19,7 @@ impl Render for Reyvr {
         let titlebar = self.clone().titlebar;
         let sidebar = self.clone().left_sidebar;
         let control_bar = self.clone().control_bar;
+        let main_view = self.clone().main_view;
         let theme = cx.global::<Theme>();
 
         div()
@@ -34,7 +36,8 @@ impl Render for Reyvr {
                     .bg(theme.background)
                     .flex()
                     .overflow_hidden()
-                    .child(sidebar),
+                    .child(sidebar)
+                    .child(main_view),
             )
             .child(control_bar)
     }

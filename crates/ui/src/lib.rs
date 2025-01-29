@@ -22,6 +22,7 @@ use components::{
 use control_bar::ControlBar;
 use gpui::*;
 use layout::Layout;
+use main_view::MainView;
 use now_playing::{NowPlaying, NowPlayingEvent};
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
@@ -191,6 +192,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let titlebar = cx.new(|_| Titlebar::new(np.clone()));
                     let left_sidebar = cx.new(|cx| LeftSidebar::new(cx));
                     let control_bar = cx.new(|_| ControlBar::new(np.clone(), vol_slider.clone()));
+                    let main_view = cx.new(|_| MainView::new(np.clone()));
                     Reyvr {
                         layout: Layout::new(),
                         now_playing: np,
@@ -198,6 +200,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         res_handler,
                         left_sidebar,
                         control_bar,
+                        main_view,
                     }
                 })
             },
