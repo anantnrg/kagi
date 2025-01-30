@@ -1,4 +1,4 @@
-use crate::player::Response;
+use crate::player::{Response, Thumbnail};
 
 use super::{Backend, playback::Track};
 use anyhow::anyhow;
@@ -185,7 +185,7 @@ impl GstBackend {
     }
 }
 
-fn retrieve_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<SmallVec<[Frame; 1]>> {
+fn retrieve_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<Thumbnail> {
     let img = ImageReader::new(Cursor::new(bytes.clone()))
         .with_guessed_format()?
         .decode()?
@@ -198,9 +198,9 @@ fn retrieve_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<SmallVec<[Frame; 1]>> 
         bgra_image.put_pixel(x, y, Rgba([b, g, r, a]));
     }
 
-    Ok(SmallVec::from_vec(vec![Frame::new(thumbnail(
-        &bgra_image,
+    Ok(Thumbnail {
+        img: SmallVec::from_vec(vec![Frame::new(thumbnail(&bgra_image, width, height))]),
         width,
         height,
-    ))]))
+    })
 }

@@ -35,7 +35,7 @@ pub enum Response {
     Eos,
     StreamStart,
     Position(u64),
-    Thumbnail(SmallVec<[Frame; 1]>),
+    Thumbnail(Thumbnail),
 }
 
 #[derive(Clone)]
@@ -52,6 +52,13 @@ pub struct Player {
 pub struct Controller {
     pub tx: Sender<Command>,
     pub rx: Receiver<Response>,
+}
+
+#[derive(Clone)]
+pub struct Thumbnail {
+    pub img: SmallVec<[Frame; 1]>,
+    pub width: u32,
+    pub height: u32,
 }
 
 impl gpui::Global for Controller {}

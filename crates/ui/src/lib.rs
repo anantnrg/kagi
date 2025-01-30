@@ -23,7 +23,7 @@ use control_bar::ControlBar;
 use gpui::*;
 use layout::Layout;
 use main_view::MainView;
-use now_playing::{NowPlaying, NowPlayingEvent};
+use now_playing::{NowPlaying, NowPlayingEvent, Thumbnail};
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
 use std::{
@@ -172,12 +172,15 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     );
                                 });
                             }
-                            Response::Thumbnail(art) => {
+                            Response::Thumbnail(thumbnail) => {
                                 this.now_playing.update(cx, |np, cx| {
-                                    np.update_thumbnail(
-                                        cx,
-                                        ImageSource::Render(RenderImage::new(art.clone()).into()),
-                                    );
+                                    np.update_thumbnail(cx, Thumbnail {
+                                        img: ImageSource::Render(
+                                            RenderImage::new(thumbnail.img.clone()).into(),
+                                        ),
+                                        width: thumbnail.width,
+                                        height: thumbnail.height,
+                                    });
                                 });
                             }
                             Response::StateChanged(state) => {

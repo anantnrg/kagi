@@ -8,15 +8,22 @@ pub struct NowPlaying {
     pub artists: Vec<SharedString>,
     pub position: u64,
     pub duration: u64,
-    pub thumbnail: Option<ImageSource>,
+    pub thumbnail: Option<Thumbnail>,
     pub state: State,
     pub volume: f64,
+}
+
+#[derive(Clone)]
+pub struct Thumbnail {
+    pub img: ImageSource,
+    pub width: u32,
+    pub height: u32,
 }
 
 pub enum NowPlayingEvent {
     Meta(SharedString, SharedString, Vec<SharedString>, u64),
     Position(u64),
-    Thumbnail(ImageSource),
+    Thumbnail(Thumbnail),
     State(State),
     Volume(f64),
 }
@@ -52,8 +59,8 @@ impl NowPlaying {
         cx.notify();
     }
 
-    pub fn update_thumbnail(&mut self, cx: &mut Context<Self>, image: ImageSource) {
-        cx.emit(NowPlayingEvent::Thumbnail(image));
+    pub fn update_thumbnail(&mut self, cx: &mut Context<Self>, thumbnail: Thumbnail) {
+        cx.emit(NowPlayingEvent::Thumbnail(thumbnail));
         cx.notify();
     }
 
