@@ -1,3 +1,4 @@
+use components::theme::Theme;
 use gpui::*;
 
 use crate::now_playing::NowPlaying;
@@ -10,6 +11,8 @@ pub struct MainView {
 impl Render for MainView {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let np = self.now_playing.clone();
+        let theme = cx.global::<Theme>();
+
         div()
             .w_full()
             .h_full()
@@ -18,15 +21,48 @@ impl Render for MainView {
             .justify_center()
             .flex_col()
             .overflow_hidden()
+            .gap_2()
             .child({
                 if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
                     div()
                         .size_full()
-                        .max_w(px(1280.))
+                        .max_w(px(1280.0))
                         .max_h(px(768.0))
                         .child(img(thumbnail).size_full())
                 } else {
                     div()
+                }
+            })
+            .child({
+                let np = np.read(cx);
+                if !np.title.is_empty() {
+                    div()
+                        .text_color(theme.accent)
+                        .child(np.title.clone())
+                        .text_3xl()
+                        .font_weight(FontWeight::BOLD)
+                        .max_w(px(1280.0))
+                        .flex()
+                        .flex_wrap()
+                        .content_center()
+                } else {
+                    div().child("")
+                }
+            })
+            .child({
+                let np = np.read(cx);
+                if !np.title.is_empty() {
+                    div()
+                        .text_color(theme.text)
+                        .child(format!("{} • {}", np.artists.join(", ").clone(), np.album))
+                        .text_xl()
+                        .font_weight(FontWeight::MEDIUM)
+                        .max_w(px(1280.0))
+                        .flex()
+                        .flex_wrap()
+                        .content_center()
+                } else {
+                    div().text_color(theme.text).child("")
                 }
             })
     }
