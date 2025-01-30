@@ -24,11 +24,13 @@ impl Render for MainView {
             .gap_2()
             .child({
                 if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
-                    div()
-                        .size_full()
-                        .max_w(px(1280.0))
-                        .max_h(px(768.0))
-                        .child(img(thumbnail).size_full())
+                    div().size_full().child(
+                        div()
+                            .size_full()
+                            .max_w(px(1280.0))
+                            .max_h(px(768.0))
+                            .child(img(thumbnail).size_full()),
+                    )
                 } else {
                     div()
                 }
