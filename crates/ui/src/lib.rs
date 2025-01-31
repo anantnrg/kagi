@@ -4,6 +4,7 @@ pub mod control_bar;
 pub mod layout;
 pub mod main_view;
 pub mod now_playing;
+pub mod queue_list;
 pub mod res_handler;
 pub mod sidebar;
 pub mod titlebar;
