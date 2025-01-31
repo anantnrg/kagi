@@ -25,7 +25,7 @@ impl Render for QueueList {
                 .min_w(px(320.0))
                 .border_l_1()
                 .border_color(theme.secondary)
-                .children(tracks.into_iter().enumerate().map(|(id, track)| {
+                .children(tracks.into_iter().map(|track| {
                     div()
                         .w_full()
                         .h_16()

@@ -116,6 +116,15 @@ impl Backend for GstBackend {
                 .duration()
                 .unwrap_or(ClockTime::from_seconds(0))
                 .seconds(),
+            thumbnail: {
+                if let Some(image) = tags.get::<gstreamer::tags::Image>() {
+                    let bytes = image.get();
+                    let buffer = bytes.buffer().unwrap().map_readable().unwrap();
+                    Some(retrieve_thumbnail(buffer.as_bytes().into()).unwrap())
+                } else {
+                    None
+                }
+            },
         })
     }
 
@@ -124,17 +133,17 @@ impl Backend for GstBackend {
         if let Some(bus) = playbin.bus() {
             while let Some(msg) = bus.pop() {
                 return match msg.view() {
-                    MessageView::Tag(msg) => {
-                        if let Some(image) = msg.tags().get::<gstreamer::tags::Image>() {
-                            let bytes = image.get();
-                            let buffer = bytes.buffer().unwrap().map_readable().unwrap();
-                            Some(Response::Thumbnail(
-                                retrieve_thumbnail(buffer.as_bytes().into()).unwrap(),
-                            ))
-                        } else {
-                            Some(Response::Error("Could not get thumbnail".to_string()))
-                        }
-                    }
+                    // MessageView::Tag(msg) => {
+                    //     if let Some(image) = msg.tags().get::<gstreamer::tags::Image>() {
+                    //         let bytes = image.get();
+                    //         let buffer = bytes.buffer().unwrap().map_readable().unwrap();
+                    //         Some(Response::Thumbnail(
+                    //             retrieve_thumbnail(buffer.as_bytes().into()).unwrap(),
+                    //         ))
+                    //     } else {
+                    //         Some(Response::Error("Could not get thumbnail".to_string()))
+                    //     }
+                    // }
                     MessageView::Eos(_) => Some(Response::Eos),
                     MessageView::StreamStart(_) => Some(Response::StreamStart),
                     MessageView::Error(e) => Some(Response::Error(e.to_string())),

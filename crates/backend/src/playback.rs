@@ -1,6 +1,6 @@
 use std::{path::PathBuf, sync::Arc};
 
-use crate::Backend;
+use crate::{Backend, player::Thumbnail};
 
 #[derive(Clone)]
 pub struct Track {
@@ -9,6 +9,7 @@ pub struct Track {
     pub album: String,
     pub uri: String,
     pub duration: u64,
+    pub thumbnail: Option<Thumbnail>,
 }
 
 #[derive(Clone)]
@@ -28,6 +29,7 @@ impl Track {
             duration: 0,
             title: "Unknown Track".into(),
             uri: "".to_string(),
+            thumbnail: None,
         }
     }
 }
