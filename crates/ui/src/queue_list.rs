@@ -14,6 +14,7 @@ impl Render for QueueList {
         let theme = cx.global::<Theme>();
         let controller = cx.global::<Controller>().clone();
         let tracks = self.now_playing.read(cx).tracks.clone();
+        let np = self.now_playing.clone();
         if window_width < 600.0 {
             div()
         } else {
@@ -29,7 +30,6 @@ impl Render for QueueList {
                         .w_full()
                         .h_16()
                         .flex()
-                        .flex_col()
                         .px_3()
                         .text_color(theme.text)
                         .items_center()
@@ -37,8 +37,35 @@ impl Render for QueueList {
                         .px_2()
                         .border_b_1()
                         .border_color(theme.secondary)
-                        .child(id.to_string())
-                        .child(track.title)
+                        .child({
+                            if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
+                                img(thumbnail.img).size_12().rounded_lg()
+                            } else {
+                                img("")
+                            }
+                        })
+                        .child(
+                            div()
+                                .w_full()
+                                .h_full()
+                                .flex()
+                                .flex_col()
+                                .gap_2()
+                                .child(
+                                    div()
+                                        .child(track.title)
+                                        .truncate()
+                                        .text_base()
+                                        .font_weight(FontWeight::MEDIUM),
+                                )
+                                .child(
+                                    div()
+                                        .child(track.artists.join(", "))
+                                        .truncate()
+                                        .text_sm()
+                                        .font_weight(FontWeight::NORMAL),
+                                ),
+                        )
                 }))
         }
     }
