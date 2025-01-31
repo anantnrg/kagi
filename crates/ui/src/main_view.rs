@@ -1,3 +1,5 @@
+use std::{cell::Cell, rc::Rc};
+
 use components::theme::Theme;
 use gpui::*;
 
@@ -24,16 +26,20 @@ impl Render for MainView {
             .gap_2()
             .child({
                 if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
-                    div()
-                        .size_full()
-                        .flex()
-                        .items_end()
-                        .justify_end()
-                        // .max_w(px(thumbnail.width as f32))
-                        // .max_h(px(thumbnail.height as f32))
-                        .child(img(thumbnail.img).size_full())
+                    div().w_24().h_24().child(
+                        div()
+                            .size_auto()
+                            .flex()
+                            .items_end()
+                            .justify_end()
+                            .bg(theme.secondary)
+                            // .max_w(px(w.get()))
+                            // .max_h(px(h.get()))
+                            .child(img(thumbnail.img).size_full()),
+                    )
+                    // img(thumbnail.img).max_w_full().max_h_auto().debug()
                 } else {
-                    div()
+                    img("")
                 }
             })
             .child({
@@ -44,7 +50,7 @@ impl Render for MainView {
                         .child(np.title.clone())
                         .text_3xl()
                         .font_weight(FontWeight::BOLD)
-                        .max_w(px(1280.0))
+                        .w_full()
                         .flex()
                         .flex_wrap()
                         .content_center()
