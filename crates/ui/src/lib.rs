@@ -25,6 +25,7 @@ use gpui::*;
 use layout::Layout;
 use main_view::MainView;
 use now_playing::{NowPlaying, NowPlayingEvent, Thumbnail};
+use queue_list::QueueList;
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
 use std::{
@@ -206,6 +207,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let left_sidebar = cx.new(|cx| LeftSidebar::new(cx));
                     let control_bar = cx.new(|_| ControlBar::new(np.clone(), vol_slider.clone()));
                     let main_view = cx.new(|_| MainView::new(np.clone()));
+                    let queue_list = cx.new(|_| QueueList::new(np.clone()));
                     Reyvr {
                         layout: Layout::new(),
                         now_playing: np,
@@ -214,6 +216,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         left_sidebar,
                         control_bar,
                         main_view,
+                        queue_list,
                     }
                 })
             },
