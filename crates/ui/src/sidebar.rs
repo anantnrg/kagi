@@ -22,7 +22,7 @@ impl Render for LeftSidebar {
             div()
                 .bg(theme.background)
                 .h_full()
-                .w(px(window_width * 0.24))
+                .w_1_5()
                 .min_w(px(240.0))
                 .border_r_1()
                 .border_color(theme.secondary)
