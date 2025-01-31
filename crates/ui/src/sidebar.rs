@@ -51,6 +51,7 @@ impl Render for LeftSidebar {
                                 .on_mouse_down(MouseButton::Left, {
                                     move |_, _, _| {
                                         controller.clone().load(path.clone());
+                                        controller.clone().get_queue();
                                     }
                                 })
                         }),

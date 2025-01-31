@@ -303,6 +303,12 @@ impl Controller {
             .expect("Could not send command");
     }
 
+    pub fn get_queue(&self) {
+        self.tx
+            .send(Command::GetTracks)
+            .expect("Could not send command");
+    }
+
     pub fn volume(&self, vol: f64) {
         self.tx
             .send(Command::Volume(vol))
