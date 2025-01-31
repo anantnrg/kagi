@@ -19,6 +19,7 @@ pub enum Command {
     Pause,
     Volume(f64),
     GetMeta,
+    GetTracks,
     Next,
     Previous,
     LoadFromFolder(String),
@@ -36,6 +37,7 @@ pub enum Response {
     StreamStart,
     Position(u64),
     Thumbnail(Thumbnail),
+    Tracks(Vec<Track>),
 }
 
 #[derive(Clone)]
@@ -149,6 +151,19 @@ impl Player {
                             let track = playlist.tracks[playlist.current_index].clone();
                             self.tx
                                 .send(Response::Metadata(track))
+                                .expect("Could not send message");
+                        }
+                    }
+                    Command::GetTracks => {
+                        let playlist = {
+                            let guard = self.playlist.lock().expect("Could not lock playlist");
+                            guard.clone()
+                        };
+
+                        if playlist.loaded {
+                            let tracks = playlist.tracks.clone();
+                            self.tx
+                                .send(Response::Tracks(tracks))
                                 .expect("Could not send message");
                         }
                     }

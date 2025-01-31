@@ -28,6 +28,7 @@ pub enum NowPlayingEvent {
     Thumbnail(Thumbnail),
     State(State),
     Volume(f64),
+    Tracks(Vec<Track>),
 }
 
 impl NowPlaying {
@@ -74,6 +75,11 @@ impl NowPlaying {
 
     pub fn update_vol(&mut self, cx: &mut Context<Self>, vol: f64) {
         cx.emit(NowPlayingEvent::Volume(vol));
+        cx.notify();
+    }
+
+    pub fn update_tracks(&mut self, cx: &mut Context<Self>, tracks: Vec<Track>) {
+        cx.emit(NowPlayingEvent::Tracks(tracks));
         cx.notify();
     }
 }
