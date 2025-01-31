@@ -14,7 +14,6 @@ impl Render for QueueList {
         let theme = cx.global::<Theme>();
         let controller = cx.global::<Controller>().clone();
         let tracks = self.now_playing.read(cx).tracks.clone();
-        let np = self.now_playing.clone();
         if window_width < 600.0 {
             div()
         } else {
@@ -38,8 +37,12 @@ impl Render for QueueList {
                         .border_b_1()
                         .border_color(theme.secondary)
                         .child({
-                            if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
-                                img(thumbnail.img).size_12().rounded_lg()
+                            if let Some(thumbnail) = track.thumbnail.clone() {
+                                img(ImageSource::Render(
+                                    RenderImage::new(thumbnail.img.clone()).into(),
+                                ))
+                                .size_12()
+                                .rounded_lg()
                             } else {
                                 img("")
                             }
