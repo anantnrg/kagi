@@ -1,3 +1,4 @@
+use backend::playback::Track;
 use gpui::*;
 use gstreamer::State;
 
@@ -11,6 +12,7 @@ pub struct NowPlaying {
     pub thumbnail: Option<Thumbnail>,
     pub state: State,
     pub volume: f64,
+    pub tracks: Vec<Track>,
 }
 
 #[derive(Clone)]
@@ -39,6 +41,7 @@ impl NowPlaying {
             thumbnail: None,
             state: State::Null,
             volume: 0.2,
+            tracks: vec![],
         }
     }
 

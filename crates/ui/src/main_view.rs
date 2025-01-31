@@ -26,18 +26,18 @@ impl Render for MainView {
             .gap_2()
             .child({
                 if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
-                    div().w_24().h_24().child(
-                        div()
-                            .size_auto()
-                            .flex()
-                            .items_end()
-                            .justify_end()
-                            .bg(theme.secondary)
-                            // .max_w(px(w.get()))
-                            // .max_h(px(h.get()))
-                            .child(img(thumbnail.img).size_full()),
-                    )
-                    // img(thumbnail.img).max_w_full().max_h_auto().debug()
+                    // div().w_24().h_24().child(
+                    //     div()
+                    //         .size_auto()
+                    //         .flex()
+                    //         .items_end()
+                    //         .justify_end()
+                    //         .bg(theme.secondary)
+                    //         // .max_w(px(w.get()))
+                    //         // .max_h(px(h.get()))
+                    //         .child(img(thumbnail.img).size_full()),
+                    // )
+                    img(thumbnail.img).max_w_full().max_h_auto()
                 } else {
                     img("")
                 }
