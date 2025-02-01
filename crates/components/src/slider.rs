@@ -152,7 +152,7 @@ impl Render for Slider {
                     )
                     .child(self.render_thumb(cx))
                     .child({
-                        let view = cx.model();
+                        let view = cx.entity().clone();
                         canvas(
                             move |bounds, _, cx| view.update(cx, |r, _| r.bounds = bounds),
                             |_, _, _, _| {},
