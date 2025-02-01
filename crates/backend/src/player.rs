@@ -254,6 +254,7 @@ impl Player {
                                 .await
                                 .expect("Could not set volume");
                         }
+                        self.playlist = Arc::new(Mutex::new(playlist));
                     }
                     Command::LoadFromFolder(path) => {
                         let backend = self.backend.clone();

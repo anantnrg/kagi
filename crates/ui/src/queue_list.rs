@@ -12,7 +12,6 @@ impl Render for QueueList {
     fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let window_width = win.window_bounds().get_bounds().size.width.0;
         let theme = cx.global::<Theme>();
-        let controller = cx.global::<Controller>().clone();
         let tracks = self.now_playing.read(cx).tracks.clone();
         if window_width < 600.0 {
             div()
@@ -24,7 +23,7 @@ impl Render for QueueList {
                 .min_w(px(320.0))
                 .border_l_1()
                 .border_color(theme.secondary)
-                .children(tracks.into_iter().map(|track| {
+                .children(tracks.into_iter().enumerate().map(|(id, track)| {
                     div()
                         .w_full()
                         .h_16()
@@ -37,6 +36,12 @@ impl Render for QueueList {
                         .px_2()
                         .border_b_1()
                         .border_color(theme.secondary)
+                        .rounded_md()
+                        .hover(|this| this.bg(theme.secondary))
+                        .on_mouse_down(MouseButton::Left, move |_, _, cx| {
+                            let controller = cx.global::<Controller>().clone();
+                            controller.play_id(id);
+                        })
                         .child({
                             if let Some(thumbnail) = track.thumbnail.clone() {
                                 img(ImageSource::Render(
