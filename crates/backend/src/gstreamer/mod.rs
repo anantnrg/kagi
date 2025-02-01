@@ -120,7 +120,7 @@ impl Backend for GstBackend {
                 if let Some(image) = tags.get::<gstreamer::tags::Image>() {
                     let bytes = image.get();
                     let buffer = bytes.buffer().unwrap().map_readable().unwrap();
-                    Some(retrieve_thumbnail(buffer.as_bytes().into()).unwrap())
+                    Some(retrieve_small_thumbnail(buffer.as_bytes().into()).unwrap())
                 } else {
                     None
                 }
@@ -133,17 +133,17 @@ impl Backend for GstBackend {
         if let Some(bus) = playbin.bus() {
             while let Some(msg) = bus.pop() {
                 return match msg.view() {
-                    // MessageView::Tag(msg) => {
-                    //     if let Some(image) = msg.tags().get::<gstreamer::tags::Image>() {
-                    //         let bytes = image.get();
-                    //         let buffer = bytes.buffer().unwrap().map_readable().unwrap();
-                    //         Some(Response::Thumbnail(
-                    //             retrieve_thumbnail(buffer.as_bytes().into()).unwrap(),
-                    //         ))
-                    //     } else {
-                    //         Some(Response::Error("Could not get thumbnail".to_string()))
-                    //     }
-                    // }
+                    MessageView::Tag(msg) => {
+                        if let Some(image) = msg.tags().get::<gstreamer::tags::Image>() {
+                            let bytes = image.get();
+                            let buffer = bytes.buffer().unwrap().map_readable().unwrap();
+                            Some(Response::Thumbnail(
+                                retrieve_thumbnail(buffer.as_bytes().into()).unwrap(),
+                            ))
+                        } else {
+                            Some(Response::Error("Could not get thumbnail".to_string()))
+                        }
+                    }
                     MessageView::Eos(_) => Some(Response::Eos),
                     MessageView::StreamStart(_) => Some(Response::StreamStart),
                     MessageView::Error(e) => Some(Response::Error(e.to_string())),
@@ -199,7 +199,6 @@ fn retrieve_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<Thumbnail> {
         .with_guessed_format()?
         .decode()?
         .into_rgba8();
-    // let resized = resize(&img, 1024, 1024, image::imageops::FilterType::Lanczos3);
     let (width, height) = img.dimensions();
     let mut bgra_image = RgbaImage::new(width, height);
     for (x, y, pixel) in img.enumerate_pixels() {
@@ -211,5 +210,26 @@ fn retrieve_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<Thumbnail> {
         img: SmallVec::from_vec(vec![Frame::new(thumbnail(&bgra_image, width, height))]),
         width,
         height,
+    })
+}
+
+fn retrieve_small_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<Thumbnail> {
+    let img = ImageReader::new(Cursor::new(bytes))
+        .with_guessed_format()?
+        .decode()?
+        .into_rgba8();
+
+    let small_img = image::imageops::resize(&img, 64, 64, image::imageops::FilterType::Lanczos3);
+
+    let mut bgra_image = RgbaImage::new(64, 64);
+    for (x, y, pixel) in small_img.enumerate_pixels() {
+        let [r, g, b, a] = pixel.0;
+        bgra_image.put_pixel(x, y, Rgba([b, g, r, a]));
+    }
+
+    Ok(Thumbnail {
+        img: SmallVec::from_vec(vec![Frame::new(thumbnail(&bgra_image, 64, 64))]),
+        width: 64,
+        height: 64,
     })
 }
