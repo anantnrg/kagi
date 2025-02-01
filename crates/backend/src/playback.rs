@@ -116,4 +116,9 @@ impl Playlist {
         }
         Ok(())
     }
+
+    pub async fn play_id(&mut self, backend: &Arc<dyn Backend>, id: usize) -> anyhow::Result<()> {
+        backend.load(&self.tracks[id].uri).await?;
+        Ok(())
+    }
 }

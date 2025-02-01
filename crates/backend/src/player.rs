@@ -22,6 +22,7 @@ pub enum Command {
     GetTracks,
     Next,
     Previous,
+    PlayId(usize),
     LoadFromFolder(String),
     Seek(u64),
 }
@@ -100,7 +101,9 @@ impl Player {
                             if !playlist.playing {
                                 if playlist.loaded {
                                     let tx = self.tx.clone();
-
+                                    self.tx
+                                        .send(Response::StateChanged(State::Playing))
+                                        .expect("Could not send message");
                                     let _ = backend
                                         .play()
                                         .await
@@ -115,9 +118,6 @@ impl Player {
                                         ))
                                         .expect("Could not send message");
                                 }
-                                self.tx
-                                    .send(Response::StateChanged(State::Playing))
-                                    .expect("Could not send message");
                             }
                         }
                         self.playlist = Arc::new(Mutex::new(playlist));
@@ -130,15 +130,15 @@ impl Player {
                         let backend = self.backend.clone();
 
                         if playlist.playing {
+                            self.tx
+                                .send(Response::StateChanged(State::Paused))
+                                .expect("Could not send message");
                             let _ = backend
                                 .pause()
                                 .await
                                 .map_err(|e| self.tx.send(Response::Error(e.to_string())));
                             playlist.playing = false;
                         }
-                        self.tx
-                            .send(Response::StateChanged(State::Paused))
-                            .expect("Could not send message");
                         self.playlist = Arc::new(Mutex::new(playlist));
                     }
                     Command::GetMeta => {
@@ -175,12 +175,12 @@ impl Player {
                         let backend = self.backend.clone();
 
                         if playlist.loaded {
-                            backend.set_volume(vol).await.expect("Could not set volume");
-                            println!("Volume set to {vol}");
-                            self.volume = vol;
                             self.tx
                                 .send(Response::Info(format!("Volume set to {vol}").to_string()))
                                 .expect("Could not send message");
+                            backend.set_volume(vol).await.expect("Could not set volume");
+                            println!("Volume set to {vol}");
+                            self.volume = vol;
                         }
                     }
                     Command::Next => {
@@ -196,11 +196,11 @@ impl Player {
                                 .play_next(&backend)
                                 .await
                                 .expect("Could not play next.");
-                            backend.play().await.expect("Could not play");
-                            playlist.playing = true;
                             self.tx
                                 .send(Response::StateChanged(State::Playing))
                                 .expect("Could not send message");
+                            backend.play().await.expect("Could not play");
+                            playlist.playing = true;
                             backend
                                 .set_volume(self.volume)
                                 .await
@@ -220,17 +220,40 @@ impl Player {
                                 .play_previous(&backend)
                                 .await
                                 .expect("Could not play next.");
-                            backend.play().await.expect("Could not play");
-                            playlist.playing = true;
                             self.tx
                                 .send(Response::StateChanged(State::Playing))
                                 .expect("Could not send message");
+                            backend.play().await.expect("Could not play");
+                            playlist.playing = true;
                             backend
                                 .set_volume(self.volume)
                                 .await
                                 .expect("Could not set volume");
                         }
                         self.playlist = Arc::new(Mutex::new(playlist));
+                    }
+                    Command::PlayId(id) => {
+                        let mut playlist = {
+                            let guard = self.playlist.lock().expect("Could not lock playlist");
+                            guard.clone()
+                        };
+                        let backend = self.backend.clone();
+                        if playlist.loaded {
+                            backend.stop().await.expect("Could not stop");
+                            playlist
+                                .play_id(&backend, id)
+                                .await
+                                .expect("Could not play track");
+                            self.tx
+                                .send(Response::StateChanged(State::Playing))
+                                .expect("Could not send message");
+                            backend.play().await.expect("Could not play");
+                            playlist.playing = true;
+                            backend
+                                .set_volume(self.volume)
+                                .await
+                                .expect("Could not set volume");
+                        }
                     }
                     Command::LoadFromFolder(path) => {
                         let backend = self.backend.clone();
@@ -279,6 +302,12 @@ impl Controller {
 
     pub fn play(&self) {
         self.tx.send(Command::Play).expect("Could not send command");
+    }
+
+    pub fn play_id(&self, id: usize) {
+        self.tx
+            .send(Command::PlayId(id))
+            .expect("Could not send command");
     }
 
     pub fn pause(&self) {
