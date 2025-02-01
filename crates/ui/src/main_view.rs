@@ -1,5 +1,3 @@
-use std::{cell::Cell, rc::Rc};
-
 use components::theme::Theme;
 use gpui::*;
 
@@ -23,7 +21,6 @@ impl Render for MainView {
             .justify_center()
             .flex_col()
             .overflow_hidden()
-            .gap_2()
             .child({
                 if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
                     // div().w_24().h_24().child(
@@ -37,43 +34,64 @@ impl Render for MainView {
                     //         // .max_h(px(h.get()))
                     //         .child(img(thumbnail.img).size_full()),
                     // )
-                    img(thumbnail.img).max_w_full().max_h_auto()
+                    img(thumbnail.img).max_w_full().max_h_auto().rounded_lg()
                 } else {
                     img("")
                 }
             })
-            .child({
-                let np = np.read(cx);
-                if !np.title.is_empty() {
-                    div()
-                        .text_color(theme.accent)
-                        .child(np.title.clone())
-                        .text_3xl()
-                        .font_weight(FontWeight::BOLD)
-                        .w_full()
-                        .flex()
-                        .flex_wrap()
-                        .content_center()
-                } else {
-                    div().child("")
-                }
-            })
-            .child({
-                let np = np.read(cx);
-                if !np.title.is_empty() {
-                    div()
-                        .text_color(theme.text)
-                        .child(format!("{} • {}", np.artists.join(", ").clone(), np.album))
-                        .text_xl()
-                        .font_weight(FontWeight::MEDIUM)
-                        .max_w(px(1280.0))
-                        .flex()
-                        .flex_wrap()
-                        .content_center()
-                } else {
-                    div().text_color(theme.text).child("")
-                }
-            })
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .justify_start()
+                    .items_center()
+                    .w_full()
+                    .h_full()
+                    .gap_2()
+                    .child({
+                        let np = np.read(cx);
+                        if !np.title.is_empty() {
+                            div()
+                                .text_color(theme.accent)
+                                .child(np.title.clone())
+                                .text_3xl()
+                                .font_weight(FontWeight::EXTRA_BOLD)
+                                .id("id")
+                                .w_full()
+                                .max_w_full()
+                                .flex_shrink_0()
+                                .flex()
+                                .justify_center()
+                                .items_center()
+                        } else {
+                            div().id("")
+                        }
+                    })
+                    .child({
+                        let np = np.read(cx);
+                        if !np.title.is_empty() {
+                            div()
+                                .child(
+                                    div()
+                                        .text_color(theme.text)
+                                        .text_xl()
+                                        .font_weight(FontWeight::MEDIUM)
+                                        .whitespace_normal()
+                                        .child(format!(
+                                            "{} • {}",
+                                            np.artists.join(", ").clone(),
+                                            np.album
+                                        )),
+                                )
+                                .id("id")
+                                .w_full()
+                                .max_w_full()
+                                .content_center()
+                        } else {
+                            div().text_color(theme.text).id("")
+                        }
+                    }),
+            )
     }
 }
 

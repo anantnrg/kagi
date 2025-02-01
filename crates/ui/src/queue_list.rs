@@ -6,7 +6,6 @@ use crate::now_playing::NowPlaying;
 
 pub struct QueueList {
     pub now_playing: Entity<NowPlaying>,
-    pub scroll_offset: Entity<f32>,
 }
 
 impl Render for QueueList {
@@ -87,10 +86,7 @@ impl Render for QueueList {
 }
 
 impl QueueList {
-    pub fn new(now_playing: Entity<NowPlaying>, scroll_offset: Entity<f32>) -> Self {
-        QueueList {
-            now_playing,
-            scroll_offset,
-        }
+    pub fn new(now_playing: Entity<NowPlaying>) -> Self {
+        QueueList { now_playing }
     }
 }
