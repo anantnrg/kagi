@@ -53,11 +53,12 @@ impl Render for QueueList {
                                 .h_full()
                                 .flex()
                                 .flex_col()
-                                .gap_2()
+                                .gap(px(1.0))
                                 .child(
                                     div()
                                         .child(track.title)
-                                        .truncate()
+                                        .flex()
+                                        .flex_wrap()
                                         .text_base()
                                         .font_weight(FontWeight::MEDIUM),
                                 )

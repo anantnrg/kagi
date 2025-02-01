@@ -92,7 +92,7 @@ impl Backend for GstBackend {
     }
 
     async fn get_meta(&self, uri: &str) -> anyhow::Result<Track> {
-        let discoverer = gst_pbutils::Discoverer::new(gstreamer::ClockTime::from_seconds(10))?;
+        let discoverer = gst_pbutils::Discoverer::new(gstreamer::ClockTime::from_seconds(2))?;
         let info = discoverer.discover_uri(uri)?;
 
         let tags = info.tags().unwrap_or_else(|| gstreamer::TagList::new());
@@ -219,7 +219,7 @@ fn retrieve_small_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<Thumbnail> {
         .decode()?
         .into_rgba8();
 
-    let small_img = image::imageops::resize(&img, 64, 64, image::imageops::FilterType::Lanczos3);
+    let small_img = image::imageops::resize(&img, 64, 64, image::imageops::FilterType::CatmullRom);
 
     let mut bgra_image = RgbaImage::new(64, 64);
     for (x, y, pixel) in small_img.enumerate_pixels() {
