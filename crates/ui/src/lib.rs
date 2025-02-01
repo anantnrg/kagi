@@ -207,7 +207,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let left_sidebar = cx.new(|cx| LeftSidebar::new(cx));
                     let control_bar = cx.new(|_| ControlBar::new(np.clone(), vol_slider.clone()));
                     let main_view = cx.new(|_| MainView::new(np.clone()));
-                    let queue_list = cx.new(|_| QueueList::new(np.clone()));
+                    let queue_list = cx.new(|cx| QueueList::new(np.clone(), cx.new(|_| 0.0)));
                     Reyvr {
                         layout: Layout::new(),
                         now_playing: np,
