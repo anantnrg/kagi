@@ -30,6 +30,7 @@ impl Render for QueueList {
                         .h_16()
                         .flex()
                         .px_3()
+                        .gap_2()
                         .text_color(theme.text)
                         .items_center()
                         .justify_between()
@@ -41,8 +42,8 @@ impl Render for QueueList {
                                 img(ImageSource::Render(
                                     RenderImage::new(thumbnail.img.clone()).into(),
                                 ))
-                                .size_12()
-                                .rounded_lg()
+                                .h(px(56.0))
+                                .rounded_md()
                             } else {
                                 img("")
                             }
@@ -50,15 +51,15 @@ impl Render for QueueList {
                         .child(
                             div()
                                 .w_full()
-                                .h_full()
+                                .h(px(56.0))
                                 .flex()
                                 .flex_col()
                                 .gap(px(1.0))
                                 .child(
                                     div()
                                         .child(track.title)
-                                        .flex()
-                                        .flex_wrap()
+                                        .truncate()
+                                        .text_ellipsis()
                                         .text_base()
                                         .font_weight(FontWeight::MEDIUM),
                                 )
@@ -66,6 +67,7 @@ impl Render for QueueList {
                                     div()
                                         .child(track.artists.join(", "))
                                         .truncate()
+                                        .text_ellipsis()
                                         .text_sm()
                                         .font_weight(FontWeight::NORMAL),
                                 ),
