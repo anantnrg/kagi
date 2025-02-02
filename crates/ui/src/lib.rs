@@ -208,8 +208,9 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let control_bar = cx.new(|_| ControlBar::new(np.clone(), vol_slider.clone()));
                     let main_view = cx.new(|_| MainView::new(np.clone()));
                     let queue_list = cx.new(|_| QueueList::new(np.clone()));
+                    let layout = cx.new(|_| Layout::new());
                     Reyvr {
-                        layout: Layout::new(),
+                        layout,
                         now_playing: np,
                         titlebar,
                         res_handler,

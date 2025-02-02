@@ -12,7 +12,7 @@ pub struct Reyvr {
     pub queue_list: Entity<QueueList>,
     pub control_bar: Entity<ControlBar>,
     pub main_view: Entity<MainView>,
-    pub layout: Layout,
+    pub layout: Entity<Layout>,
     pub now_playing: Entity<NowPlaying>,
     pub res_handler: Entity<ResHandler>,
 }

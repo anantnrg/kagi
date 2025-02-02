@@ -23,49 +23,46 @@ impl Render for MainView {
             .overflow_hidden()
             .child({
                 if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
-                        div()
-                            .size_auto()
-                            .flex()
-                            .items_end()
-                            .justify_end()
-                            .bg(theme.secondary)
-                            // .max_w(px(w.get()))
-                            // .max_h(px(h.get()))
-                            .child(img(thumbnail.img).size_full()),
-                    // img(thumbnail.img)
-                    //     .max_w_full()
-                    //     .h_full()
-                    //     .rounded_lg()
-                    //     .flex()
-                    //     .justify_end()
-                    //     .items_center()
+                    div()
+                        .w_full()
+                        .flex_col()
+                        .flex()
+                        .items_end()
+                        .justify_end()
+                        .flex_grow()
+                        .bg(theme.secondary)
+                        .child(
+                            img(thumbnail.img)
+                                .size_full()
+                                .object_fit(ObjectFit::Contain),
+                        )
                 } else {
-                    img("")
+                    div()
                 }
             })
+            .child(div().h(px(16.0)))
             .child(
                 div()
                     .flex()
                     .flex_col()
-                    .justify_center()
+                    .justify_start()
                     .items_center()
                     .w_full()
-                    .h_full()
+                    .flex_shrink_0()
                     .gap_2()
                     .child({
                         let np = np.read(cx);
                         if !np.title.is_empty() {
                             div()
                                 .text_color(theme.accent)
-                                .child(div().child(np.title.clone()))
+                                .child(np.title.clone())
                                 .text_3xl()
                                 .font_weight(FontWeight::EXTRA_BOLD)
-                                .id("id")
                                 .w_full()
-                                .text_align(TextAlign::Center)
                                 .max_w_full()
+                                .text_align(TextAlign::Center)
                         } else {
-                            div().id("")
+                            div()
                         }
                     })
                     .child({
@@ -76,13 +73,12 @@ impl Render for MainView {
                                 .text_xl()
                                 .font_weight(FontWeight::MEDIUM)
                                 .whitespace_normal()
-                                .child(format!("{} • {}", np.artists.join(", ").clone(), np.album))
-                                .id("id")
+                                .child(format!("{} • {}", np.artists.join(", "), np.album))
                                 .w_full()
-                                .text_align(TextAlign::Center)
                                 .max_w_full()
+                                .text_align(TextAlign::Center)
                         } else {
-                            div().text_color(theme.text).id("")
+                            div()
                         }
                     }),
             )
