@@ -12,16 +12,14 @@ pub struct QueueList {
 impl Render for QueueList {
     fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = cx.global::<Theme>();
-        let window_width = win.window_bounds().get_bounds().size.width.0;
+        let layout = self.layout.clone().read(cx);
         let tracks = self.now_playing.read(cx).tracks.clone();
 
-        if window_width < 600.0 {
-            div().id("")
-        } else {
+        if layout.right_sidebar.show {
             div()
                 .bg(theme.background)
                 .h_full()
-                .w_1_3()
+                .w(px(layout.right_sidebar.width))
                 .min_w(px(320.0))
                 .border_l_1()
                 .border_color(theme.secondary)
@@ -82,6 +80,8 @@ impl Render for QueueList {
                                 ),
                         )
                 }))
+        } else {
+            div().id("")
         }
     }
 }

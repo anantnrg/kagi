@@ -24,6 +24,9 @@ impl Render for Reyvr {
         let control_bar = self.clone().control_bar;
         let main_view = self.clone().main_view;
         let queue_list = self.clone().queue_list;
+        self.layout.update(cx, |layout, _| {
+            *layout = layout.clone().layout(win.bounds().size.width.0);
+        });
         let theme = cx.global::<Theme>();
 
         div()

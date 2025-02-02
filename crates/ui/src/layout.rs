@@ -7,6 +7,7 @@ pub struct Layout {
     pub left_sidebar: SidebarLayout,
     pub central: CentralLayout,
     pub right_sidebar: SidebarLayout,
+    pub central_width: f32,
 }
 
 #[derive(Clone)]
@@ -25,9 +26,9 @@ pub enum CentralLayout {
 impl SidebarLayout {
     pub fn new() -> Self {
         SidebarLayout {
-            show: false,
+            show: true,
             width: 0.0,
-            should_show: false,
+            should_show: true,
         }
     }
 }
@@ -38,6 +39,7 @@ impl Layout {
             left_sidebar: SidebarLayout::new(),
             central: CentralLayout::List,
             right_sidebar: SidebarLayout::new(),
+            central_width: 0.0,
         }
     }
 
@@ -49,12 +51,13 @@ impl Layout {
         self.right_sidebar.clone()
     }
 
-    /// Returns a new updated Layout based on the given `window_width`.
-    /// It calculates the widths for the sidebars if they be allowed to show.
+    /// Recalculates the layout based on the provided window_width.
+    /// This sets the sidebars' widths and computes the main view's width.
     pub fn layout(mut self, window_width: f32) -> Self {
         let potential_left_width = window_width * LEFT_PCT;
         let potential_right_width = window_width * RIGHT_PCT;
 
+        // Priority: main view > right sidebar > left sidebar
         if self.left_sidebar.should_show && self.right_sidebar.should_show {
             if window_width >= (potential_left_width + potential_right_width + MIN_CENTRAL_WIDTH) {
                 self.left_sidebar.show = true;
@@ -99,18 +102,19 @@ impl Layout {
             self.right_sidebar.width = 0.0;
         }
 
-        self
-    }
+        let used_width = if self.left_sidebar.show {
+            self.left_sidebar.width
+        } else {
+            0.0
+        } + if self.right_sidebar.show {
+            self.right_sidebar.width
+        } else {
+            0.0
+        };
+        let computed_central = window_width - used_width;
 
-    /// Returns the width allocated to the central (main view) area given the `window_width`.
-    pub fn central_width(&self, window_width: f32) -> f32 {
-        let mut used_width = 0.0;
-        if self.left_sidebar.show {
-            used_width += self.left_sidebar.width;
-        }
-        if self.right_sidebar.show {
-            used_width += self.right_sidebar.width;
-        }
-        window_width - used_width
+        self.central_width = computed_central.max(MIN_CENTRAL_WIDTH);
+
+        self
     }
 }

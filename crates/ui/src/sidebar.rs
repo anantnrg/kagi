@@ -13,19 +13,17 @@ pub struct LeftSidebar {
 
 impl Render for LeftSidebar {
     fn render(&mut self, win: &mut Window, cx: &mut Context<'_, Self>) -> impl IntoElement {
-        let window_width = win.window_bounds().get_bounds().size.width.0;
         let theme = cx.global::<Theme>();
         let controller = cx.global::<Controller>().clone();
         let playlists = self.playlists.read(cx).clone();
         let current_index = *self.active_index.clone().read(cx);
+        let layout = self.layout.clone().read(cx);
 
-        if window_width < 400.0 {
-            div()
-        } else {
+        if layout.left_sidebar.show {
             div()
                 .bg(theme.background)
                 .h_full()
-                .w_1_5()
+                .w(px(layout.left_sidebar.width))
                 .min_w(px(240.0))
                 .border_r_1()
                 .border_color(theme.secondary)
@@ -59,6 +57,8 @@ impl Render for LeftSidebar {
                                 })
                         }),
                 )
+        } else {
+            div()
         }
     }
 }

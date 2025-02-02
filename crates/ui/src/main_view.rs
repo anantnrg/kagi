@@ -10,12 +10,13 @@ pub struct MainView {
 }
 
 impl Render for MainView {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let np = self.now_playing.clone();
         let theme = cx.global::<Theme>();
+        let layout = self.layout.clone().read(cx);
 
         div()
-            .w_full()
+            .w(px(layout.central_width))
             .h_full()
             .flex()
             .items_center()
@@ -25,7 +26,8 @@ impl Render for MainView {
             .child({
                 if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
                     div()
-                        .w_full()
+                        .w(px(layout.central_width))
+                        .max_h(px(layout.central_width))
                         .flex_col()
                         .flex()
                         .items_end()
