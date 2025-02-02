@@ -23,18 +23,22 @@ impl Render for MainView {
             .overflow_hidden()
             .child({
                 if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
-                    // div().w_24().h_24().child(
-                    //     div()
-                    //         .size_auto()
-                    //         .flex()
-                    //         .items_end()
-                    //         .justify_end()
-                    //         .bg(theme.secondary)
-                    //         // .max_w(px(w.get()))
-                    //         // .max_h(px(h.get()))
-                    //         .child(img(thumbnail.img).size_full()),
-                    // )
-                    img(thumbnail.img).max_w_full().max_h_auto().rounded_lg()
+                        div()
+                            .size_auto()
+                            .flex()
+                            .items_end()
+                            .justify_end()
+                            .bg(theme.secondary)
+                            // .max_w(px(w.get()))
+                            // .max_h(px(h.get()))
+                            .child(img(thumbnail.img).size_full()),
+                    // img(thumbnail.img)
+                    //     .max_w_full()
+                    //     .h_full()
+                    //     .rounded_lg()
+                    //     .flex()
+                    //     .justify_end()
+                    //     .items_center()
                 } else {
                     img("")
                 }
@@ -53,12 +57,13 @@ impl Render for MainView {
                         if !np.title.is_empty() {
                             div()
                                 .text_color(theme.accent)
-                                .child(np.title.clone())
+                                .child(div().child(np.title.clone()))
                                 .text_3xl()
                                 .font_weight(FontWeight::EXTRA_BOLD)
                                 .id("id")
-                                .w_auto()
-                            // .max_w_full()
+                                .w_full()
+                                .text_align(TextAlign::Center)
+                                .max_w_full()
                         } else {
                             div().id("")
                         }
@@ -73,10 +78,9 @@ impl Render for MainView {
                                 .whitespace_normal()
                                 .child(format!("{} • {}", np.artists.join(", ").clone(), np.album))
                                 .id("id")
-                                // .w_full()
+                                .w_full()
+                                .text_align(TextAlign::Center)
                                 .max_w_full()
-                                .flex()
-                                .content_center()
                         } else {
                             div().text_color(theme.text).id("")
                         }
