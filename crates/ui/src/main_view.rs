@@ -1,11 +1,12 @@
 use components::theme::Theme;
 use gpui::*;
 
-use crate::now_playing::NowPlaying;
+use crate::{layout::Layout, now_playing::NowPlaying};
 
 #[derive(Clone)]
 pub struct MainView {
     pub now_playing: Entity<NowPlaying>,
+    pub layout: Entity<Layout>,
 }
 
 impl Render for MainView {
@@ -86,7 +87,10 @@ impl Render for MainView {
 }
 
 impl MainView {
-    pub fn new(now_playing: Entity<NowPlaying>) -> Self {
-        MainView { now_playing }
+    pub fn new(now_playing: Entity<NowPlaying>, layout: Entity<Layout>) -> Self {
+        MainView {
+            now_playing,
+            layout,
+        }
     }
 }

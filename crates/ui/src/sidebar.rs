@@ -2,10 +2,13 @@ use backend::player::Controller;
 use components::theme::Theme;
 use gpui::{prelude::FluentBuilder, *};
 
+use crate::layout::Layout;
+
 #[derive(Clone)]
 pub struct LeftSidebar {
     pub playlists: Entity<Vec<(String, String)>>,
     pub active_index: Entity<usize>,
+    pub layout: Entity<Layout>,
 }
 
 impl Render for LeftSidebar {
@@ -61,7 +64,7 @@ impl Render for LeftSidebar {
 }
 
 impl LeftSidebar {
-    pub fn new(cx: &mut App) -> Self {
+    pub fn new(cx: &mut App, layout: Entity<Layout>) -> Self {
         LeftSidebar {
             playlists: cx.new(|_| {
                 vec![(
@@ -70,6 +73,7 @@ impl LeftSidebar {
                 )]
             }),
             active_index: cx.new(|_| 0),
+            layout,
         }
     }
 }
