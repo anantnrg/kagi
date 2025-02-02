@@ -204,11 +204,11 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     )
                     .detach();
                     let titlebar = cx.new(|_| Titlebar::new(np.clone()));
-                    let left_sidebar = cx.new(|cx| LeftSidebar::new(cx));
-                    let control_bar = cx.new(|_| ControlBar::new(np.clone(), vol_slider.clone()));
-                    let main_view = cx.new(|_| MainView::new(np.clone()));
-                    let queue_list = cx.new(|_| QueueList::new(np.clone()));
                     let layout = cx.new(|_| Layout::new());
+                    let left_sidebar = cx.new(|cx| LeftSidebar::new(cx, layout.clone()));
+                    let control_bar = cx.new(|_| ControlBar::new(np.clone(), vol_slider.clone()));
+                    let main_view = cx.new(|_| MainView::new(np.clone(), layout.clone()));
+                    let queue_list = cx.new(|_| QueueList::new(np.clone(), layout.clone()));
                     Reyvr {
                         layout,
                         now_playing: np,
