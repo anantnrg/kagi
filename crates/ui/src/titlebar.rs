@@ -58,7 +58,7 @@ impl Render for Titlebar {
                     .when((200.0..400.0).contains(&window_width), |this| {
                         this.child({
                             if np.title.is_empty() {
-                                "No Song Playing".to_string()
+                                "Reyvr".to_string()
                             } else {
                                 truncate(&np.title, 30)
                             }

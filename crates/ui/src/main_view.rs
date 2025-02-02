@@ -43,7 +43,7 @@ impl Render for MainView {
                 div()
                     .flex()
                     .flex_col()
-                    .justify_start()
+                    .justify_center()
                     .items_center()
                     .w_full()
                     .h_full()
@@ -57,12 +57,8 @@ impl Render for MainView {
                                 .text_3xl()
                                 .font_weight(FontWeight::EXTRA_BOLD)
                                 .id("id")
-                                .w_full()
-                                .max_w_full()
-                                .flex_shrink_0()
-                                .flex()
-                                .justify_center()
-                                .items_center()
+                                .w_auto()
+                            // .max_w_full()
                         } else {
                             div().id("")
                         }
@@ -71,21 +67,15 @@ impl Render for MainView {
                         let np = np.read(cx);
                         if !np.title.is_empty() {
                             div()
-                                .child(
-                                    div()
-                                        .text_color(theme.text)
-                                        .text_xl()
-                                        .font_weight(FontWeight::MEDIUM)
-                                        .whitespace_normal()
-                                        .child(format!(
-                                            "{} • {}",
-                                            np.artists.join(", ").clone(),
-                                            np.album
-                                        )),
-                                )
+                                .text_color(theme.text)
+                                .text_xl()
+                                .font_weight(FontWeight::MEDIUM)
+                                .whitespace_normal()
+                                .child(format!("{} • {}", np.artists.join(", ").clone(), np.album))
                                 .id("id")
-                                .w_full()
+                                // .w_full()
                                 .max_w_full()
+                                .flex()
                                 .content_center()
                         } else {
                             div().text_color(theme.text).id("")
