@@ -1,7 +1,7 @@
 const MIN_CENTRAL_WIDTH: f32 = 200.0;
 const LEFT_PCT: f32 = 0.20;
 const RIGHT_PCT: f32 = 0.33;
-const OVERLAY_THRESHOLD: f32 = 768.0;
+const OVERLAY_THRESHOLD: f32 = 640.0;
 
 #[derive(Clone, PartialEq)]
 pub enum LayoutMode {

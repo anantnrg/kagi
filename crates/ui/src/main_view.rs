@@ -14,11 +14,7 @@ impl Render for MainView {
         let np = self.now_playing.clone();
         let theme = cx.global::<Theme>();
         let layout = self.layout.clone().read(cx);
-        println!(
-            "window width: {} central_width: {}",
-            win.bounds().size.width.0,
-            layout.central_width
-        );
+
         div()
             .w(px(layout.central_width))
             .h_full()
@@ -38,7 +34,6 @@ impl Render for MainView {
                         .items_end()
                         .justify_end()
                         .flex_grow()
-                        .bg(theme.secondary)
                         .child(
                             img(thumbnail.img)
                                 .size_full()

@@ -8,6 +8,7 @@ use prelude::FluentBuilder;
 #[derive(Clone)]
 pub struct Titlebar {
     now_playing: Entity<NowPlaying>,
+    pub layout: Entity<Layout>,
 }
 
 impl Render for Titlebar {
@@ -141,7 +142,7 @@ impl Render for Titlebar {
 }
 
 impl Titlebar {
-    pub fn new(now_playing: Entity<NowPlaying>) -> Titlebar {
-        Titlebar { now_playing }
+    pub fn new(now_playing: Entity<NowPlaying>, layout: Entity<Layout>) -> Titlebar {
+        Titlebar { now_playing,, layout }
     }
 }

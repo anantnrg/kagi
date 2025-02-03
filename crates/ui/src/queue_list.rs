@@ -13,7 +13,7 @@ pub struct QueueList {
 }
 
 impl Render for QueueList {
-    fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = cx.global::<Theme>();
         let layout = self.layout.clone().read(cx);
         let tracks = self.now_playing.read(cx).tracks.clone();
@@ -55,7 +55,8 @@ impl Render for QueueList {
                                 img(ImageSource::Render(
                                     RenderImage::new(thumbnail.img.clone()).into(),
                                 ))
-                                .h(px(56.0))
+                                .min_h(px(56.0))
+                                .min_w(px(56.0))
                                 .rounded_md()
                             } else {
                                 img("")

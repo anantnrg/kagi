@@ -5,7 +5,7 @@ default-members = ["crates/reyvr"]
 
 [workspace.dependencies]
 anyhow = "1.0.95"
-gpui = { git = "https://github.com/someone13574/zed", branch = "text-center" }
+gpui = { git = "https://github.com/zed-industries/zed" }
 gstreamer = "0.23.4"
 async-trait = "0.1.85"
 smol = "2.0.2"

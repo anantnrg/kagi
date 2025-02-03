@@ -12,7 +12,7 @@ pub struct LeftSidebar {
 }
 
 impl Render for LeftSidebar {
-    fn render(&mut self, win: &mut Window, cx: &mut Context<'_, Self>) -> impl IntoElement {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<'_, Self>) -> impl IntoElement {
         let theme = cx.global::<Theme>();
         let controller = cx.global::<Controller>().clone();
         let playlists = self.playlists.read(cx).clone();
