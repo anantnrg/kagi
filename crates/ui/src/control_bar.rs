@@ -32,12 +32,12 @@ impl Render for ControlBar {
             .justify_center()
             .justify_between()
             .px_4()
-            .child("")
+            .child(div().w_full().h_full())
             .child(
                 div()
                     .flex()
                     .h_full()
-                    .w_auto()
+                    .w_full()
                     .items_center()
                     .justify_center()
                     .overflow_hidden()
@@ -122,10 +122,13 @@ impl Render for ControlBar {
                 div()
                     .flex()
                     .items_center()
-                    .justify_center()
+                    .justify_end()
                     .h_auto()
-                    .w_20()
-                    .child(self.vol_slider.clone()),
+                    .w_full()
+                    .px_2()
+                    .gap_2()
+                    .child(div().child(format!("{}%", np.volume * 100.0)))
+                    .child(div().w_20().child(self.vol_slider.clone())),
             )
     }
 }

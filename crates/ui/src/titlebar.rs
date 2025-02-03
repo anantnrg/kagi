@@ -62,6 +62,7 @@ impl Render for Titlebar {
                     .flex()
                     .w_full()
                     .h_full()
+                    .px_4()
                     .items_center()
                     .justify_center()
                     .child({
@@ -137,6 +138,7 @@ impl Render for Titlebar {
                         div()
                             .w_6()
                             .h_6()
+                            .mr_2()
                             .flex()
                             .items_center()
                             .justify_center()
