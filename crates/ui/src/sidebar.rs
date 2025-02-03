@@ -2,7 +2,7 @@ use backend::player::Controller;
 use components::theme::Theme;
 use gpui::{prelude::FluentBuilder, *};
 
-use crate::layout::Layout;
+use crate::layout::{Layout, LayoutMode};
 
 #[derive(Clone)]
 pub struct LeftSidebar {
@@ -24,7 +24,10 @@ impl Render for LeftSidebar {
                 .bg(theme.background)
                 .h_full()
                 .w(px(layout.left_sidebar.width))
-                .min_w(px(240.0))
+                .min_w(px(200.0))
+                .when(layout.mode == LayoutMode::Overlay, |this| {
+                    this.absolute().border_0()
+                })
                 .border_r_1()
                 .border_color(theme.secondary)
                 .px_3()

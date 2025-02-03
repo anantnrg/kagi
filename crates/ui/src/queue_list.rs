@@ -1,8 +1,11 @@
 use backend::player::Controller;
 use components::theme::Theme;
-use gpui::*;
+use gpui::{prelude::FluentBuilder, *};
 
-use crate::{layout::Layout, now_playing::NowPlaying};
+use crate::{
+    layout::{Layout, LayoutMode},
+    now_playing::NowPlaying,
+};
 
 pub struct QueueList {
     pub now_playing: Entity<NowPlaying>,
@@ -20,7 +23,10 @@ impl Render for QueueList {
                 .bg(theme.background)
                 .h_full()
                 .w(px(layout.right_sidebar.width))
-                .min_w(px(320.0))
+                .min_w(px(280.0))
+                .when(layout.mode == LayoutMode::Overlay, |this| {
+                    this.absolute().border_0()
+                })
                 .border_l_1()
                 .border_color(theme.secondary)
                 .id("scrollview")

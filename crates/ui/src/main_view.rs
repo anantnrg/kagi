@@ -10,15 +10,20 @@ pub struct MainView {
 }
 
 impl Render for MainView {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let np = self.now_playing.clone();
         let theme = cx.global::<Theme>();
         let layout = self.layout.clone().read(cx);
-        println!("{}", layout.central_width);
+        println!(
+            "window width: {} central_width: {}",
+            win.bounds().size.width.0,
+            layout.central_width
+        );
         div()
-            .min_w(px(layout.central_width))
+            .w(px(layout.central_width))
             .h_full()
             .flex()
+            .flex_grow()
             .items_center()
             .justify_center()
             .flex_col()
