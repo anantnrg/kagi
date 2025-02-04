@@ -126,17 +126,12 @@ impl Render for ControlBar {
                     .h_auto()
                     .w_full()
                     .px_2()
-                    .gap_2()
+                    .child(div().w_20().child(self.vol_slider.clone()))
                     .child(
                         div()
-                            .child(format!("{}%", np.volume * 100.0))
-                            .text_color(theme.text),
-                    )
-                    .child(
-                        div()
-                            .w_20()
-                            .bg(theme.secondary)
-                            .child(self.vol_slider.clone()),
+                            .child(format!("{:.0}%", np.volume * 100.0))
+                            .text_color(theme.text)
+                            .ml_4(),
                     ),
             )
     }

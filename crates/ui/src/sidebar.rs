@@ -12,11 +12,11 @@ pub struct LeftSidebar {
 }
 
 impl Render for LeftSidebar {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<'_, Self>) -> impl IntoElement {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = cx.global::<Theme>();
         let controller = cx.global::<Controller>().clone();
         let playlists = self.playlists.read(cx).clone();
-        let current_index = *self.active_index.clone().read(cx);
+        let current_index = self.active_index.clone();
         let layout = self.layout.clone().read(cx);
 
         if layout.left_sidebar.show {
@@ -37,10 +37,13 @@ impl Render for LeftSidebar {
                         .enumerate()
                         .map(|(index, (name, path))| {
                             let controller = controller.clone();
+                            let curr_index = current_index.clone();
+                            let current_index = *curr_index.read(cx);
+                            println!("current: {} index: {}", current_index, index);
                             let path = path.clone();
 
                             div()
-                                .when(current_index == index, |this| this.bg(theme.secondary))
+                                .when(index == current_index, |this| this.bg(theme.accent))
                                 .bg(theme.background)
                                 .text_color(theme.text)
                                 .font_weight(FontWeight::MEDIUM)
@@ -53,7 +56,10 @@ impl Render for LeftSidebar {
                                 .px_2()
                                 .child(name.clone())
                                 .on_mouse_down(MouseButton::Left, {
-                                    move |_, _, _| {
+                                    move |_, _, cx| {
+                                        curr_index.update(cx, |this, _| {
+                                            *this = index;
+                                        });
                                         controller.clone().load(path.clone());
                                         controller.clone().get_queue();
                                     }
@@ -75,7 +81,7 @@ impl LeftSidebar {
                     "E:\\music\\straight up liquid fire".to_string(),
                 )]
             }),
-            active_index: cx.new(|_| 0),
+            active_index: cx.new(|_| 1),
             layout,
         }
     }

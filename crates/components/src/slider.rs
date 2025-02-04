@@ -135,7 +135,6 @@ impl Render for Slider {
                     .id("bar")
                     .relative()
                     .w_full()
-                    .my_1p5()
                     .h_1p5()
                     .bg(self.theme.secondary)
                     .active(|this| this.bg(self.theme.accent))
