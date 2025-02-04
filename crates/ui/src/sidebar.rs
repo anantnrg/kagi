@@ -31,6 +31,7 @@ impl Render for LeftSidebar {
                 .border_r_1()
                 .border_color(theme.secondary)
                 .px_3()
+                .py_3()
                 .children(
                     playlists
                         .into_iter()
@@ -43,8 +44,9 @@ impl Render for LeftSidebar {
                             let path = path.clone();
 
                             div()
-                                .when(index == current_index, |this| this.bg(theme.accent))
                                 .bg(theme.background)
+                                .hover(|this| this.border_2().border_color(theme.accent))
+                                .when(index == current_index, |this| this.bg(theme.secondary))
                                 .text_color(theme.text)
                                 .font_weight(FontWeight::MEDIUM)
                                 .w_full()
@@ -53,7 +55,7 @@ impl Render for LeftSidebar {
                                 .flex()
                                 .items_center()
                                 .justify_start()
-                                .px_2()
+                                .px_3()
                                 .child(name.clone())
                                 .on_mouse_down(MouseButton::Left, {
                                     move |_, _, cx| {
