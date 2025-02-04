@@ -67,6 +67,23 @@ impl Render for LeftSidebar {
                                 })
                         }),
                 )
+                .child(
+                    div()
+                        .w_full()
+                        .h_10()
+                        .child("Open Folder")
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .hover(|this| {
+                            this.bg(theme.secondary)
+                                .border_2()
+                                .border_color(theme.accent)
+                        })
+                        .on_mouse_down(MouseButton::Left, move |_, _, _| {
+                            controller.clone().open_folder();
+                        }),
+                )
         } else {
             div()
         }

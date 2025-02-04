@@ -314,6 +314,12 @@ impl Controller {
             .expect("Could not send command");
     }
 
+    pub fn open_folder(&self) {
+        self.tx
+            .send(Command::LoadFolder)
+            .expect("Could not send command");
+    }
+
     pub fn play(&self) {
         self.tx.send(Command::Play).expect("Could not send command");
     }
