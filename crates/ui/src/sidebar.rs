@@ -40,7 +40,6 @@ impl Render for LeftSidebar {
                             let controller = controller.clone();
                             let curr_index = current_index.clone();
                             let current_index = *curr_index.read(cx);
-                            println!("current: {} index: {}", current_index, index);
                             let path = path.clone();
 
                             div()

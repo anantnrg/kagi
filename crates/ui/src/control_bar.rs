@@ -131,7 +131,9 @@ impl Render for ControlBar {
                         div()
                             .child(format!("{:.0}%", np.volume * 100.0))
                             .text_color(theme.text)
-                            .ml_4(),
+                            .ml_4()
+                            .w_10()
+                            .overflow_hidden(),
                     ),
             )
     }
