@@ -4669,6 +4669,7 @@ dependencies = [
  "components",
  "gpui",
  "gstreamer",
+ "rfd",
 ]
 
 [[package]]

@@ -270,8 +270,9 @@ impl Player {
                     Command::LoadFolder => {
                         let backend = self.backend.clone();
                         if let Some(path) = rfd::AsyncFileDialog::new().pick_folder().await {
+                            println!("{:#?}", path);
                             let mut playlist =
-                                Playlist::from_dir(&backend, PathBuf::from(path)).await;
+                                Playlist::from_dir(&backend, path.path().to_owned()).await;
                             playlist
                                 .load(&backend)
                                 .await
