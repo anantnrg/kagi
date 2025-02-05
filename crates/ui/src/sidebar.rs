@@ -80,12 +80,8 @@ impl Render for LeftSidebar {
                                 .border_2()
                                 .border_color(theme.accent)
                         })
-                        .on_mouse_down(MouseButton::Left, async move |_, _, _| {
-                            if let Some(path) = rfd::AsyncFileDialog::new().pick_folder().await {
-                                controller
-                                    .clone()
-                                    .load(String::from(path.to_str().unwrap()));
-                            }
+                        .on_mouse_down(MouseButton::Left, move |_, _, _| {
+                            controller.clone().open_folder();
                         }),
                 )
         } else {

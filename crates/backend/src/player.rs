@@ -269,10 +269,14 @@ impl Player {
                     }
                     Command::LoadFolder => {
                         let backend = self.backend.clone();
-                        if let Some(path) = rfd::AsyncFileDialog::new().pick_folder().await {
-                            println!("{:#?}", path);
-                            let mut playlist =
-                                Playlist::from_dir(&backend, path.path().to_owned()).await;
+                        let selected_folder =
+                            std::thread::spawn(|| rfd::FileDialog::new().pick_folder())
+                                .join()
+                                .expect("The thread panicked");
+
+                        if let Some(path) = selected_folder {
+                            let mut playlist = Playlist::from_dir(&backend, path).await;
+                            println!("path: {:#?};", path);
                             playlist
                                 .load(&backend)
                                 .await
