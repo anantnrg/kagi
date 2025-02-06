@@ -61,8 +61,8 @@ impl Render for LeftSidebar {
                                         curr_index.update(cx, |this, _| {
                                             *this = index;
                                         });
-                                        controller.clone().load(path.clone());
-                                        controller.clone().get_queue();
+                                        controller.load(path.clone());
+                                        controller.get_queue();
                                     }
                                 })
                         }),
@@ -81,7 +81,8 @@ impl Render for LeftSidebar {
                                 .border_color(theme.accent)
                         })
                         .on_mouse_down(MouseButton::Left, move |_, _, _| {
-                            controller.clone().open_folder();
+                            controller.open_folder();
+                            controller.get_queue();
                         }),
                 )
         } else {

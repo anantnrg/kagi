@@ -275,8 +275,8 @@ impl Player {
                                 .expect("The thread panicked");
 
                         if let Some(path) = selected_folder {
-                            let mut playlist = Playlist::from_dir(&backend, path).await;
                             println!("path: {:#?};", path);
+                            let mut playlist = Playlist::from_dir(&backend, path).await;
                             playlist
                                 .load(&backend)
                                 .await
@@ -320,9 +320,13 @@ impl Controller {
     }
 
     pub fn open_folder(&self) {
-        self.tx
-            .send(Command::LoadFolder)
-            .expect("Could not send command");
+        if let Some(path) = rfd::FileDialog::new().pick_folder() {
+            self.tx
+                .send(Command::LoadFromFolder(String::from(
+                    path.to_str().unwrap(),
+                )))
+                .expect("Could not send command");
+        }
     }
 
     pub fn play(&self) {
