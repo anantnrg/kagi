@@ -32,6 +32,9 @@ impl Render for LeftSidebar {
                 .border_color(theme.secondary)
                 .px_3()
                 .py_3()
+                .flex()
+                .flex_col()
+                .gap_2()
                 .children(
                     playlists
                         .into_iter()
@@ -44,7 +47,9 @@ impl Render for LeftSidebar {
 
                             div()
                                 .bg(theme.background)
-                                .hover(|this| this.border_2().border_color(theme.accent))
+                                .border_1()
+                                .border_color(theme.secondary)
+                                .hover(|this| this.border_color(theme.accent))
                                 .when(index == current_index, |this| this.bg(theme.secondary))
                                 .text_color(theme.text)
                                 .font_weight(FontWeight::MEDIUM)
@@ -75,11 +80,11 @@ impl Render for LeftSidebar {
                         .flex()
                         .items_center()
                         .justify_center()
-                        .hover(|this| {
-                            this.bg(theme.secondary)
-                                .border_2()
-                                .border_color(theme.accent)
-                        })
+                        .rounded_lg()
+                        .text_color(theme.text)
+                        .border_1()
+                        .border_color(theme.secondary)
+                        .hover(|this| this.bg(theme.secondary).border_color(theme.accent))
                         .on_mouse_down(MouseButton::Left, move |_, _, _| {
                             controller.open_folder();
                             controller.get_queue();
