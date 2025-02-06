@@ -16,9 +16,6 @@ pub struct Track {
 pub struct Playlist {
     pub name: String,
     pub tracks: Vec<Track>,
-    pub current_index: usize,
-    pub loaded: bool,
-    pub playing: bool,
 }
 
 impl Track {
@@ -39,9 +36,6 @@ impl Playlist {
         Playlist {
             name: "Unknown Playlist".to_string(),
             tracks: vec![],
-            current_index: 0,
-            loaded: false,
-            playing: false,
         }
     }
     pub async fn from_dir(backend: &Arc<dyn Backend>, dir: PathBuf) -> Self {
