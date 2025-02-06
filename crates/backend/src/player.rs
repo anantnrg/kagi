@@ -105,11 +105,17 @@ impl Player {
 
         if self.current_index + 1 < tracks_len {
             self.current_index += 1;
-            self.playlist
-                .lock()
-                .expect("Could not lock playlist")
-                .load(backend, self.current_index)
-                .await?;
+            {
+                // Extract data from mutex and drop the guard immediately
+                let mut playlist = self
+                    .playlist
+                    .lock()
+                    .expect("Could not lock playlist")
+                    .clone();
+                playlist.load(backend, self.current_index).await?;
+                // Replace the playlist with the updated clone
+                self.playlist = Arc::new(Mutex::new(playlist));
+            }
         }
         Ok(())
     }
@@ -117,27 +123,27 @@ impl Player {
     pub async fn play_previous(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
         if self.current_index > 0 {
             self.current_index -= 1;
-            self.playlist
-                .lock()
-                .expect("Could not lock playlist")
-                .load(backend, self.current_index)
-                .await?;
+            {
+                let mut playlist = self
+                    .playlist
+                    .lock()
+                    .expect("Could not lock playlist")
+                    .clone();
+                playlist.load(backend, self.current_index).await?;
+                self.playlist = Arc::new(Mutex::new(playlist));
+            }
         }
         Ok(())
     }
 
     pub async fn play_id(&mut self, backend: &Arc<dyn Backend>, id: usize) -> anyhow::Result<()> {
         self.current_index = id;
-        backend
-            .load(
-                &self
-                    .playlist
-                    .lock()
-                    .expect("Could not lock playlist")
-                    .tracks[id]
-                    .uri,
-            )
-            .await?;
+        // Extract the URI before calling async functions so the guard is dropped.
+        let uri = {
+            let guard = self.playlist.lock().expect("Could not lock playlist");
+            guard.tracks[id].uri.clone()
+        };
+        backend.load(&uri).await?;
         Ok(())
     }
 
@@ -146,6 +152,7 @@ impl Player {
             while let Ok(command) = self.rx.try_recv() {
                 match command {
                     Command::Play => {
+                        // Clone playlist data to drop the guard immediately.
                         let mut playlist = {
                             let guard = self.playlist.lock().expect("Could not lock playlist");
                             guard.clone()
@@ -163,7 +170,6 @@ impl Player {
                                         .play()
                                         .await
                                         .map_err(|e| tx.send(Response::Error(e.to_string())));
-
                                     self.playing = true;
                                 } else {
                                     println!("Playlist is not loaded.");
@@ -254,7 +260,7 @@ impl Player {
                             backend.stop().await.expect("Could not stop");
                             self.play_previous(&backend)
                                 .await
-                                .expect("Could not play next.");
+                                .expect("Could not play previous.");
                             self.tx
                                 .send(Response::StateChanged(State::Playing))
                                 .expect("Could not send message");
@@ -287,7 +293,6 @@ impl Player {
                     Command::LoadFromFolder(path) => {
                         let backend = self.backend.clone();
                         let mut playlist = Playlist::from_dir(&backend, PathBuf::from(path)).await;
-
                         playlist
                             .load(&backend, 0)
                             .await
@@ -324,7 +329,6 @@ impl Player {
                 self.tx
                     .send(Response::Position(curr_pos))
                     .expect("Could not send message.");
-
                 self.position = curr_pos;
             }
         }
