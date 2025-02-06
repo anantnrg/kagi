@@ -9,3 +9,4 @@ anyhow.workspace = true
 components = { path = "../components" }
 backend = { path = "../backend" }
 gstreamer.workspace = true
+rfd.workspace = true

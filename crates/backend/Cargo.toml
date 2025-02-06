@@ -13,3 +13,4 @@ gstreamer-pbutils = "0.23.4"
 gpui.workspace = true
 smallvec.workspace = true
 image.workspace = true
+rfd.workspace = true

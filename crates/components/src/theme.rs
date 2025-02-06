@@ -19,7 +19,7 @@ impl Theme {
             text: rgb(0xcdd6f4),
             icon: rgb(0xcdd6f4),
             background: rgb(0x11111B),
-            secondary: rgb(0x181825),
+            secondary: rgb(0x1e1e2d),
             sidebar_bg: rgb(0x11111B),
             main_bg: rgb(0x11111B),
             titlebar_bg: rgb(0x11111B),

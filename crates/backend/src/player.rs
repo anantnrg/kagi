@@ -24,6 +24,7 @@ pub enum Command {
     Previous,
     PlayId(usize),
     LoadFromFolder(String),
+    LoadFolder,
     Seek(u64),
 }
 
@@ -266,6 +267,19 @@ impl Player {
                             .expect("Could not load first item");
                         self.playlist = Arc::new(Mutex::new(playlist));
                     }
+                    Command::LoadFolder => {
+                        let backend = self.backend.clone();
+                        if let Some(path) = rfd::AsyncFileDialog::new().pick_folder().await {
+                            let mut playlist =
+                                Playlist::from_dir(&backend, PathBuf::from(path.path().to_owned()))
+                                    .await;
+                            playlist
+                                .load(&backend)
+                                .await
+                                .expect("Could not load first item");
+                            self.playlist = Arc::new(Mutex::new(playlist));
+                        }
+                    }
                     Command::Seek(time) => {
                         let playlist = {
                             let guard = self.playlist.lock().expect("Could not lock playlist");
@@ -298,6 +312,12 @@ impl Controller {
     pub fn load(&self, path: String) {
         self.tx
             .send(Command::LoadFromFolder(path))
+            .expect("Could not send command");
+    }
+
+    pub fn open_folder(&self) {
+        self.tx
+            .send(Command::LoadFolder)
             .expect("Could not send command");
     }
 
