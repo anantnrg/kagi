@@ -98,9 +98,18 @@ impl Player {
     }
 
     pub async fn play_next(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
-        if self.current_index + 1 < self.tracks.len() {
+        let tracks_len = {
+            let guard = self.playlist.lock().expect("Could not lock playlist");
+            guard.tracks.len()
+        };
+
+        if self.current_index + 1 < tracks_len {
             self.current_index += 1;
-            self.load(backend).await?;
+            self.playlist
+                .lock()
+                .expect("Could not lock playlist")
+                .load(backend, self.current_index)
+                .await?;
         }
         Ok(())
     }
@@ -108,14 +117,27 @@ impl Player {
     pub async fn play_previous(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
         if self.current_index > 0 {
             self.current_index -= 1;
-            self.load(backend).await?;
+            self.playlist
+                .lock()
+                .expect("Could not lock playlist")
+                .load(backend, self.current_index)
+                .await?;
         }
         Ok(())
     }
 
     pub async fn play_id(&mut self, backend: &Arc<dyn Backend>, id: usize) -> anyhow::Result<()> {
         self.current_index = id;
-        backend.load(&self.tracks[id].uri).await?;
+        backend
+            .load(
+                &self
+                    .playlist
+                    .lock()
+                    .expect("Could not lock playlist")
+                    .tracks[id]
+                    .uri,
+            )
+            .await?;
         Ok(())
     }
 
@@ -156,10 +178,6 @@ impl Player {
                         self.playlist = Arc::new(Mutex::new(playlist));
                     }
                     Command::Pause => {
-                        let mut playlist = {
-                            let guard = self.playlist.lock().expect("Could not lock playlist");
-                            guard.clone()
-                        };
                         let backend = self.backend.clone();
 
                         if self.playing {
@@ -200,10 +218,6 @@ impl Player {
                         }
                     }
                     Command::Volume(vol) => {
-                        let playlist = {
-                            let guard = self.playlist.lock().expect("Could not lock playlist");
-                            guard.clone()
-                        };
                         let backend = self.backend.clone();
 
                         if self.loaded {
@@ -216,10 +230,6 @@ impl Player {
                         }
                     }
                     Command::Next => {
-                        let mut playlist = {
-                            let guard = self.playlist.lock().expect("Could not lock playlist");
-                            guard.clone()
-                        };
                         let backend = self.backend.clone();
 
                         if self.loaded {
@@ -239,10 +249,6 @@ impl Player {
                         }
                     }
                     Command::Previous => {
-                        let mut playlist = {
-                            let guard = self.playlist.lock().expect("Could not lock playlist");
-                            guard.clone()
-                        };
                         let backend = self.backend.clone();
                         if self.loaded {
                             backend.stop().await.expect("Could not stop");
@@ -261,10 +267,6 @@ impl Player {
                         }
                     }
                     Command::PlayId(id) => {
-                        let mut playlist = {
-                            let guard = self.playlist.lock().expect("Could not lock playlist");
-                            guard.clone()
-                        };
                         let backend = self.backend.clone();
                         if self.loaded {
                             backend.stop().await.expect("Could not stop");
@@ -306,10 +308,6 @@ impl Player {
                         }
                     }
                     Command::Seek(time) => {
-                        let playlist = {
-                            let guard = self.playlist.lock().expect("Could not lock playlist");
-                            guard.clone()
-                        };
                         let backend = self.backend.clone();
 
                         if self.playing {
