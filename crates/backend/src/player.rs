@@ -28,6 +28,7 @@ pub enum Command {
     LoadFolder,
     LoadSavedPlaylists,
     WriteSavedPlaylists,
+    RetrieveSavedPlaylists,
 }
 
 #[derive(Clone)]
@@ -324,6 +325,11 @@ impl Player {
                             .send(Response::SavedPlaylists(self.saved_playlists.clone()))
                             .expect("Could not send message");
                     }
+                    Command::RetrieveSavedPlaylists => {
+                        self.tx
+                            .send(Response::SavedPlaylists(self.saved_playlists.clone()))
+                            .expect("Could not send message");
+                    }
                     Command::WriteSavedPlaylists => {
                         SavedPlaylists::save_playlists(&self.saved_playlists)
                             .expect("Could not save to file");
@@ -417,6 +423,12 @@ impl Controller {
     pub fn write_playlist(&self) {
         self.tx
             .send(Command::WriteSavedPlaylists)
+            .expect("Could not send command");
+    }
+
+    pub fn retrieve_saved_playlists(&self) {
+        self.tx
+            .send(Command::RetrieveSavedPlaylists)
             .expect("Could not send command");
     }
 }

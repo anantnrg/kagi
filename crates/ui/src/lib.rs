@@ -13,7 +13,7 @@ use app::Reyvr;
 use assets::*;
 use backend::{
     Backend,
-    playback::{Playlist, SavedPlaylist, SavedPlaylists},
+    playback::{Playlist, SavedPlaylists},
     player::{Controller, Player, Response},
 };
 use components::{

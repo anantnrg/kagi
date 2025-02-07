@@ -57,6 +57,7 @@ impl Render for LeftSidebar {
                         .justify_start()
                         .px_3()
                         .child(playlist.name.clone())
+                        .truncate()
                         .on_mouse_down(MouseButton::Left, {
                             move |_, _, cx| {
                                 curr_index.update(cx, |this, _| {
@@ -84,6 +85,7 @@ impl Render for LeftSidebar {
                             controller.open_folder();
                             controller.get_queue();
                             controller.write_playlist();
+                            controller.retrieve_saved_playlists();
                         }),
                 )
         } else {
