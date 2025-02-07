@@ -303,11 +303,19 @@ impl Player {
                                 .and_then(|name| name.to_str())
                                 .unwrap_or("unknown playlist")
                                 .to_string();
-                            let cached_name = name
+                            let cached_name: String = name
                                 .to_lowercase()
-                                .replace("-", "")
-                                .replace(",", "")
-                                .replace(" ", "_");
+                                .chars()
+                                .filter_map(|c| {
+                                    if c.is_ascii_alphabetic() {
+                                        Some(c)
+                                    } else if c == ' ' {
+                                        Some('_')
+                                    } else {
+                                        None
+                                    }
+                                })
+                                .collect();
                             let new_saved_playlist = SavedPlaylist {
                                 name,
                                 actual_path: path.to_string_lossy().to_string(),
