@@ -303,20 +303,34 @@ impl Player {
                                 .and_then(|name| name.to_str())
                                 .unwrap_or("unknown playlist")
                                 .to_string();
-                            let cached_name = name.to_lowercase().replace(" ", "_");
+                            let cached_name = name
+                                .to_lowercase()
+                                .replace("-", "")
+                                .replace(",", "")
+                                .replace(" ", "_");
+                            let new_saved_playlist = SavedPlaylist {
+                                name,
+                                actual_path: path.to_string_lossy().to_string(),
+                                cached_name,
+                            };
                             let mut playlist =
                                 Playlist::from_dir(&backend, PathBuf::from(path.clone())).await;
                             playlist
                                 .load(&backend, 0)
                                 .await
                                 .expect("Could not load first item");
+
                             self.loaded = true;
-                            self.saved_playlists.playlists.push(SavedPlaylist {
-                                name,
-                                actual_path: path.to_string_lossy().to_string(),
-                                cached_name,
-                            });
                             self.playlist = Arc::new(Mutex::new(playlist));
+
+                            if !self
+                                .saved_playlists
+                                .playlists
+                                .iter()
+                                .any(|p| *p == new_saved_playlist)
+                            {
+                                self.saved_playlists.playlists.push(new_saved_playlist);
+                            }
                         }
                     }
                     Command::LoadSavedPlaylists => {

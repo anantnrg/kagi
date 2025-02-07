@@ -5,7 +5,7 @@ use std::{
     sync::Arc,
 };
 
-use directories::ProjectDirs;
+use directories::BaseDirs;
 use serde::{Deserialize, Serialize};
 
 use crate::{Backend, player::Thumbnail};
@@ -31,7 +31,7 @@ pub struct SavedPlaylists {
     pub playlists: Vec<SavedPlaylist>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub struct SavedPlaylist {
     pub name: String,
     pub actual_path: String,
@@ -117,13 +117,13 @@ impl SavedPlaylists {
         SavedPlaylists { playlists: vec![] }
     }
     pub fn get_playlists_file() -> Option<PathBuf> {
-        if let Some(proj_dirs) = ProjectDirs::from("", "", "Reyvr") {
-            let config_dir = proj_dirs.config_dir();
-            if let Err(e) = fs::create_dir_all(config_dir) {
+        if let Some(base_dir) = BaseDirs::new() {
+            let proj_dir = base_dir.preference_dir().join("Reyvr");
+            if let Err(e) = fs::create_dir_all(proj_dir.clone()) {
                 eprintln!("Could not create config directory: {}", e);
                 return None;
             }
-            Some(config_dir.join("playlists.toml"))
+            Some(proj_dir.join("playlists.toml"))
         } else {
             None
         }
