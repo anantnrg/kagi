@@ -16,9 +16,6 @@ pub struct Track {
 pub struct Playlist {
     pub name: String,
     pub tracks: Vec<Track>,
-    pub current_index: usize,
-    pub loaded: bool,
-    pub playing: bool,
 }
 
 impl Track {
@@ -39,9 +36,6 @@ impl Playlist {
         Playlist {
             name: "Unknown Playlist".to_string(),
             tracks: vec![],
-            current_index: 0,
-            loaded: false,
-            playing: false,
         }
     }
     pub async fn from_dir(backend: &Arc<dyn Backend>, dir: PathBuf) -> Self {
@@ -51,9 +45,6 @@ impl Playlist {
                 .map(|n| n.to_string_lossy().to_string())
                 .unwrap_or_else(|| "Unknown Playlist".into()),
             tracks: Vec::new(),
-            current_index: 0,
-            loaded: false,
-            playing: false,
         };
 
         if let Ok(entries) = std::fs::read_dir(&dir) {
@@ -87,39 +78,16 @@ impl Playlist {
                 }
             }
         }
-        playlist.loaded = true;
         playlist
     }
 
-    pub fn set_playing(&mut self) {
-        self.playing = !self.playing;
-    }
-
-    pub async fn load(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
-        let current_song = &self.tracks[self.current_index];
+    pub async fn load(
+        &mut self,
+        backend: &Arc<dyn Backend>,
+        current_index: usize,
+    ) -> anyhow::Result<()> {
+        let current_song = &self.tracks[current_index];
         backend.load(&current_song.uri).await?;
-        Ok(())
-    }
-
-    pub async fn play_next(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
-        if self.current_index + 1 < self.tracks.len() {
-            self.current_index += 1;
-            self.load(backend).await?;
-        }
-        Ok(())
-    }
-
-    pub async fn play_previous(&mut self, backend: &Arc<dyn Backend>) -> anyhow::Result<()> {
-        if self.current_index > 0 {
-            self.current_index -= 1;
-            self.load(backend).await?;
-        }
-        Ok(())
-    }
-
-    pub async fn play_id(&mut self, backend: &Arc<dyn Backend>, id: usize) -> anyhow::Result<()> {
-        self.current_index = id;
-        backend.load(&self.tracks[id].uri).await?;
         Ok(())
     }
 }
