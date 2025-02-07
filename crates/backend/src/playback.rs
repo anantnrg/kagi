@@ -117,7 +117,7 @@ impl SavedPlaylists {
         SavedPlaylists { playlists: vec![] }
     }
     pub fn get_playlists_file() -> Option<PathBuf> {
-        if let Some(proj_dirs) = ProjectDirs::from("com", "Reyvr", "Reyvr") {
+        if let Some(proj_dirs) = ProjectDirs::from("", "", "Reyvr") {
             let config_dir = proj_dirs.config_dir();
             if let Err(e) = fs::create_dir_all(config_dir) {
                 eprintln!("Could not create config directory: {}", e);

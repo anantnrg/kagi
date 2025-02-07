@@ -83,6 +83,7 @@ impl Render for LeftSidebar {
                         .on_mouse_down(MouseButton::Left, move |_, _, _| {
                             controller.open_folder();
                             controller.get_queue();
+                            controller.write_playlist();
                         }),
                 )
         } else {

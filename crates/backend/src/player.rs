@@ -28,7 +28,6 @@ pub enum Command {
     LoadFolder,
     LoadSavedPlaylists,
     WriteSavedPlaylists,
-    AddSavedPlaylist(SavedPlaylist),
 }
 
 #[derive(Clone)]
@@ -297,14 +296,25 @@ impl Player {
                     Command::LoadFolder => {
                         let backend = self.backend.clone();
                         if let Some(path) = rfd::AsyncFileDialog::new().pick_folder().await {
+                            let path = path.path().to_owned();
+                            let name = path
+                                .file_name()
+                                .and_then(|name| name.to_str())
+                                .unwrap_or("unknown playlist")
+                                .to_string();
+                            let cached_name = name.to_lowercase().replace(" ", "_");
                             let mut playlist =
-                                Playlist::from_dir(&backend, PathBuf::from(path.path().to_owned()))
-                                    .await;
+                                Playlist::from_dir(&backend, PathBuf::from(path.clone())).await;
                             playlist
                                 .load(&backend, 0)
                                 .await
                                 .expect("Could not load first item");
                             self.loaded = true;
+                            self.saved_playlists.playlists.push(SavedPlaylist {
+                                name,
+                                actual_path: path.to_string_lossy().to_string(),
+                                cached_name,
+                            });
                             self.playlist = Arc::new(Mutex::new(playlist));
                         }
                     }
@@ -317,9 +327,6 @@ impl Player {
                     Command::WriteSavedPlaylists => {
                         SavedPlaylists::save_playlists(&self.saved_playlists)
                             .expect("Could not save to file");
-                    }
-                    Command::AddSavedPlaylist(playlist) => {
-                        self.saved_playlists.playlists.push(playlist);
                     }
                     Command::Seek(time) => {
                         let backend = self.backend.clone();
@@ -407,5 +414,9 @@ impl Controller {
             .expect("Could not send command");
     }
 
-    pub fn save_playlist(&self) {}
+    pub fn write_playlist(&self) {
+        self.tx
+            .send(Command::WriteSavedPlaylists)
+            .expect("Could not send command");
+    }
 }
