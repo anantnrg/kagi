@@ -344,6 +344,7 @@ dependencies = [
  "image",
  "rfd",
  "ring-channel",
+ "serde",
  "smallvec",
  "smol",
 ]
