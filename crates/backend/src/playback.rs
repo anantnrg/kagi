@@ -1,5 +1,7 @@
 use std::{path::PathBuf, sync::Arc};
 
+use serde::{Deserialize, Serialize};
+
 use crate::{Backend, player::Thumbnail};
 
 #[derive(Clone)]
@@ -16,6 +18,18 @@ pub struct Track {
 pub struct Playlist {
     pub name: String,
     pub tracks: Vec<Track>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SavedPlaylists {
+    pub playlist: Vec<SavedPlaylist>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SavedPlaylist {
+    pub name: String,
+    pub actual_path: String,
+    pub cached_name: String,
 }
 
 impl Track {
