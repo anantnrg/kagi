@@ -13,7 +13,7 @@ use app::Reyvr;
 use assets::*;
 use backend::{
     Backend,
-    playback::Playlist,
+    playback::{Playlist, SavedPlaylists},
     player::{Controller, Player, Response},
 };
 use components::{
@@ -72,6 +72,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .default(0.2)
                     });
                     let recv_controller = controller.clone();
+                    let saved_playlists = cx.new(|_| SavedPlaylists::default());
+                    let playlists = saved_playlists.clone();
 
                     cx.set_global(controller);
                     cx.set_global(theme);
@@ -199,6 +201,11 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             Response::Tracks(tracks) => this.now_playing.update(cx, |np, cx| {
                                 np.update_tracks(cx, tracks.clone());
                             }),
+                            Response::SavedPlaylists(playlists) => {
+                                saved_playlists.update(cx, |this, _| {
+                                    *this = playlists.clone();
+                                })
+                            }
                             _ => {}
                         },
                     )
@@ -206,10 +213,16 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let layout = cx.new(|_| Layout::new());
 
                     let titlebar = cx.new(|_| Titlebar::new(np.clone(), layout.clone()));
-                    let left_sidebar = cx.new(|cx| LeftSidebar::new(cx, layout.clone()));
+
                     let control_bar = cx.new(|_| ControlBar::new(np.clone(), vol_slider.clone()));
                     let main_view = cx.new(|_| MainView::new(np.clone(), layout.clone()));
                     let queue_list = cx.new(|_| QueueList::new(np.clone(), layout.clone()));
+                    let layout_sidebar = layout.clone();
+                    let left_sidebar = cx.new(move |cx| {
+                        LeftSidebar::new(cx, playlists.clone(), layout_sidebar.clone())
+                    });
+                    cx.global::<Controller>().load_saved_playlists();
+
                     Reyvr {
                         layout,
                         now_playing: np,

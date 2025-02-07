@@ -11,7 +11,7 @@ use smallvec::SmallVec;
 
 use crate::{
     Backend,
-    playback::{Playlist, Track},
+    playback::{Playlist, SavedPlaylist, SavedPlaylists, Track},
 };
 
 pub enum Command {
@@ -22,10 +22,13 @@ pub enum Command {
     GetTracks,
     Next,
     Previous,
+    Seek(u64),
     PlayId(usize),
     LoadFromFolder(String),
     LoadFolder,
-    Seek(u64),
+    LoadSavedPlaylists,
+    WriteSavedPlaylists,
+    RetrieveSavedPlaylists,
 }
 
 #[derive(Clone)]
@@ -40,6 +43,7 @@ pub enum Response {
     Position(u64),
     Thumbnail(Thumbnail),
     Tracks(Vec<Track>),
+    SavedPlaylists(SavedPlaylists),
 }
 
 #[derive(Clone)]
@@ -51,6 +55,7 @@ pub struct Player {
     pub current_index: usize,
     pub loaded: bool,
     pub playing: bool,
+    pub saved_playlists: SavedPlaylists,
     pub tx: Sender<Response>,
     pub rx: Receiver<Command>,
 }
@@ -83,6 +88,7 @@ impl Player {
                 current_index: 0,
                 loaded: false,
                 playing: false,
+                saved_playlists: SavedPlaylists::default(),
                 tx: res_tx,
                 rx: cmd_rx,
             },
@@ -291,16 +297,64 @@ impl Player {
                     Command::LoadFolder => {
                         let backend = self.backend.clone();
                         if let Some(path) = rfd::AsyncFileDialog::new().pick_folder().await {
+                            let path = path.path().to_owned();
+                            let name = path
+                                .file_name()
+                                .and_then(|name| name.to_str())
+                                .unwrap_or("unknown playlist")
+                                .to_string();
+                            let cached_name: String = name
+                                .to_lowercase()
+                                .chars()
+                                .filter_map(|c| {
+                                    if c.is_ascii_alphabetic() {
+                                        Some(c)
+                                    } else if c == ' ' {
+                                        Some('_')
+                                    } else {
+                                        None
+                                    }
+                                })
+                                .collect();
+                            let new_saved_playlist = SavedPlaylist {
+                                name,
+                                actual_path: path.to_string_lossy().to_string(),
+                                cached_name,
+                            };
                             let mut playlist =
-                                Playlist::from_dir(&backend, PathBuf::from(path.path().to_owned()))
-                                    .await;
+                                Playlist::from_dir(&backend, PathBuf::from(path.clone())).await;
                             playlist
                                 .load(&backend, 0)
                                 .await
                                 .expect("Could not load first item");
+
                             self.loaded = true;
                             self.playlist = Arc::new(Mutex::new(playlist));
+
+                            if !self
+                                .saved_playlists
+                                .playlists
+                                .iter()
+                                .any(|p| *p == new_saved_playlist)
+                            {
+                                self.saved_playlists.playlists.push(new_saved_playlist);
+                            }
                         }
+                    }
+                    Command::LoadSavedPlaylists => {
+                        self.saved_playlists = SavedPlaylists::load();
+                        self.tx
+                            .send(Response::SavedPlaylists(self.saved_playlists.clone()))
+                            .expect("Could not send message");
+                    }
+                    Command::RetrieveSavedPlaylists => {
+                        self.tx
+                            .send(Response::SavedPlaylists(self.saved_playlists.clone()))
+                            .expect("Could not send message");
+                    }
+                    Command::WriteSavedPlaylists => {
+                        SavedPlaylists::save_playlists(&self.saved_playlists)
+                            .expect("Could not save to file");
                     }
                     Command::Seek(time) => {
                         let backend = self.backend.clone();
@@ -379,6 +433,24 @@ impl Controller {
     pub fn volume(&self, vol: f64) {
         self.tx
             .send(Command::Volume(vol))
+            .expect("Could not send command");
+    }
+
+    pub fn load_saved_playlists(&self) {
+        self.tx
+            .send(Command::LoadSavedPlaylists)
+            .expect("Could not send command");
+    }
+
+    pub fn write_playlist(&self) {
+        self.tx
+            .send(Command::WriteSavedPlaylists)
+            .expect("Could not send command");
+    }
+
+    pub fn retrieve_saved_playlists(&self) {
+        self.tx
+            .send(Command::RetrieveSavedPlaylists)
             .expect("Could not send command");
     }
 }

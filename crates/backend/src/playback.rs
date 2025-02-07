@@ -1,4 +1,12 @@
-use std::{path::PathBuf, sync::Arc};
+use std::{
+    fs,
+    io::{self, Write},
+    path::PathBuf,
+    sync::Arc,
+};
+
+use directories::BaseDirs;
+use serde::{Deserialize, Serialize};
 
 use crate::{Backend, player::Thumbnail};
 
@@ -16,6 +24,18 @@ pub struct Track {
 pub struct Playlist {
     pub name: String,
     pub tracks: Vec<Track>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SavedPlaylists {
+    pub playlists: Vec<SavedPlaylist>,
+}
+
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
+pub struct SavedPlaylist {
+    pub name: String,
+    pub actual_path: String,
+    pub cached_name: String,
 }
 
 impl Track {
@@ -88,6 +108,56 @@ impl Playlist {
     ) -> anyhow::Result<()> {
         let current_song = &self.tracks[current_index];
         backend.load(&current_song.uri).await?;
+        Ok(())
+    }
+}
+
+impl SavedPlaylists {
+    pub fn default() -> Self {
+        SavedPlaylists { playlists: vec![] }
+    }
+    pub fn get_playlists_file() -> Option<PathBuf> {
+        if let Some(base_dir) = BaseDirs::new() {
+            let proj_dir = base_dir.preference_dir().join("Reyvr");
+            if let Err(e) = fs::create_dir_all(proj_dir.clone()) {
+                eprintln!("Could not create config directory: {}", e);
+                return None;
+            }
+            Some(proj_dir.join("playlists.toml"))
+        } else {
+            None
+        }
+    }
+    pub fn load() -> Self {
+        if let Some(file_path) = Self::get_playlists_file() {
+            if file_path.exists() {
+                match fs::read_to_string(&file_path) {
+                    Ok(contents) => match toml::from_str(&contents) {
+                        Ok(saved) => saved,
+                        Err(e) => {
+                            eprintln!("Failed to parse TOML: {}", e);
+                            SavedPlaylists::default()
+                        }
+                    },
+                    Err(e) => {
+                        eprintln!("Failed to read file: {}", e);
+                        SavedPlaylists::default()
+                    }
+                }
+            } else {
+                SavedPlaylists::default()
+            }
+        } else {
+            SavedPlaylists::default()
+        }
+    }
+    pub fn save_playlists(saved: &SavedPlaylists) -> io::Result<()> {
+        if let Some(file_path) = Self::get_playlists_file() {
+            let toml_str =
+                toml::to_string_pretty(saved).expect("Failed to serialize SavedPlaylists");
+            let mut file = fs::File::create(file_path)?;
+            file.write_all(toml_str.as_bytes())?;
+        }
         Ok(())
     }
 }
