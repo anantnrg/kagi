@@ -11,7 +11,7 @@ use smallvec::SmallVec;
 
 use crate::{
     Backend,
-    playback::{Playlist, Track},
+    playback::{Playlist, SavedPlaylists, Track},
 };
 
 pub enum Command {
@@ -22,10 +22,12 @@ pub enum Command {
     GetTracks,
     Next,
     Previous,
+    Seek(u64),
     PlayId(usize),
     LoadFromFolder(String),
     LoadFolder,
-    Seek(u64),
+    LoadSavedPlaylists,
+    WriteSavedPlaylists,
 }
 
 #[derive(Clone)]
@@ -40,6 +42,7 @@ pub enum Response {
     Position(u64),
     Thumbnail(Thumbnail),
     Tracks(Vec<Track>),
+    SavedPlaylists(SavedPlaylists),
 }
 
 #[derive(Clone)]
@@ -51,6 +54,7 @@ pub struct Player {
     pub current_index: usize,
     pub loaded: bool,
     pub playing: bool,
+    pub saved_playlists: SavedPlaylists,
     pub tx: Sender<Response>,
     pub rx: Receiver<Command>,
 }
@@ -83,6 +87,7 @@ impl Player {
                 current_index: 0,
                 loaded: false,
                 playing: false,
+                saved_playlists: SavedPlaylists::default(),
                 tx: res_tx,
                 rx: cmd_rx,
             },
@@ -301,6 +306,16 @@ impl Player {
                             self.loaded = true;
                             self.playlist = Arc::new(Mutex::new(playlist));
                         }
+                    }
+                    Command::LoadSavedPlaylists => {
+                        self.saved_playlists = SavedPlaylists::load();
+                        self.tx
+                            .send(Response::SavedPlaylists(self.saved_playlists.clone()))
+                            .expect("Could not send message");
+                    }
+                    Command::WriteSavedPlaylists => {
+                        SavedPlaylists::save_playlists(&self.saved_playlists)
+                            .expect("Could not save to file");
                     }
                     Command::Seek(time) => {
                         let backend = self.backend.clone();

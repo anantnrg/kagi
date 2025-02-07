@@ -1,4 +1,9 @@
-use std::{fs, path::PathBuf, sync::Arc};
+use std::{
+    fs,
+    io::{self, Write},
+    path::PathBuf,
+    sync::Arc,
+};
 
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
@@ -145,5 +150,14 @@ impl SavedPlaylists {
         } else {
             SavedPlaylists::default()
         }
+    }
+    pub fn save_playlists(saved: &SavedPlaylists) -> io::Result<()> {
+        if let Some(file_path) = Self::get_playlists_file() {
+            let toml_str =
+                toml::to_string_pretty(saved).expect("Failed to serialize SavedPlaylists");
+            let mut file = fs::File::create(file_path)?;
+            file.write_all(toml_str.as_bytes())?;
+        }
+        Ok(())
     }
 }
