@@ -11,7 +11,7 @@ use smallvec::SmallVec;
 
 use crate::{
     Backend,
-    playback::{Playlist, SavedPlaylists, Track},
+    playback::{Playlist, SavedPlaylist, SavedPlaylists, Track},
 };
 
 pub enum Command {
@@ -28,6 +28,7 @@ pub enum Command {
     LoadFolder,
     LoadSavedPlaylists,
     WriteSavedPlaylists,
+    AddSavedPlaylist(SavedPlaylist),
 }
 
 #[derive(Clone)]
@@ -317,6 +318,9 @@ impl Player {
                         SavedPlaylists::save_playlists(&self.saved_playlists)
                             .expect("Could not save to file");
                     }
+                    Command::AddSavedPlaylist(playlist) => {
+                        self.saved_playlists.playlists.push(playlist);
+                    }
                     Command::Seek(time) => {
                         let backend = self.backend.clone();
                         if self.playing {
@@ -396,4 +400,12 @@ impl Controller {
             .send(Command::Volume(vol))
             .expect("Could not send command");
     }
+
+    pub fn load_saved_playlists(&self) {
+        self.tx
+            .send(Command::LoadSavedPlaylists)
+            .expect("Could not send command");
+    }
+
+    pub fn save_playlist(&self) {}
 }
