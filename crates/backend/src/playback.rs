@@ -1,5 +1,6 @@
-use std::{path::PathBuf, sync::Arc};
+use std::{fs, path::PathBuf, sync::Arc};
 
+use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
 use crate::{Backend, player::Thumbnail};
@@ -22,7 +23,7 @@ pub struct Playlist {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct SavedPlaylists {
-    pub playlist: Vec<SavedPlaylist>,
+    pub playlists: Vec<SavedPlaylist>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -103,5 +104,46 @@ impl Playlist {
         let current_song = &self.tracks[current_index];
         backend.load(&current_song.uri).await?;
         Ok(())
+    }
+}
+
+impl SavedPlaylists {
+    pub fn default() -> Self {
+        SavedPlaylists { playlists: vec![] }
+    }
+    pub fn get_playlists_file() -> Option<PathBuf> {
+        if let Some(proj_dirs) = ProjectDirs::from("com", "Reyvr", "Reyvr") {
+            let config_dir = proj_dirs.config_dir();
+            if let Err(e) = fs::create_dir_all(config_dir) {
+                eprintln!("Could not create config directory: {}", e);
+                return None;
+            }
+            Some(config_dir.join("playlists.toml"))
+        } else {
+            None
+        }
+    }
+    pub fn load() -> Self {
+        if let Some(file_path) = Self::get_playlists_file() {
+            if file_path.exists() {
+                match fs::read_to_string(&file_path) {
+                    Ok(contents) => match toml::from_str(&contents) {
+                        Ok(saved) => saved,
+                        Err(e) => {
+                            eprintln!("Failed to parse TOML: {}", e);
+                            SavedPlaylists::default()
+                        }
+                    },
+                    Err(e) => {
+                        eprintln!("Failed to read file: {}", e);
+                        SavedPlaylists::default()
+                    }
+                }
+            } else {
+                SavedPlaylists::default()
+            }
+        } else {
+            SavedPlaylists::default()
+        }
     }
 }
