@@ -53,7 +53,7 @@ impl Render for QueueList {
                         .child({
                             if let Some(thumbnail) = track.thumbnail.clone() {
                                 img(ImageSource::Render(
-                                    RenderImage::new(thumbnail.img.clone()).into(),
+                                    RenderImage::new(thumbnail.to_frame()).into(),
                                 ))
                                 .min_h(px(56.0))
                                 .min_w(px(56.0))

@@ -5,7 +5,7 @@ use std::{
 };
 
 use gstreamer::State;
-use image::{Frame, RgbaImage};
+use image::{Frame, RgbaImage, imageops::thumbnail};
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 use smallvec::SmallVec;
 
@@ -459,7 +459,6 @@ impl Thumbnail {
     pub fn to_frame(&self) -> SmallVec<[Frame; 1]> {
         let img = RgbaImage::from_raw(self.width, self.height, self.img.clone())
             .expect("Failed to reconstruct image from raw bytes");
-        Frame::new(img)
-        SmallVec::from_vec(vec![Frame::new(thumbnail(&bgra_image, width, height))])
+        SmallVec::from_vec(vec![Frame::new(thumbnail(&img, self.width, self.height))])
     }
 }
