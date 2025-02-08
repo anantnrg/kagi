@@ -5,10 +5,9 @@ use anyhow::anyhow;
 use async_trait::async_trait;
 use gstreamer::{ClockTime, MessageView, SeekFlags, State, prelude::*};
 use gstreamer_pbutils as gst_pbutils;
-use image::{EncodableLayout, Frame, ImageReader, Rgba, RgbaImage, imageops::thumbnail};
-use smallvec::SmallVec;
+use image::{EncodableLayout, ImageReader, Rgba, RgbaImage};
 use std::{
-    io::{Cursor, Read},
+    io::Cursor,
     sync::{Arc, Mutex},
 };
 
@@ -207,7 +206,6 @@ fn retrieve_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<Thumbnail> {
     }
 
     Ok(Thumbnail {
-        // img: SmallVec::from_vec(vec![Frame::new(thumbnail(&bgra_image, width, height))]),
         img: bgra_image.as_raw().clone(),
         width,
         height,
@@ -229,7 +227,6 @@ fn retrieve_small_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<Thumbnail> {
     }
 
     Ok(Thumbnail {
-        // img: SmallVec::from_vec(vec![Frame::new(thumbnail(&bgra_image, 64, 64))]),
         img: bgra_image.as_raw().clone(),
         width: 64,
         height: 64,
