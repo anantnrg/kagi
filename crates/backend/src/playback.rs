@@ -5,7 +5,7 @@ use std::{
     sync::Arc,
 };
 
-use directories::BaseDirs;
+use directories::UserDirs;
 use serde::{Deserialize, Serialize};
 
 use crate::{Backend, player::Thumbnail};
@@ -110,6 +110,10 @@ impl Playlist {
         backend.load(&current_song.uri).await?;
         Ok(())
     }
+
+    pub async fn cache(&self, cached_name: String) -> anyhow::Result<()> {
+        Ok(())
+    }
 }
 
 impl SavedPlaylists {
@@ -117,8 +121,11 @@ impl SavedPlaylists {
         SavedPlaylists { playlists: vec![] }
     }
     pub fn get_playlists_file() -> Option<PathBuf> {
-        if let Some(base_dir) = BaseDirs::new() {
-            let proj_dir = base_dir.preference_dir().join("Reyvr");
+        if let Some(user_dirs) = UserDirs::new() {
+            let proj_dir = user_dirs
+                .audio_dir()
+                .unwrap_or(user_dirs.home_dir())
+                .join("Reyvr");
             if let Err(e) = fs::create_dir_all(proj_dir.clone()) {
                 eprintln!("Could not create config directory: {}", e);
                 return None;
