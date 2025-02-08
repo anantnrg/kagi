@@ -10,3 +10,5 @@ components = { path = "../components" }
 backend = { path = "../backend" }
 gstreamer.workspace = true
 rfd.workspace = true
+image.workspace = true
+smallvec.workspace = true

@@ -186,7 +186,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 this.now_playing.update(cx, |np, cx| {
                                     np.update_thumbnail(cx, Thumbnail {
                                         img: ImageSource::Render(
-                                            RenderImage::new(thumbnail.img.clone()).into(),
+                                            RenderImage::new(thumbnail.clone().to_frame()).into(),
                                         ),
                                         width: thumbnail.width,
                                         height: thumbnail.height,
