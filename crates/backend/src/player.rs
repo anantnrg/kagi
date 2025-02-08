@@ -25,7 +25,7 @@ pub enum Command {
     Previous,
     Seek(u64),
     PlayId(usize),
-    LoadFromFolder(String),
+    LoadFromFolder(SavedPlaylist),
     LoadFolder,
     LoadSavedPlaylists,
     WriteSavedPlaylists,
@@ -285,9 +285,20 @@ impl Player {
                                 .expect("Could not set volume");
                         }
                     }
-                    Command::LoadFromFolder(path) => {
+                    Command::LoadFromFolder(saved_playlist) => {
                         let backend = self.backend.clone();
-                        let mut playlist = Playlist::from_dir(&backend, PathBuf::from(path)).await;
+                        let mut playlist: Playlist;
+                        if let Some(cached) =
+                            Playlist::read_cached(saved_playlist.cached_name).await
+                        {
+                            playlist = cached;
+                        } else {
+                            playlist = Playlist::from_dir(
+                                &backend,
+                                PathBuf::from(saved_playlist.actual_path),
+                            )
+                            .await;
+                        }
                         playlist
                             .load(&backend, 0)
                             .await
@@ -385,9 +396,9 @@ impl Player {
 }
 
 impl Controller {
-    pub fn load(&self, path: String) {
+    pub fn load(&self, saved_playlist: SavedPlaylist) {
         self.tx
-            .send(Command::LoadFromFolder(path))
+            .send(Command::LoadFromFolder(saved_playlist))
             .expect("Could not send command");
     }
 

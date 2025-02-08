@@ -120,7 +120,6 @@ impl Playlist {
             .join("Reyvr")
             .join("cache")
             .join(cached_name);
-        println!("cached: {:#?}", cached_path.clone());
 
         let mut cached_file = File::create(cached_path)?;
         let serialized = &bincode::serde::encode_to_vec(self, config::standard())?;
@@ -137,7 +136,6 @@ impl Playlist {
             .join("Reyvr")
             .join("cache")
             .join(cached_name);
-        println!("cached: {:#?}", cached_path.clone());
 
         if cached_path.exists() {
             let cached_data = &fs::read(cached_path).expect("Could not read file");
