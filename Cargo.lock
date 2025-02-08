@@ -4681,7 +4681,9 @@ dependencies = [
  "components",
  "gpui",
  "gstreamer",
+ "image",
  "rfd",
+ "smallvec",
 ]
 
 [[package]]

@@ -5,7 +5,7 @@ use std::{
 };
 
 use gstreamer::State;
-use image::Frame;
+use image::{Frame, RgbaImage};
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 use smallvec::SmallVec;
 
@@ -68,7 +68,7 @@ pub struct Controller {
 
 #[derive(Clone)]
 pub struct Thumbnail {
-    pub img: SmallVec<[Frame; 1]>,
+    pub img: Vec<u8>,
     pub width: u32,
     pub height: u32,
 }
@@ -452,5 +452,14 @@ impl Controller {
         self.tx
             .send(Command::RetrieveSavedPlaylists)
             .expect("Could not send command");
+    }
+}
+
+impl Thumbnail {
+    pub fn to_frame(&self) -> SmallVec<[Frame; 1]> {
+        let img = RgbaImage::from_raw(self.width, self.height, self.img.clone())
+            .expect("Failed to reconstruct image from raw bytes");
+        Frame::new(img)
+        SmallVec::from_vec(vec![Frame::new(thumbnail(&bgra_image, width, height))])
     }
 }
