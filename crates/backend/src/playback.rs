@@ -1,10 +1,11 @@
 use std::{
-    fs,
+    fs::{self, File},
     io::{self, Write},
     path::PathBuf,
     sync::Arc,
 };
 
+use bincode::config;
 use directories::UserDirs;
 use serde::{Deserialize, Serialize};
 
@@ -111,7 +112,23 @@ impl Playlist {
         Ok(())
     }
 
-    pub async fn cache(&self, cached_name: String) -> anyhow::Result<()> {
+    pub async fn write_cached(
+        &self,
+        playlist: Playlist,
+        cached_name: String,
+    ) -> anyhow::Result<()> {
+        let cached_path = UserDirs::new()
+            .unwrap()
+            .audio_dir()
+            .unwrap_or(UserDirs::new().unwrap().home_dir())
+            .join("Reyvr")
+            .join(cached_name);
+        println!("cached: {:#?}", cached_path.clone());
+
+        let mut cached_file = File::create(cached_path)?;
+        let serialized = &bincode::serde::encode_to_vec(playlist, config::standard())?;
+        cached_file.write(serialized)?;
+
         Ok(())
     }
 }

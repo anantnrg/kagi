@@ -16,4 +16,6 @@ rfd = "0.15.2"
 serde = "1.0.217"
 directories = "5.0"
 toml = "0.8.20"
-bincode = { git = "https://github.com/bincode-org/bincode", branch = "trunk" }
+bincode = { git = "https://github.com/bincode-org/bincode", branch = "trunk", features = [
+    "serde",
+] }
