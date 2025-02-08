@@ -8,6 +8,8 @@ use gstreamer::State;
 use image::{Frame, RgbaImage, imageops::thumbnail};
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 use smallvec::SmallVec;
+use serde::{Deserialize, Serialize};
+
 
 use crate::{
     Backend,
@@ -66,7 +68,7 @@ pub struct Controller {
     pub rx: Receiver<Response>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Thumbnail {
     pub img: Vec<u8>,
     pub width: u32,

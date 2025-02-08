@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{Backend, player::Thumbnail};
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Track {
     pub title: String,
     pub artists: Vec<String>,
@@ -20,7 +20,7 @@ pub struct Track {
     pub thumbnail: Option<Thumbnail>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Playlist {
     pub name: String,
     pub tracks: Vec<Track>,
