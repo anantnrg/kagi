@@ -7,9 +7,8 @@ use std::{
 use gstreamer::State;
 use image::{Frame, RgbaImage, imageops::thumbnail};
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
-use smallvec::SmallVec;
 use serde::{Deserialize, Serialize};
-
+use smallvec::SmallVec;
 
 use crate::{
     Backend,
@@ -321,7 +320,7 @@ impl Player {
                             let new_saved_playlist = SavedPlaylist {
                                 name,
                                 actual_path: path.to_string_lossy().to_string(),
-                                cached_name,
+                                cached_name: cached_name.clone(),
                             };
                             let mut playlist =
                                 Playlist::from_dir(&backend, PathBuf::from(path.clone())).await;
@@ -331,7 +330,11 @@ impl Player {
                                 .expect("Could not load first item");
 
                             self.loaded = true;
-                            self.playlist = Arc::new(Mutex::new(playlist));
+                            self.playlist = Arc::new(Mutex::new(playlist.clone()));
+                            playlist
+                                .write_cached(cached_name)
+                                .await
+                                .expect("Could not write cache");
 
                             if !self
                                 .saved_playlists

@@ -112,24 +112,43 @@ impl Playlist {
         Ok(())
     }
 
-    pub async fn write_cached(
-        &self,
-        playlist: Playlist,
-        cached_name: String,
-    ) -> anyhow::Result<()> {
+    pub async fn write_cached(&self, cached_name: String) -> anyhow::Result<()> {
         let cached_path = UserDirs::new()
             .unwrap()
             .audio_dir()
             .unwrap_or(UserDirs::new().unwrap().home_dir())
             .join("Reyvr")
+            .join("cache")
             .join(cached_name);
         println!("cached: {:#?}", cached_path.clone());
 
         let mut cached_file = File::create(cached_path)?;
-        let serialized = &bincode::serde::encode_to_vec(playlist, config::standard())?;
+        let serialized = &bincode::serde::encode_to_vec(self, config::standard())?;
         cached_file.write(serialized)?;
 
         Ok(())
+    }
+
+    pub async fn read_cached(cached_name: String) -> Option<Playlist> {
+        let cached_path = UserDirs::new()
+            .unwrap()
+            .audio_dir()
+            .unwrap_or(UserDirs::new().unwrap().home_dir())
+            .join("Reyvr")
+            .join("cache")
+            .join(cached_name);
+        println!("cached: {:#?}", cached_path.clone());
+
+        if cached_path.exists() {
+            let cached_data = &fs::read(cached_path).expect("Could not read file");
+            let deserialized: Playlist =
+                bincode::serde::decode_from_slice(cached_data, config::standard())
+                    .expect("Could not decode playlist")
+                    .0;
+            return Some(deserialized);
+        } else {
+            return None;
+        }
     }
 }
 
