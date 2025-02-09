@@ -39,6 +39,7 @@ pub enum NowPlayingEvent {
     State(State),
     Volume(f64),
     Tracks(Vec<Track>),
+    PlaylistName(String),
 }
 
 impl NowPlaying {
@@ -91,6 +92,11 @@ impl NowPlaying {
 
     pub fn update_tracks(&mut self, cx: &mut Context<Self>, tracks: Vec<Track>) {
         cx.emit(NowPlayingEvent::Tracks(tracks));
+        cx.notify();
+    }
+
+    pub fn update_playlist_name(&mut self, cx: &mut Context<Self>, name: String) {
+        cx.emit(NowPlayingEvent::PlaylistName(name));
         cx.notify();
     }
 }

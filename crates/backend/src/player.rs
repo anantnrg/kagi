@@ -45,6 +45,7 @@ pub enum Response {
     Thumbnail(Thumbnail),
     Tracks(Vec<Track>),
     SavedPlaylists(SavedPlaylists),
+    PlaylistName(String),
 }
 
 #[derive(Clone)]
@@ -304,7 +305,10 @@ impl Player {
                             .await
                             .expect("Could not load first item");
                         self.loaded = true;
-                        self.playlist = Arc::new(Mutex::new(playlist));
+                        self.playlist = Arc::new(Mutex::new(playlist.clone()));
+                        self.tx
+                            .send(Response::PlaylistName(playlist.name))
+                            .expect("Could not send message");
                     }
                     Command::LoadFolder => {
                         let backend = self.backend.clone();
@@ -346,6 +350,9 @@ impl Player {
                                 .write_cached(cached_name)
                                 .await
                                 .expect("Could not write cache");
+                            self.tx
+                                .send(Response::PlaylistName(playlist.name))
+                                .expect("Could not send message");
 
                             if !self
                                 .saved_playlists

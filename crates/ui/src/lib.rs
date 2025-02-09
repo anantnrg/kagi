@@ -155,6 +155,12 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     });
                                     cx.notify();
                                 }
+                                NowPlayingEvent::PlaylistName(name) => {
+                                    this.now_playing.update(cx, |this, _| {
+                                        this.playlist_name = name.into();
+                                    });
+                                    cx.notify();
+                                }
                             }
                         },
                     )
@@ -224,6 +230,11 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 saved_playlists.update(cx, |this, _| {
                                     *this = playlists.clone();
                                 })
+                            }
+                            Response::PlaylistName(name) => {
+                                this.now_playing.update(cx, |np, cx| {
+                                    np.update_playlist_name(cx, name.clone());
+                                });
                             }
                             _ => {}
                         },
