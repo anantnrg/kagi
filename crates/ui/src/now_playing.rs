@@ -3,6 +3,7 @@ use gstreamer::State;
 
 #[derive(Clone)]
 pub struct NowPlaying {
+    pub playlist_name: SharedString,
     pub title: SharedString,
     pub album: SharedString,
     pub artists: Vec<SharedString>,
@@ -43,6 +44,7 @@ pub enum NowPlayingEvent {
 impl NowPlaying {
     pub fn new() -> Self {
         NowPlaying {
+            playlist_name: "".into(),
             title: "".into(),
             artists: vec!["".into()],
             album: "".into(),

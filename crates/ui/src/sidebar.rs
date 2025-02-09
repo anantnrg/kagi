@@ -7,7 +7,7 @@ use crate::layout::{Layout, LayoutMode};
 #[derive(Clone)]
 pub struct LeftSidebar {
     pub playlists: Entity<SavedPlaylists>,
-    pub active_index: Entity<usize>,
+    pub active_index: Entity<String>,
     pub layout: Entity<Layout>,
 }
 
@@ -35,17 +35,19 @@ impl Render for LeftSidebar {
                 .flex()
                 .flex_col()
                 .gap_2()
-                .children(playlists.into_iter().enumerate().map(|(index, playlist)| {
+                .children(playlists.into_iter().map(|playlist| {
                     let controller = controller.clone();
                     let curr_index = current_index.clone();
-                    let current_index = *curr_index.read(cx);
+                    let current_index = curr_index.read(cx);
 
                     div()
                         .bg(theme.background)
                         .border_1()
                         .border_color(theme.secondary)
                         .hover(|this| this.border_color(theme.accent))
-                        .when(index == current_index, |this| this.bg(theme.secondary))
+                        .when(playlist.name == current_index.clone(), |this| {
+                            this.bg(theme.secondary)
+                        })
                         .text_color(theme.text)
                         .font_weight(FontWeight::MEDIUM)
                         .w_full()
@@ -60,7 +62,7 @@ impl Render for LeftSidebar {
                         .on_mouse_down(MouseButton::Left, {
                             move |_, _, cx| {
                                 curr_index.update(cx, |this, _| {
-                                    *this = index;
+                                    *this = playlist.name.clone();
                                 });
                                 controller.load(playlist.clone());
                                 controller.get_queue();
@@ -97,7 +99,7 @@ impl LeftSidebar {
     pub fn new(cx: &mut App, playlists: Entity<SavedPlaylists>, layout: Entity<Layout>) -> Self {
         LeftSidebar {
             playlists,
-            active_index: cx.new(|_| 1),
+            active_index: cx.new(|_| String::new()),
             layout,
         }
     }
