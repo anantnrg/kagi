@@ -248,8 +248,9 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let main_view = cx.new(|_| MainView::new(np.clone(), layout.clone()));
                     let queue_list = cx.new(|_| QueueList::new(np.clone(), layout.clone()));
                     let layout_sidebar = layout.clone();
-                    let left_sidebar = cx.new(move |cx| {
-                        LeftSidebar::new(cx, playlists.clone(), layout_sidebar.clone())
+                    let np_sidebar = np.clone();
+                    let left_sidebar = cx.new(move |_| {
+                        LeftSidebar::new(playlists.clone(), layout_sidebar.clone(), np_sidebar)
                     });
                     cx.global::<Controller>().load_saved_playlists();
 
