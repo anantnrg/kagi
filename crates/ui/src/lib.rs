@@ -24,7 +24,7 @@ use control_bar::ControlBar;
 use gpui::*;
 use layout::Layout;
 use main_view::MainView;
-use now_playing::{NowPlaying, NowPlayingEvent, Thumbnail};
+use now_playing::{NowPlaying, NowPlayingEvent, Thumbnail, Track};
 use queue_list::QueueList;
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
@@ -199,7 +199,26 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 });
                             }
                             Response::Tracks(tracks) => this.now_playing.update(cx, |np, cx| {
-                                np.update_tracks(cx, tracks.clone());
+                                let mut np_tracks = vec![];
+                                for track in tracks {
+                                    if let Some(thumbnail) = track.thumbnail.clone() {
+                                        np_tracks.push(Track {
+                                            album: track.album.clone(),
+                                            artists: track.artists.clone(),
+                                            duration: track.duration,
+                                            thumbnail: Some(Thumbnail {
+                                                img: ImageSource::Render(
+                                                    RenderImage::new(thumbnail.to_frame()).into(),
+                                                ),
+                                                width: thumbnail.width,
+                                                height: thumbnail.height,
+                                            }),
+                                            title: track.title.clone(),
+                                            uri: track.uri.clone(),
+                                        });
+                                    }
+                                }
+                                np.update_tracks(cx, np_tracks);
                             }),
                             Response::SavedPlaylists(playlists) => {
                                 saved_playlists.update(cx, |this, _| {

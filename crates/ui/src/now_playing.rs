@@ -1,4 +1,3 @@
-use backend::playback::Track;
 use gpui::*;
 use gstreamer::State;
 
@@ -20,6 +19,16 @@ pub struct Thumbnail {
     pub img: ImageSource,
     pub width: u32,
     pub height: u32,
+}
+
+#[derive(Clone)]
+pub struct Track {
+    pub title: String,
+    pub artists: Vec<String>,
+    pub album: String,
+    pub uri: String,
+    pub duration: u64,
+    pub thumbnail: Option<Thumbnail>,
 }
 
 pub enum NowPlayingEvent {
