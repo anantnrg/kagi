@@ -34,7 +34,7 @@ impl Render for QueueList {
                         cx.entity(),
                         "queue_list",
                         tracks.len(),
-                        move |_this, range, _window, cx| {
+                        move |_, range, _, cx| {
                             let theme = cx.global::<Theme>();
 
                             range
@@ -57,7 +57,7 @@ impl Render for QueueList {
                                         .hover(|this| this.bg(theme.secondary))
                                         .on_mouse_down(MouseButton::Left, move |_, _, cx| {
                                             let controller = cx.global::<Controller>().clone();
-                                            controller.play_id(id);
+                                            controller.play_id(id + 1);
                                         })
                                         .child({
                                             if let Some(thumbnail) = &track.thumbnail {
