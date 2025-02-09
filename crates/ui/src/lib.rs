@@ -24,7 +24,7 @@ use control_bar::ControlBar;
 use gpui::*;
 use layout::Layout;
 use main_view::MainView;
-use now_playing::{NowPlaying, NowPlayingEvent, Thumbnail};
+use now_playing::{NowPlaying, NowPlayingEvent, Thumbnail, Track};
 use queue_list::QueueList;
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
@@ -155,6 +155,12 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     });
                                     cx.notify();
                                 }
+                                NowPlayingEvent::PlaylistName(name) => {
+                                    this.now_playing.update(cx, |this, _| {
+                                        this.playlist_name = name.into();
+                                    });
+                                    cx.notify();
+                                }
                             }
                         },
                     )
@@ -199,12 +205,36 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 });
                             }
                             Response::Tracks(tracks) => this.now_playing.update(cx, |np, cx| {
-                                np.update_tracks(cx, tracks.clone());
+                                let mut np_tracks = vec![];
+                                for track in tracks {
+                                    if let Some(thumbnail) = track.thumbnail.clone() {
+                                        np_tracks.push(Track {
+                                            album: track.album.clone(),
+                                            artists: track.artists.clone(),
+                                            duration: track.duration,
+                                            thumbnail: Some(Thumbnail {
+                                                img: ImageSource::Render(
+                                                    RenderImage::new(thumbnail.to_frame()).into(),
+                                                ),
+                                                width: thumbnail.width,
+                                                height: thumbnail.height,
+                                            }),
+                                            title: track.title.clone(),
+                                            uri: track.uri.clone(),
+                                        });
+                                    }
+                                }
+                                np.update_tracks(cx, np_tracks);
                             }),
                             Response::SavedPlaylists(playlists) => {
                                 saved_playlists.update(cx, |this, _| {
                                     *this = playlists.clone();
                                 })
+                            }
+                            Response::PlaylistName(name) => {
+                                this.now_playing.update(cx, |np, cx| {
+                                    np.update_playlist_name(cx, name.clone());
+                                });
                             }
                             _ => {}
                         },
@@ -218,8 +248,9 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let main_view = cx.new(|_| MainView::new(np.clone(), layout.clone()));
                     let queue_list = cx.new(|_| QueueList::new(np.clone(), layout.clone()));
                     let layout_sidebar = layout.clone();
-                    let left_sidebar = cx.new(move |cx| {
-                        LeftSidebar::new(cx, playlists.clone(), layout_sidebar.clone())
+                    let np_sidebar = np.clone();
+                    let left_sidebar = cx.new(move |_| {
+                        LeftSidebar::new(playlists.clone(), layout_sidebar.clone(), np_sidebar)
                     });
                     cx.global::<Controller>().load_saved_playlists();
 

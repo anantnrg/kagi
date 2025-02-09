@@ -1,9 +1,9 @@
-use backend::playback::Track;
 use gpui::*;
 use gstreamer::State;
 
 #[derive(Clone)]
 pub struct NowPlaying {
+    pub playlist_name: SharedString,
     pub title: SharedString,
     pub album: SharedString,
     pub artists: Vec<SharedString>,
@@ -22,6 +22,16 @@ pub struct Thumbnail {
     pub height: u32,
 }
 
+#[derive(Clone)]
+pub struct Track {
+    pub title: String,
+    pub artists: Vec<String>,
+    pub album: String,
+    pub uri: String,
+    pub duration: u64,
+    pub thumbnail: Option<Thumbnail>,
+}
+
 pub enum NowPlayingEvent {
     Meta(SharedString, SharedString, Vec<SharedString>, u64),
     Position(u64),
@@ -29,11 +39,13 @@ pub enum NowPlayingEvent {
     State(State),
     Volume(f64),
     Tracks(Vec<Track>),
+    PlaylistName(String),
 }
 
 impl NowPlaying {
     pub fn new() -> Self {
         NowPlaying {
+            playlist_name: "".into(),
             title: "".into(),
             artists: vec!["".into()],
             album: "".into(),
@@ -80,6 +92,11 @@ impl NowPlaying {
 
     pub fn update_tracks(&mut self, cx: &mut Context<Self>, tracks: Vec<Track>) {
         cx.emit(NowPlayingEvent::Tracks(tracks));
+        cx.notify();
+    }
+
+    pub fn update_playlist_name(&mut self, cx: &mut Context<Self>, name: String) {
+        cx.emit(NowPlayingEvent::PlaylistName(name));
         cx.notify();
     }
 }
