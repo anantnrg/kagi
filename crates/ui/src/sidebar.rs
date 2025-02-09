@@ -39,7 +39,6 @@ impl Render for LeftSidebar {
                     let controller = controller.clone();
                     let curr_index = current_index.clone();
                     let current_index = *curr_index.read(cx);
-                    let path = playlist.actual_path.clone();
 
                     div()
                         .bg(theme.background)
@@ -63,7 +62,7 @@ impl Render for LeftSidebar {
                                 curr_index.update(cx, |this, _| {
                                     *this = index;
                                 });
-                                controller.load(path.clone());
+                                controller.load(playlist.clone());
                                 controller.get_queue();
                             }
                         })

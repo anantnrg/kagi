@@ -1,16 +1,17 @@
 use std::{
-    fs,
+    fs::{self, File},
     io::{self, Write},
     path::PathBuf,
     sync::Arc,
 };
 
-use directories::BaseDirs;
+use bincode::config;
+use directories::UserDirs;
 use serde::{Deserialize, Serialize};
 
 use crate::{Backend, player::Thumbnail};
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Track {
     pub title: String,
     pub artists: Vec<String>,
@@ -20,7 +21,7 @@ pub struct Track {
     pub thumbnail: Option<Thumbnail>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Playlist {
     pub name: String,
     pub tracks: Vec<Track>,
@@ -110,6 +111,43 @@ impl Playlist {
         backend.load(&current_song.uri).await?;
         Ok(())
     }
+
+    pub async fn write_cached(&self, cached_name: String) -> anyhow::Result<()> {
+        let cached_path = UserDirs::new()
+            .unwrap()
+            .audio_dir()
+            .unwrap_or(UserDirs::new().unwrap().home_dir())
+            .join("Reyvr")
+            .join("cache")
+            .join(cached_name);
+
+        let mut cached_file = File::create(cached_path)?;
+        let serialized = &bincode::serde::encode_to_vec(self, config::standard())?;
+        cached_file.write(serialized)?;
+
+        Ok(())
+    }
+
+    pub async fn read_cached(cached_name: String) -> Option<Playlist> {
+        let cached_path = UserDirs::new()
+            .unwrap()
+            .audio_dir()
+            .unwrap_or(UserDirs::new().unwrap().home_dir())
+            .join("Reyvr")
+            .join("cache")
+            .join(cached_name);
+
+        if cached_path.exists() {
+            let cached_data = &fs::read(cached_path).expect("Could not read file");
+            let deserialized: Playlist =
+                bincode::serde::decode_from_slice(cached_data, config::standard())
+                    .expect("Could not decode playlist")
+                    .0;
+            return Some(deserialized);
+        } else {
+            return None;
+        }
+    }
 }
 
 impl SavedPlaylists {
@@ -117,8 +155,11 @@ impl SavedPlaylists {
         SavedPlaylists { playlists: vec![] }
     }
     pub fn get_playlists_file() -> Option<PathBuf> {
-        if let Some(base_dir) = BaseDirs::new() {
-            let proj_dir = base_dir.preference_dir().join("Reyvr");
+        if let Some(user_dirs) = UserDirs::new() {
+            let proj_dir = user_dirs
+                .audio_dir()
+                .unwrap_or(user_dirs.home_dir())
+                .join("Reyvr");
             if let Err(e) = fs::create_dir_all(proj_dir.clone()) {
                 eprintln!("Could not create config directory: {}", e);
                 return None;
