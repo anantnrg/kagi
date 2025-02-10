@@ -71,6 +71,13 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .step(0.005)
                             .default(0.2)
                     });
+                    let playbar = cx.new(|_| {
+                        Slider::new(theme)
+                            .min(0.0)
+                            .max(1.0)
+                            .step(0.005)
+                            .default(0.2)
+                    });
                     let recv_controller = controller.clone();
                     let saved_playlists = cx.new(|_| SavedPlaylists::default());
                     let playlists = saved_playlists.clone();
@@ -112,6 +119,20 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         },
                     )
                     .detach();
+                    // cx.subscribe(
+                    //     &playbar,
+                    //     move |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {
+                    //         SliderEvent::Change(time) => {
+                    //             let volume = (vol * 100.0).round() as f64 / 100.0;
+                    //             cx.global::<Controller>().volume(volume);
+                    //             this.now_playing.update(cx, |this, cx| {
+                    //                 this.update_vol(cx, volume.clone());
+                    //             });
+                    //             cx.notify();
+                    //         }
+                    //     },
+                    // )
+                    // .detach();
                     cx.subscribe(
                         &np,
                         |this: &mut Reyvr, _, event: &NowPlayingEvent, cx: &mut Context<Reyvr>| {
@@ -244,7 +265,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
 
                     let titlebar = cx.new(|_| Titlebar::new(np.clone(), layout.clone()));
 
-                    let control_bar = cx.new(|_| ControlBar::new(np.clone(), vol_slider.clone()));
+                    let control_bar = cx
+                        .new(|_| ControlBar::new(np.clone(), vol_slider.clone(), playbar.clone()));
                     let main_view = cx.new(|_| MainView::new(np.clone(), layout.clone()));
                     let queue_list = cx.new(|_| QueueList::new(np.clone(), layout.clone()));
                     let layout_sidebar = layout.clone();

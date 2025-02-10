@@ -30,6 +30,7 @@ impl Render for ControlBar {
             .bg(theme.background)
             .border_color(theme.secondary)
             .flex()
+            .flex_col()
             .justify_center()
             .justify_between()
             .px_4()
@@ -37,17 +38,22 @@ impl Render for ControlBar {
                 div()
                     .w_full()
                     .id("playbar")
-                    .h_full()
+                    .h_auto()
                     .flex()
                     .items_center()
                     .justify_center()
-                    .px_8()
+                    .px_4()
+                    .pt_3()
+                    .pb_1()
                     .child(self.playbar.clone()),
             )
             .child(
                 div()
                     .w_full()
-                    .h_8()
+                    .h_full()
+                    .flex()
+                    .items_center()
+                    .justify_center()
                     .child(div().w_full().h_full())
                     .child(
                         div()
@@ -57,7 +63,7 @@ impl Render for ControlBar {
                             .items_center()
                             .justify_center()
                             .overflow_hidden()
-                            .gap_3()
+                            .gap_x_3()
                             .child(
                                 div()
                                     .size_6()
@@ -163,10 +169,15 @@ impl Render for ControlBar {
 }
 
 impl ControlBar {
-    pub fn new(now_playing: Entity<NowPlaying>, vol_slider: Entity<Slider>) -> Self {
+    pub fn new(
+        now_playing: Entity<NowPlaying>,
+        vol_slider: Entity<Slider>,
+        playbar: Entity<Slider>,
+    ) -> Self {
         ControlBar {
             now_playing,
             vol_slider,
+            playbar,
         }
     }
 }
