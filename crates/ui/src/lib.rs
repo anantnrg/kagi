@@ -76,7 +76,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .min(0.0)
                             .max(1.0)
                             .step(0.005)
-                            .default(0.2)
+                            .default(0.0)
                     });
                     let recv_controller = controller.clone();
                     let saved_playlists = cx.new(|_| SavedPlaylists::default());
@@ -119,23 +119,34 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         },
                     )
                     .detach();
-                    // cx.subscribe(
-                    //     &playbar,
-                    //     move |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {
-                    //         SliderEvent::Change(time) => {
-                    //             let volume = (vol * 100.0).round() as f64 / 100.0;
-                    //             cx.global::<Controller>().volume(volume);
-                    //             this.now_playing.update(cx, |this, cx| {
-                    //                 this.update_vol(cx, volume.clone());
-                    //             });
-                    //             cx.notify();
-                    //         }
-                    //     },
-                    // )
-                    // .detach();
+                    cx.subscribe(
+                        &playbar,
+                        move |this: &mut Reyvr, playbar, event: &SliderEvent, cx| match event {
+                            SliderEvent::Change(time) => {
+                                let controller = cx.global::<Controller>();
+                                let np = this.now_playing.read(cx);
+                                let total_duration = np.duration as f32;
+                                if total_duration > 0.0 {
+                                    let seek_time =
+                                        (total_duration * (*time as f32)).round() as u64;
+                                    controller.seek(seek_time);
+                                    this.now_playing.update(cx, |this, cx| {
+                                        this.update_pos(cx, seek_time);
+                                    });
+                                }
+
+                                cx.notify();
+                            }
+                        },
+                    )
+                    .detach();
+                    let pb_clone = playbar.clone();
                     cx.subscribe(
                         &np,
-                        |this: &mut Reyvr, _, event: &NowPlayingEvent, cx: &mut Context<Reyvr>| {
+                        move |this: &mut Reyvr,
+                              _,
+                              event: &NowPlayingEvent,
+                              cx: &mut Context<Reyvr>| {
                             match event {
                                 NowPlayingEvent::Meta(title, album, artists, duration) => {
                                     this.now_playing.update(cx, |this, _| {
@@ -147,8 +158,18 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     cx.notify();
                                 }
                                 NowPlayingEvent::Position(pos) => {
-                                    this.now_playing.update(cx, |this, _| {
+                                    let np = &this.now_playing;
+                                    np.update(cx, |this, _| {
                                         this.position = *pos;
+                                    });
+                                    let total_duration = np.read(cx).duration;
+                                    let slider_value = (*pos / total_duration) as f32;
+                                    println!(
+                                        "dur: {}, pos: {}, slider: {}",
+                                        total_duration, pos, slider_value
+                                    );
+                                    pb_clone.update(cx, |this, cx| {
+                                        this.value(slider_value, cx);
                                     });
                                     cx.notify();
                                 }
