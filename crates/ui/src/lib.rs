@@ -121,7 +121,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
                     cx.subscribe(
                         &playbar,
-                        move |this: &mut Reyvr, playbar, event: &SliderEvent, cx| match event {
+                        move |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {
                             SliderEvent::Change(time) => {
                                 let controller = cx.global::<Controller>();
                                 let np = this.now_playing.read(cx);
@@ -163,11 +163,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                         this.position = *pos;
                                     });
                                     let total_duration = np.read(cx).duration;
-                                    let slider_value = (*pos / total_duration) as f32;
-                                    println!(
-                                        "dur: {}, pos: {}, slider: {}",
-                                        total_duration, pos, slider_value
-                                    );
+                                    let slider_value = (*pos as f64 / total_duration as f64) as f32;
+
                                     pb_clone.update(cx, |this, cx| {
                                         this.value(slider_value, cx);
                                     });

@@ -25,7 +25,7 @@ impl Render for ControlBar {
 
         div()
             .w_full()
-            .h(px(72.0))
+            .h_24()
             .border_t_1()
             .bg(theme.background)
             .border_color(theme.secondary)
@@ -38,14 +38,27 @@ impl Render for ControlBar {
                 div()
                     .w_full()
                     .id("playbar")
+                    .overflow_hidden()
                     .h_auto()
                     .flex()
                     .items_center()
                     .justify_center()
-                    .px_4()
-                    .pt_3()
+                    .gap_x_2()
+                    .px_3()
+                    .mt_3()
                     .pb_1()
-                    .child(self.playbar.clone()),
+                    .text_color(theme.text)
+                    .font_weight(FontWeight::MEDIUM)
+                    .child(format!("{:02}:{:02}", np.position / 60, np.position % 60))
+                    .child(
+                        div()
+                            .mx_3()
+                            .w_full()
+                            .h_6()
+                            .pt(px(10.0))
+                            .child(self.playbar.clone()),
+                    )
+                    .child(format!("{:02}:{:02}", np.duration / 60, np.duration % 60)),
             )
             .child(
                 div()
