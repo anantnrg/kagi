@@ -57,7 +57,7 @@ impl Render for QueueList {
                                         .hover(|this| this.bg(theme.secondary))
                                         .on_mouse_down(MouseButton::Left, move |_, _, cx| {
                                             let controller = cx.global::<Controller>().clone();
-                                            controller.play_id(id + 1);
+                                            controller.play_id(id);
                                         })
                                         .child({
                                             if let Some(thumbnail) = &track.thumbnail {
