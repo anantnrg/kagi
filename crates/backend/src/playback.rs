@@ -113,13 +113,16 @@ impl Playlist {
     }
 
     pub async fn write_cached(&self, cached_name: String) -> anyhow::Result<()> {
-        let cached_path = UserDirs::new()
+        let cache_dir = UserDirs::new()
             .unwrap()
             .audio_dir()
             .unwrap_or(UserDirs::new().unwrap().home_dir())
             .join("Reyvr")
-            .join("cache")
-            .join(cached_name);
+            .join("cache");
+        if !cache_dir.exists() {
+            fs::create_dir_all(&cache_dir).expect("Failed to create cache directory");
+        }
+        let cached_path = cache_dir.join(cached_name);
 
         let mut cached_file = File::create(cached_path)?;
         let serialized = &bincode::serde::encode_to_vec(self, config::standard())?;
