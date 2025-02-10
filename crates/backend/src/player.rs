@@ -476,6 +476,12 @@ impl Controller {
             .send(Command::RetrieveSavedPlaylists)
             .expect("Could not send command");
     }
+
+    pub fn seek(&self, time: u64) {
+        self.tx
+            .send(Command::Seek(time))
+            .expect("Could not send command");
+    }
 }
 
 impl Thumbnail {

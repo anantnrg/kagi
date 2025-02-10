@@ -71,6 +71,13 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .step(0.005)
                             .default(0.2)
                     });
+                    let playbar = cx.new(|_| {
+                        Slider::new(theme)
+                            .min(0.0)
+                            .max(1.0)
+                            .step(0.005)
+                            .default(0.0)
+                    });
                     let recv_controller = controller.clone();
                     let saved_playlists = cx.new(|_| SavedPlaylists::default());
                     let playlists = saved_playlists.clone();
@@ -113,8 +120,33 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     )
                     .detach();
                     cx.subscribe(
+                        &playbar,
+                        move |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {
+                            SliderEvent::Change(time) => {
+                                let controller = cx.global::<Controller>();
+                                let np = this.now_playing.read(cx);
+                                let total_duration = np.duration as f32;
+                                if total_duration > 0.0 {
+                                    let seek_time =
+                                        (total_duration * (*time as f32)).round() as u64;
+                                    controller.seek(seek_time);
+                                    this.now_playing.update(cx, |this, cx| {
+                                        this.update_pos(cx, seek_time);
+                                    });
+                                }
+
+                                cx.notify();
+                            }
+                        },
+                    )
+                    .detach();
+                    let pb_clone = playbar.clone();
+                    cx.subscribe(
                         &np,
-                        |this: &mut Reyvr, _, event: &NowPlayingEvent, cx: &mut Context<Reyvr>| {
+                        move |this: &mut Reyvr,
+                              _,
+                              event: &NowPlayingEvent,
+                              cx: &mut Context<Reyvr>| {
                             match event {
                                 NowPlayingEvent::Meta(title, album, artists, duration) => {
                                     this.now_playing.update(cx, |this, _| {
@@ -126,8 +158,15 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     cx.notify();
                                 }
                                 NowPlayingEvent::Position(pos) => {
-                                    this.now_playing.update(cx, |this, _| {
+                                    let np = &this.now_playing;
+                                    np.update(cx, |this, _| {
                                         this.position = *pos;
+                                    });
+                                    let total_duration = np.read(cx).duration;
+                                    let slider_value = (*pos as f64 / total_duration as f64) as f32;
+
+                                    pb_clone.update(cx, |this, cx| {
+                                        this.value(slider_value, cx);
                                     });
                                     cx.notify();
                                 }
@@ -244,7 +283,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
 
                     let titlebar = cx.new(|_| Titlebar::new(np.clone(), layout.clone()));
 
-                    let control_bar = cx.new(|_| ControlBar::new(np.clone(), vol_slider.clone()));
+                    let control_bar = cx
+                        .new(|_| ControlBar::new(np.clone(), vol_slider.clone(), playbar.clone()));
                     let main_view = cx.new(|_| MainView::new(np.clone(), layout.clone()));
                     let queue_list = cx.new(|_| QueueList::new(np.clone(), layout.clone()));
                     let layout_sidebar = layout.clone();
