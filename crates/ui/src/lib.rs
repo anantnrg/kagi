@@ -206,6 +206,12 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     });
                                     cx.notify();
                                 }
+                                NowPlayingEvent::Repeat(repeat) => {
+                                    this.now_playing.update(cx, |this, _| {
+                                        this.repeat = repeat.clone();
+                                    });
+                                    cx.notify();
+                                }
                             }
                         },
                     )
@@ -214,8 +220,11 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         &res_handler,
                         move |this: &mut Reyvr, _, event: &Response, cx| match event {
                             Response::Eos => {
-                                println!("End of stream");
-                                cx.global::<Controller>().next();
+                                if this.now_playing.read(cx).repeat {
+                                    cx.global::<Controller>().seek(0);
+                                } else {
+                                    cx.global::<Controller>().next();
+                                }
                             }
                             Response::Position(pos) => this.now_playing.update(cx, |np, cx| {
                                 np.update_pos(cx, *pos);

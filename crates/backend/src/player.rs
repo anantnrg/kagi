@@ -6,7 +6,7 @@ use std::{
 
 use gstreamer::State;
 use image::{Frame, RgbaImage, imageops::thumbnail};
-use rand::{seq::SliceRandom, thread_rng};
+use rand::seq::SliceRandom;
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;

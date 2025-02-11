@@ -14,6 +14,7 @@ pub struct NowPlaying {
     pub volume: f64,
     pub tracks: Vec<Track>,
     pub shuffle: bool,
+    pub repeat: bool,
 }
 
 #[derive(Clone)]
@@ -42,6 +43,7 @@ pub enum NowPlayingEvent {
     Tracks(Vec<Track>),
     PlaylistName(String),
     Shuffle(bool),
+    Repeat(bool),
 }
 
 impl NowPlaying {
@@ -58,6 +60,7 @@ impl NowPlaying {
             volume: 0.2,
             tracks: vec![],
             shuffle: false,
+            repeat: false,
         }
     }
 
@@ -105,6 +108,11 @@ impl NowPlaying {
 
     pub fn update_shuffle(&mut self, cx: &mut Context<Self>, shuffle: bool) {
         cx.emit(NowPlayingEvent::Shuffle(shuffle));
+        cx.notify();
+    }
+
+    pub fn update_repeat(&mut self, cx: &mut Context<Self>, repeat: bool) {
+        cx.emit(NowPlayingEvent::Repeat(repeat));
         cx.notify();
     }
 }

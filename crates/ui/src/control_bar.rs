@@ -17,11 +17,12 @@ pub struct ControlBar {
 }
 
 impl Render for ControlBar {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let controller = cx.global::<Controller>();
         let theme = cx.global::<Theme>();
 
         let np = self.now_playing.read(cx);
+        let np_write = self.now_playing.clone();
 
         div()
             .w_full()
@@ -67,7 +68,14 @@ impl Render for ControlBar {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .child(div().w_full().h_full())
+                    .child(
+                        div()
+                            .w_full()
+                            .h_full()
+                            .when(win.bounds().size.width.0 < 400.0, |this| {
+                                this.w_auto().flex_grow()
+                            }),
+                    )
                     .child(
                         div()
                             .flex()
@@ -86,7 +94,7 @@ impl Render for ControlBar {
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Shuffle)
-                                            .size(26.0)
+                                            .size(24.0)
                                             .color(theme.text)
                                             .hover(theme.accent)
                                             .when(np.shuffle, |this| this.color(theme.accent)),
@@ -109,7 +117,7 @@ impl Render for ControlBar {
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Previous)
-                                            .size(26.0)
+                                            .size(24.0)
                                             .color(theme.text)
                                             .hover(theme.accent),
                                     )
@@ -133,7 +141,7 @@ impl Render for ControlBar {
                                     .when(np.state == State::Null, |this| {
                                         this.child(
                                             Icon::new(Icons::Stopped)
-                                                .size(26.0)
+                                                .size(24.0)
                                                 .color(theme.text)
                                                 .hover(theme.accent),
                                         )
@@ -141,7 +149,7 @@ impl Render for ControlBar {
                                     .when(np.state == State::Playing, |this| {
                                         this.child(
                                             Icon::new(Icons::Pause)
-                                                .size(26.0)
+                                                .size(24.0)
                                                 .color(theme.text)
                                                 .hover(theme.accent),
                                         )
@@ -149,7 +157,7 @@ impl Render for ControlBar {
                                     .when(np.state == State::Paused, |this| {
                                         this.child(
                                             Icon::new(Icons::Play)
-                                                .size(26.0)
+                                                .size(24.0)
                                                 .color(theme.text)
                                                 .hover(theme.accent),
                                         )
@@ -180,7 +188,7 @@ impl Render for ControlBar {
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Next)
-                                            .size(26.0)
+                                            .size(24.0)
                                             .color(theme.text)
                                             .hover(theme.accent),
                                     )
@@ -189,6 +197,30 @@ impl Render for ControlBar {
                                             let controller = controller.clone();
                                             move |_, _, _| {
                                                 controller.next();
+                                            }
+                                        }
+                                    }),
+                            )
+                            .child(
+                                div()
+                                    .size_6()
+                                    .flex()
+                                    .flex_col()
+                                    .items_center()
+                                    .justify_center()
+                                    .child(
+                                        Icon::new(Icons::Repeat)
+                                            .size(24.0)
+                                            .color(theme.text)
+                                            .hover(theme.accent)
+                                            .when(np.repeat, |this| this.color(theme.accent)),
+                                    )
+                                    .on_mouse_down(MouseButton::Left, {
+                                        {
+                                            move |_, _, cx| {
+                                                np_write.update(cx, |this, _| {
+                                                    this.repeat = !this.repeat
+                                                })
                                             }
                                         }
                                     }),
