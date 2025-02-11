@@ -30,6 +30,7 @@ pub enum Command {
     LoadSavedPlaylists,
     WriteSavedPlaylists,
     RetrieveSavedPlaylists,
+    Shuffle,
 }
 
 #[derive(Clone)]
@@ -52,6 +53,7 @@ pub enum Response {
 pub struct Player {
     pub backend: Arc<dyn Backend>,
     pub playlist: Arc<Mutex<Playlist>>,
+    pub queue: Vec<Track>,
     pub volume: f64,
     pub position: u64,
     pub current_index: usize,
@@ -85,6 +87,7 @@ impl Player {
             Player {
                 backend,
                 playlist,
+                queue: vec![],
                 volume: 0.5,
                 position: 0,
                 current_index: 0,
