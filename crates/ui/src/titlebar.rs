@@ -167,7 +167,7 @@ impl Render for Titlebar {
                             .items_center()
                             .justify_center()
                             .hover(|this| this.bg(theme.secondary))
-                            .child(Icon::new(Icons::Minimize).size(20.0).color(0xffffff)),
+                            .child(Icon::new(Icons::Minimize).size(20.0).color(rgb(0xffffff))),
                     )
                     .child(
                         div()
@@ -179,9 +179,9 @@ impl Render for Titlebar {
                             .hover(|this| this.bg(theme.secondary))
                             .child({
                                 if win.is_maximized() {
-                                    Icon::new(Icons::Restore).size(20.0).color(0xffffff)
+                                    Icon::new(Icons::Restore).size(20.0).color(rgb(0xffffff))
                                 } else {
-                                    Icon::new(Icons::Maximize).size(20.0).color(0xffffff)
+                                    Icon::new(Icons::Maximize).size(20.0).color(rgb(0xffffff))
                                 }
                             }),
                     )
@@ -193,7 +193,7 @@ impl Render for Titlebar {
                             .items_center()
                             .justify_center()
                             .hover(|this| this.bg(rgb(0xe81123)))
-                            .child(Icon::new(Icons::Close).size(20.0).color(0xffffff)),
+                            .child(Icon::new(Icons::Close).size(20.0).color(rgb(0xffffff))),
                     ),
             )
     }

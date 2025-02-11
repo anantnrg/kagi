@@ -85,11 +85,10 @@ impl Render for ControlBar {
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Shuffle)
-                                            .size(32.0)
-                                            .color(theme.text.into())
-                                            .when(np.shuffle, |this| {
-                                                this.color(theme.accent.into())
-                                            }),
+                                            .size(28.0)
+                                            .color(theme.text)
+                                            .hover(theme.accent)
+                                            .when(np.shuffle, |this| this.color(theme.accent)),
                                     )
                                     .on_mouse_down(MouseButton::Left, {
                                         {
@@ -109,7 +108,8 @@ impl Render for ControlBar {
                                     .child(
                                         Icon::new(Icons::Previous)
                                             .size(32.0)
-                                            .color(theme.text.into()),
+                                            .color(theme.text)
+                                            .hover(theme.accent),
                                     )
                                     .hover(|this| this.text_color(theme.accent))
                                     .on_mouse_down(MouseButton::Left, {
@@ -131,21 +131,24 @@ impl Render for ControlBar {
                                         this.child(
                                             Icon::new(Icons::Stopped)
                                                 .size(32.0)
-                                                .color(theme.text.into()),
+                                                .color(theme.text)
+                                                .hover(theme.accent),
                                         )
                                     })
                                     .when(np.state == State::Playing, |this| {
                                         this.child(
                                             Icon::new(Icons::Pause)
                                                 .size(32.0)
-                                                .color(theme.text.into()),
+                                                .color(theme.text)
+                                                .hover(theme.accent),
                                         )
                                     })
                                     .when(np.state == State::Paused, |this| {
                                         this.child(
                                             Icon::new(Icons::Play)
                                                 .size(32.0)
-                                                .color(theme.text.into()),
+                                                .color(theme.text)
+                                                .hover(theme.accent),
                                         )
                                     })
                                     .hover(|this| this.text_color(theme.accent))
@@ -172,9 +175,11 @@ impl Render for ControlBar {
                                     .items_center()
                                     .justify_center()
                                     .child(
-                                        Icon::new(Icons::Next).size(32.0).color(theme.text.into()),
+                                        Icon::new(Icons::Next)
+                                            .size(32.0)
+                                            .color(theme.text)
+                                            .hover(theme.accent),
                                     )
-                                    .hover(|this| this.text_color(theme.accent))
                                     .on_mouse_down(MouseButton::Left, {
                                         {
                                             let controller = controller.clone();

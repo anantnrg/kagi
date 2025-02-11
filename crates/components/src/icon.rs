@@ -39,8 +39,8 @@ impl Icons {
 pub struct Icon {
     pub icon: Icons,
     pub size: f32,
-    pub color: u32,
-    pub hover: u32,
+    pub color: Rgba,
+    pub hover: Rgba,
 }
 
 impl Icon {
@@ -48,8 +48,8 @@ impl Icon {
         Icon {
             icon,
             size: 24.0,
-            color: 0xcdd6f4,
-            hover: 0xcdd6f4,
+            color: rgb(0xcdd6f4),
+            hover: rgb(0xcdd6f4),
         }
     }
 
@@ -58,12 +58,12 @@ impl Icon {
         self
     }
 
-    pub fn color(mut self, color: u32) -> Self {
+    pub fn color(mut self, color: Rgba) -> Self {
         self.color = color;
         self
     }
 
-    pub fn hover(mut self, color: u32) -> Self {
+    pub fn hover(mut self, color: Rgba) -> Self {
         self.hover = color;
         self
     }
@@ -73,8 +73,8 @@ impl RenderOnce for Icon {
     fn render(self, _win: &mut Window, _cx: &mut App) -> impl IntoElement {
         svg()
             .size(px(self.size))
-            .text_color(rgb(self.color))
+            .text_color(self.color)
             .path(self.icon.path())
-            .hover(|this| this.text_color(rgb(self.hover)))
+            .hover(|this| this.text_color(self.hover))
     }
 }
