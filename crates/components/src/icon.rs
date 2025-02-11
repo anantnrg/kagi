@@ -12,6 +12,8 @@ pub enum Icons {
     Next,
     Previous,
     Stopped,
+    Shuffle,
+    Repeat,
 }
 
 impl Icons {
@@ -28,6 +30,8 @@ impl Icons {
             Self::Next => "icons/next.svg",
             Self::Previous => "icons/previous.svg",
             Self::Stopped => "icons/stopped.svg",
+            Self::Shuffle => "icons/shuffle.svg",
+            Self::Repeat => "icons/repeat.svg",
         }
         .into()
     }
@@ -37,7 +41,8 @@ impl Icons {
 pub struct Icon {
     pub icon: Icons,
     pub size: f32,
-    pub color: u32,
+    pub color: Rgba,
+    pub hover: Rgba,
 }
 
 impl Icon {
@@ -45,7 +50,8 @@ impl Icon {
         Icon {
             icon,
             size: 24.0,
-            color: 0xcdd6f4,
+            color: rgb(0xcdd6f4),
+            hover: rgb(0xcdd6f4),
         }
     }
 
@@ -54,8 +60,13 @@ impl Icon {
         self
     }
 
-    pub fn color(mut self, color: u32) -> Self {
+    pub fn color(mut self, color: Rgba) -> Self {
         self.color = color;
+        self
+    }
+
+    pub fn hover(mut self, color: Rgba) -> Self {
+        self.hover = color;
         self
     }
 }
@@ -63,8 +74,12 @@ impl Icon {
 impl RenderOnce for Icon {
     fn render(self, _win: &mut Window, _cx: &mut App) -> impl IntoElement {
         svg()
+            .flex()
+            .items_center()
+            .justify_center()
             .size(px(self.size))
-            .text_color(rgb(self.color))
+            .text_color(self.color)
             .path(self.icon.path())
+            .hover(|this| this.text_color(self.hover))
     }
 }

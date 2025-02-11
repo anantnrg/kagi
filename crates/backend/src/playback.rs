@@ -102,16 +102,6 @@ impl Playlist {
         playlist
     }
 
-    pub async fn load(
-        &mut self,
-        backend: &Arc<dyn Backend>,
-        current_index: usize,
-    ) -> anyhow::Result<()> {
-        let current_song = &self.tracks[current_index];
-        backend.load(&current_song.uri).await?;
-        Ok(())
-    }
-
     pub async fn write_cached(&self, cached_name: String) -> anyhow::Result<()> {
         let cache_dir = UserDirs::new()
             .unwrap()
