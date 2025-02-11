@@ -6,6 +6,7 @@ use std::{
 
 use gstreamer::State;
 use image::{Frame, RgbaImage, imageops::thumbnail};
+use rand::{seq::SliceRandom, thread_rng};
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
@@ -377,7 +378,13 @@ impl Player {
                             backend.seek(time).await.expect("Could not seek");
                         }
                     }
-                    Command::Shuffle => {}
+                    Command::Shuffle => {
+                        let mut rng = rand::rng();
+                        self.queue.shuffle(&mut rng);
+                        self.tx
+                            .send(Response::Tracks(self.queue.clone()))
+                            .expect("Could not send message");
+                    }
                 }
             }
 
