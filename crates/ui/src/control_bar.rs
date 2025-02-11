@@ -84,6 +84,26 @@ impl Render for ControlBar {
                                     .items_center()
                                     .justify_center()
                                     .child(
+                                        Icon::new(Icons::Shuffle)
+                                            .size(32.0)
+                                            .color(theme.text.into()),
+                                    )
+                                    .on_mouse_down(MouseButton::Left, {
+                                        {
+                                            let controller = controller.clone();
+                                            move |_, _, _| {
+                                                controller.shuffle();
+                                            }
+                                        }
+                                    }),
+                            )
+                            .child(
+                                div()
+                                    .size_6()
+                                    .flex()
+                                    .items_center()
+                                    .justify_center()
+                                    .child(
                                         Icon::new(Icons::Previous)
                                             .size(32.0)
                                             .color(theme.text.into()),

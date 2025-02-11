@@ -12,6 +12,7 @@ pub enum Icons {
     Next,
     Previous,
     Stopped,
+    Shuffle,
 }
 
 impl Icons {
@@ -28,6 +29,7 @@ impl Icons {
             Self::Next => "icons/next.svg",
             Self::Previous => "icons/previous.svg",
             Self::Stopped => "icons/stopped.svg",
+            Self::Shuffle => "icons/shuffle.svg",
         }
         .into()
     }
