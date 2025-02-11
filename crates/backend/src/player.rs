@@ -158,12 +158,8 @@ impl Player {
             while let Ok(command) = self.rx.try_recv() {
                 match command {
                     Command::Play => {
-                        let cloned_playlist = {
-                            let guard = self.playlist.lock().expect("Could not lock playlist");
-                            guard.clone()
-                        };
                         let backend = self.backend.clone();
-                        if !cloned_playlist.tracks.is_empty() {
+                        if !self.queue.is_empty() {
                             if !self.playing {
                                 if self.loaded {
                                     let tx = self.tx.clone();
@@ -185,7 +181,6 @@ impl Player {
                                 }
                             }
                         }
-                        self.playlist = Arc::new(Mutex::new(cloned_playlist));
                     }
                     Command::Pause => {
                         let backend = self.backend.clone();
@@ -201,24 +196,16 @@ impl Player {
                         }
                     }
                     Command::GetMeta => {
-                        let cloned_playlist = {
-                            let guard = self.playlist.lock().expect("Could not lock playlist");
-                            guard.clone()
-                        };
                         if self.loaded {
-                            let track = cloned_playlist.tracks[self.current_index].clone();
+                            let track = self.queue[self.current_index].clone();
                             self.tx
                                 .send(Response::Metadata(track))
                                 .expect("Could not send message");
                         }
                     }
                     Command::GetTracks => {
-                        let cloned_playlist = {
-                            let guard = self.playlist.lock().expect("Could not lock playlist");
-                            guard.clone()
-                        };
                         if self.loaded {
-                            let tracks = cloned_playlist.tracks.clone();
+                            let tracks = self.queue.clone();
                             self.tx
                                 .send(Response::Tracks(tracks))
                                 .expect("Could not send message");
@@ -309,6 +296,7 @@ impl Player {
                             .expect("Could not load first item");
                         self.loaded = true;
                         self.playlist = Arc::new(Mutex::new(playlist.clone()));
+                        self.queue = playlist.clone().tracks;
                         self.tx
                             .send(Response::PlaylistName(playlist.name))
                             .expect("Could not send message");
@@ -349,6 +337,7 @@ impl Player {
 
                             self.loaded = true;
                             self.playlist = Arc::new(Mutex::new(playlist.clone()));
+                            self.queue = playlist.clone().tracks;
                             playlist
                                 .write_cached(cached_name)
                                 .await
@@ -388,6 +377,7 @@ impl Player {
                             backend.seek(time).await.expect("Could not seek");
                         }
                     }
+                    Command::Shuffle => {}
                 }
             }
 
