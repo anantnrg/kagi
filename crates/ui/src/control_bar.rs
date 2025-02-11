@@ -76,16 +76,17 @@ impl Render for ControlBar {
                             .items_center()
                             .justify_center()
                             .overflow_hidden()
-                            .gap_x_3()
+                            .gap_x_4()
                             .child(
                                 div()
                                     .size_6()
                                     .flex()
+                                    .flex_col()
                                     .items_center()
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Shuffle)
-                                            .size(28.0)
+                                            .size(26.0)
                                             .color(theme.text)
                                             .hover(theme.accent)
                                             .when(np.shuffle, |this| this.color(theme.accent)),
@@ -103,11 +104,12 @@ impl Render for ControlBar {
                                 div()
                                     .size_6()
                                     .flex()
+                                    .flex_col()
                                     .items_center()
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Previous)
-                                            .size(32.0)
+                                            .size(26.0)
                                             .color(theme.text)
                                             .hover(theme.accent),
                                     )
@@ -125,12 +127,13 @@ impl Render for ControlBar {
                                 div()
                                     .size_6()
                                     .flex()
+                                    .flex_col()
                                     .items_center()
                                     .justify_center()
                                     .when(np.state == State::Null, |this| {
                                         this.child(
                                             Icon::new(Icons::Stopped)
-                                                .size(32.0)
+                                                .size(26.0)
                                                 .color(theme.text)
                                                 .hover(theme.accent),
                                         )
@@ -138,7 +141,7 @@ impl Render for ControlBar {
                                     .when(np.state == State::Playing, |this| {
                                         this.child(
                                             Icon::new(Icons::Pause)
-                                                .size(32.0)
+                                                .size(26.0)
                                                 .color(theme.text)
                                                 .hover(theme.accent),
                                         )
@@ -146,7 +149,7 @@ impl Render for ControlBar {
                                     .when(np.state == State::Paused, |this| {
                                         this.child(
                                             Icon::new(Icons::Play)
-                                                .size(32.0)
+                                                .size(26.0)
                                                 .color(theme.text)
                                                 .hover(theme.accent),
                                         )
@@ -172,11 +175,12 @@ impl Render for ControlBar {
                                 div()
                                     .size_6()
                                     .flex()
+                                    .flex_col()
                                     .items_center()
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Next)
-                                            .size(32.0)
+                                            .size(26.0)
                                             .color(theme.text)
                                             .hover(theme.accent),
                                     )
