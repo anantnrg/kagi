@@ -13,6 +13,7 @@ pub struct NowPlaying {
     pub state: State,
     pub volume: f64,
     pub tracks: Vec<Track>,
+    pub shuffle: bool,
 }
 
 #[derive(Clone)]
@@ -40,6 +41,7 @@ pub enum NowPlayingEvent {
     Volume(f64),
     Tracks(Vec<Track>),
     PlaylistName(String),
+    Shuffle(bool),
 }
 
 impl NowPlaying {
@@ -55,6 +57,7 @@ impl NowPlaying {
             state: State::Null,
             volume: 0.2,
             tracks: vec![],
+            shuffle: false,
         }
     }
 
@@ -97,6 +100,11 @@ impl NowPlaying {
 
     pub fn update_playlist_name(&mut self, cx: &mut Context<Self>, name: String) {
         cx.emit(NowPlayingEvent::PlaylistName(name));
+        cx.notify();
+    }
+
+    pub fn update_shuffle(&mut self, cx: &mut Context<Self>, shuffle: bool) {
+        cx.emit(NowPlayingEvent::Shuffle(shuffle));
         cx.notify();
     }
 }

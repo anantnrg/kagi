@@ -86,7 +86,10 @@ impl Render for ControlBar {
                                     .child(
                                         Icon::new(Icons::Shuffle)
                                             .size(32.0)
-                                            .color(theme.text.into()),
+                                            .color(theme.text.into())
+                                            .when(np.shuffle, |this| {
+                                                this.color(theme.accent.into())
+                                            }),
                                     )
                                     .on_mouse_down(MouseButton::Left, {
                                         {
@@ -108,6 +111,7 @@ impl Render for ControlBar {
                                             .size(32.0)
                                             .color(theme.text.into()),
                                     )
+                                    .hover(|this| this.text_color(theme.accent))
                                     .on_mouse_down(MouseButton::Left, {
                                         {
                                             let controller = controller.clone();
@@ -144,6 +148,7 @@ impl Render for ControlBar {
                                                 .color(theme.text.into()),
                                         )
                                     })
+                                    .hover(|this| this.text_color(theme.accent))
                                     .on_mouse_down(MouseButton::Left, {
                                         {
                                             let controller = controller.clone();
@@ -169,6 +174,7 @@ impl Render for ControlBar {
                                     .child(
                                         Icon::new(Icons::Next).size(32.0).color(theme.text.into()),
                                     )
+                                    .hover(|this| this.text_color(theme.accent))
                                     .on_mouse_down(MouseButton::Left, {
                                         {
                                             let controller = controller.clone();

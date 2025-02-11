@@ -40,6 +40,7 @@ pub struct Icon {
     pub icon: Icons,
     pub size: f32,
     pub color: u32,
+    pub hover: u32,
 }
 
 impl Icon {
@@ -48,6 +49,7 @@ impl Icon {
             icon,
             size: 24.0,
             color: 0xcdd6f4,
+            hover: 0xcdd6f4,
         }
     }
 
@@ -60,6 +62,11 @@ impl Icon {
         self.color = color;
         self
     }
+
+    pub fn hover(mut self, color: u32) -> Self {
+        self.hover = color;
+        self
+    }
 }
 
 impl RenderOnce for Icon {
@@ -68,5 +75,6 @@ impl RenderOnce for Icon {
             .size(px(self.size))
             .text_color(rgb(self.color))
             .path(self.icon.path())
+            .hover(|this| this.text_color(rgb(self.hover)))
     }
 }

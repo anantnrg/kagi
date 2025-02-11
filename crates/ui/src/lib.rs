@@ -200,6 +200,12 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     });
                                     cx.notify();
                                 }
+                                NowPlayingEvent::Shuffle(shuffle) => {
+                                    this.now_playing.update(cx, |this, _| {
+                                        this.shuffle = shuffle.clone();
+                                    });
+                                    cx.notify();
+                                }
                             }
                         },
                     )
@@ -273,6 +279,11 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             Response::PlaylistName(name) => {
                                 this.now_playing.update(cx, |np, cx| {
                                     np.update_playlist_name(cx, name.clone());
+                                });
+                            }
+                            Response::Shuffle(shuffle) => {
+                                this.now_playing.update(cx, |np, cx| {
+                                    np.update_shuffle(cx, shuffle.clone());
                                 });
                             }
                             _ => {}

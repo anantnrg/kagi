@@ -48,6 +48,7 @@ pub enum Response {
     Tracks(Vec<Track>),
     SavedPlaylists(SavedPlaylists),
     PlaylistName(String),
+    Shuffle(bool),
 }
 
 #[derive(Clone)]
@@ -388,6 +389,9 @@ impl Player {
                         }
                         self.tx
                             .send(Response::Tracks(self.queue.clone()))
+                            .expect("Could not send message");
+                        self.tx
+                            .send(Response::Shuffle(self.shuffle.clone()))
                             .expect("Could not send message");
                     }
                 }
