@@ -1,22 +1,26 @@
 use backend::player::Controller;
 use components::theme::Theme;
 use gpui::{prelude::FluentBuilder, *};
+use nucleo::{Config, Matcher};
 
 use crate::{
     layout::{Layout, LayoutMode},
-    now_playing::NowPlaying,
+    now_playing::{NowPlaying, Track},
 };
 
 pub struct QueueList {
     pub now_playing: Entity<NowPlaying>,
     pub layout: Entity<Layout>,
+    pub matcher: Matcher,
 }
 
 impl Render for QueueList {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let query = cx.new(|_| String::new());
+
         let theme = cx.global::<Theme>();
         let layout = self.layout.clone().read(cx);
-        let tracks = self.now_playing.read(cx).tracks.clone();
+        let tracks = self.search(query.read(cx).clone());
 
         if layout.right_sidebar.show {
             div()
@@ -107,9 +111,13 @@ impl Render for QueueList {
 
 impl QueueList {
     pub fn new(now_playing: Entity<NowPlaying>, layout: Entity<Layout>) -> Self {
+        let matcher = Matcher::new(Config::DEFAULT);
         QueueList {
             now_playing,
             layout,
+            matcher,
         }
     }
+
+    pub fn search(&mut self, query: String) -> Vec<Track> {}
 }
