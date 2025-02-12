@@ -2515,6 +2515,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "kagi"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "backend",
+ "gpui",
+ "smol",
+ "ui",
+]
+
+[[package]]
 name = "khronos-egl"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3775,17 +3786,6 @@ dependencies = [
  "svgtypes",
  "tiny-skia",
  "usvg",
-]
-
-[[package]]
-name = "reyvr"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "backend",
- "gpui",
- "smol",
- "ui",
 ]
 
 [[package]]

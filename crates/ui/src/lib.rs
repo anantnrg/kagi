@@ -9,7 +9,7 @@ pub mod res_handler;
 pub mod sidebar;
 pub mod titlebar;
 
-use app::Reyvr;
+use app::Kagi;
 use assets::*;
 use backend::{
     Backend,
@@ -107,7 +107,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
                     cx.subscribe(
                         &vol_slider,
-                        move |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {
+                        move |this: &mut Kagi, _, event: &SliderEvent, cx| match event {
                             SliderEvent::Change(vol) => {
                                 let volume = (vol * 100.0).round() as f64 / 100.0;
                                 cx.global::<Controller>().volume(volume);
@@ -121,7 +121,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
                     cx.subscribe(
                         &playbar,
-                        move |this: &mut Reyvr, _, event: &SliderEvent, cx| match event {
+                        move |this: &mut Kagi, _, event: &SliderEvent, cx| match event {
                             SliderEvent::Change(time) => {
                                 let controller = cx.global::<Controller>();
                                 let np = this.now_playing.read(cx);
@@ -143,10 +143,10 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let pb_clone = playbar.clone();
                     cx.subscribe(
                         &np,
-                        move |this: &mut Reyvr,
+                        move |this: &mut Kagi,
                               _,
                               event: &NowPlayingEvent,
-                              cx: &mut Context<Reyvr>| {
+                              cx: &mut Context<Kagi>| {
                             match event {
                                 NowPlayingEvent::Meta(title, album, artists, duration) => {
                                     this.now_playing.update(cx, |this, _| {
@@ -218,7 +218,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
                     cx.subscribe(
                         &res_handler,
-                        move |this: &mut Reyvr, _, event: &Response, cx| match event {
+                        move |this: &mut Kagi, _, event: &Response, cx| match event {
                             Response::Eos => {
                                 if this.now_playing.read(cx).repeat {
                                     cx.global::<Controller>().seek(0);
@@ -314,7 +314,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     });
                     cx.global::<Controller>().load_saved_playlists();
 
-                    Reyvr {
+                    Kagi {
                         layout,
                         now_playing: np,
                         titlebar,
