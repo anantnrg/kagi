@@ -6,7 +6,7 @@ use components::theme::Theme;
 use gpui::*;
 
 #[derive(Clone)]
-pub struct Reyvr {
+pub struct Kagi {
     pub titlebar: Entity<Titlebar>,
     pub left_sidebar: Entity<LeftSidebar>,
     pub queue_list: Entity<QueueList>,
@@ -17,7 +17,7 @@ pub struct Reyvr {
     pub res_handler: Entity<ResHandler>,
 }
 
-impl Render for Reyvr {
+impl Render for Kagi {
     fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let titlebar = self.clone().titlebar;
         let sidebar = self.clone().left_sidebar;

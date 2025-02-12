@@ -107,7 +107,7 @@ impl Playlist {
             .unwrap()
             .audio_dir()
             .unwrap_or(UserDirs::new().unwrap().home_dir())
-            .join("Reyvr")
+            .join("Kagi")
             .join("cache");
         if !cache_dir.exists() {
             fs::create_dir_all(&cache_dir).expect("Failed to create cache directory");
@@ -126,7 +126,7 @@ impl Playlist {
             .unwrap()
             .audio_dir()
             .unwrap_or(UserDirs::new().unwrap().home_dir())
-            .join("Reyvr")
+            .join("Kagi")
             .join("cache")
             .join(cached_name);
 
@@ -152,7 +152,7 @@ impl SavedPlaylists {
             let proj_dir = user_dirs
                 .audio_dir()
                 .unwrap_or(user_dirs.home_dir())
-                .join("Reyvr");
+                .join("Kagi");
             if let Err(e) = fs::create_dir_all(proj_dir.clone()) {
                 eprintln!("Could not create config directory: {}", e);
                 return None;

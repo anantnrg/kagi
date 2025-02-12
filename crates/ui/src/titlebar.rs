@@ -81,11 +81,11 @@ impl Render for Titlebar {
                             .text_color(theme.accent)
                             .text_sm()
                             .overflow_hidden()
-                            .when(window_width < 200.0, |this| this.child("Reyvr"))
+                            .when(window_width < 200.0, |this| this.child("Kagi"))
                             .when((200.0..400.0).contains(&window_width), |this| {
                                 this.child({
                                     if np.title.is_empty() {
-                                        "Reyvr".to_string()
+                                        "Kagi".to_string()
                                     } else {
                                         truncate(&np.title, 30)
                                     }
@@ -105,7 +105,7 @@ impl Render for Titlebar {
                             })
                             .when(window_width >= 600.0, |this| {
                                 if np.title.is_empty() {
-                                    this.child("Reyvr".to_string())
+                                    this.child("Kagi".to_string())
                                 } else {
                                     let artists = if np.artists.is_empty() {
                                         "".to_string()

@@ -1,7 +1,7 @@
 [workspace]
-members = ["crates/reyvr", "crates/backend", "crates/ui", "crates/components"]
+members = ["crates/kagi", "crates/backend", "crates/ui", "crates/components"]
 resolver = "2"
-default-members = ["crates/reyvr"]
+default-members = ["crates/kagi"]
 
 [workspace.dependencies]
 anyhow = "1.0.95"
