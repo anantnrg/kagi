@@ -1,7 +1,5 @@
-use std::sync::{Arc, Mutex};
-
 use backend::player::Controller;
-use components::theme::Theme;
+use components::{input::TextInput, theme::Theme};
 use gpui::{prelude::FluentBuilder, *};
 use simsearch::SimSearch;
 
@@ -16,6 +14,14 @@ pub struct QueueList {
     pub simsearch: SimSearch<String>,
     pub query: Entity<String>,
     pub tracks: Vec<Track>,
+    text_input: Entity<TextInput>,
+    focus_handle: FocusHandle,
+}
+
+impl Focusable for QueueList {
+    fn focus_handle(&self, _: &App) -> FocusHandle {
+        self.focus_handle.clone()
+    }
 }
 
 impl Render for QueueList {
@@ -37,12 +43,15 @@ impl Render for QueueList {
                 .bg(theme.background)
                 .h_full()
                 .w(px(layout.right_sidebar.width))
+                .flex()
+                .flex_col()
                 .min_w(px(280.0))
                 .when(layout.mode == LayoutMode::Overlay, |this| {
                     this.absolute().border_0()
                 })
                 .border_l_1()
                 .border_color(theme.secondary)
+                .child(div().w_full().h_8().child(self.text_input.clone()))
                 .child(
                     uniform_list(
                         cx.entity(),
@@ -121,17 +130,33 @@ impl Render for QueueList {
 
 impl QueueList {
     pub fn new(
+        cx: &mut Context<QueueList>,
         now_playing: Entity<NowPlaying>,
         layout: Entity<Layout>,
-        simsearch: SimSearch<String>,
-        query: Entity<String>,
     ) -> Self {
+        let simsearch = SimSearch::new();
+        let query = cx.new(|_| String::new());
+
+        let text_input = cx.new(|cx| TextInput {
+            focus_handle: cx.focus_handle(),
+            content: "".into(),
+            placeholder: "Type here...".into(),
+            selected_range: 0..0,
+            selection_reversed: false,
+            marked_range: None,
+            last_layout: None,
+            last_bounds: None,
+            is_selecting: false,
+        });
+
         QueueList {
             now_playing,
             layout,
             simsearch,
             query,
             tracks: vec![],
+            text_input,
+            focus_handle: cx.focus_handle(),
         }
     }
 

@@ -36,6 +36,21 @@ use std::{
 };
 use titlebar::Titlebar;
 
+actions!(text_input, [
+    Backspace,
+    Delete,
+    Left,
+    Right,
+    SelectLeft,
+    SelectRight,
+    SelectAll,
+    Home,
+    End,
+    Paste,
+    Cut,
+    Copy,
+]);
+
 pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
     let app = Application::new().with_assets(Assets {
         base: PathBuf::from("assets"),
@@ -43,7 +58,20 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
 
     app.run(move |cx: &mut App| {
         let bounds = Bounds::centered(None, size(px(500.0), px(500.0)), cx);
-
+        cx.bind_keys([
+            KeyBinding::new("backspace", Backspace, None),
+            KeyBinding::new("delete", Delete, None),
+            KeyBinding::new("left", Left, None),
+            KeyBinding::new("right", Right, None),
+            KeyBinding::new("shift-left", SelectLeft, None),
+            KeyBinding::new("shift-right", SelectRight, None),
+            KeyBinding::new("ctrl-a", SelectAll, None),
+            KeyBinding::new("ctrl-v", Paste, None),
+            KeyBinding::new("ctrl-c", Copy, None),
+            KeyBinding::new("ctrl-x", Cut, None),
+            KeyBinding::new("home", Home, None),
+            KeyBinding::new("end", End, None),
+        ]);
         cx.open_window(
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
@@ -300,7 +328,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         },
                     )
                     .detach();
-                    let simsearch = SimSearch::new();
                     let layout = cx.new(|_| Layout::new());
 
                     let titlebar = cx.new(|_| Titlebar::new(np.clone(), layout.clone()));
@@ -308,14 +335,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let control_bar = cx
                         .new(|_| ControlBar::new(np.clone(), vol_slider.clone(), playbar.clone()));
                     let main_view = cx.new(|_| MainView::new(np.clone(), layout.clone()));
-                    let queue_list = cx.new(|cx| {
-                        QueueList::new(
-                            np.clone(),
-                            layout.clone(),
-                            simsearch.clone(),
-                            cx.new(|_| String::new()),
-                        )
-                    });
+                    let queue_list = cx.new(|cx| QueueList::new(cx, np.clone(), layout.clone()));
                     let layout_sidebar = layout.clone();
                     let np_sidebar = np.clone();
                     let left_sidebar = cx.new(move |_| {

@@ -17,16 +17,16 @@ actions!(text_input, [
     Copy,
 ]);
 
-struct TextInput {
-    focus_handle: FocusHandle,
-    content: SharedString,
-    placeholder: SharedString,
-    selected_range: Range<usize>,
-    selection_reversed: bool,
-    marked_range: Option<Range<usize>>,
-    last_layout: Option<ShapedLine>,
-    last_bounds: Option<Bounds<Pixels>>,
-    is_selecting: bool,
+pub struct TextInput {
+    pub focus_handle: FocusHandle,
+    pub content: SharedString,
+    pub placeholder: SharedString,
+    pub selected_range: Range<usize>,
+    pub selection_reversed: bool,
+    pub marked_range: Option<Range<usize>>,
+    pub last_layout: Option<ShapedLine>,
+    pub last_bounds: Option<Bounds<Pixels>>,
+    pub is_selecting: bool,
 }
 
 impl TextInput {
