@@ -28,6 +28,7 @@ use now_playing::{NowPlaying, NowPlayingEvent, Thumbnail, Track};
 use queue_list::QueueList;
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
+use simsearch::SimSearch;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -299,6 +300,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         },
                     )
                     .detach();
+                    let simsearch = SimSearch::new();
                     let layout = cx.new(|_| Layout::new());
 
                     let titlebar = cx.new(|_| Titlebar::new(np.clone(), layout.clone()));
@@ -306,7 +308,14 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let control_bar = cx
                         .new(|_| ControlBar::new(np.clone(), vol_slider.clone(), playbar.clone()));
                     let main_view = cx.new(|_| MainView::new(np.clone(), layout.clone()));
-                    let queue_list = cx.new(|_| QueueList::new(np.clone(), layout.clone()));
+                    let queue_list = cx.new(|cx| {
+                        QueueList::new(
+                            np.clone(),
+                            layout.clone(),
+                            simsearch.clone(),
+                            cx.new(|_| String::new()),
+                        )
+                    });
                     let layout_sidebar = layout.clone();
                     let np_sidebar = np.clone();
                     let left_sidebar = cx.new(move |_| {

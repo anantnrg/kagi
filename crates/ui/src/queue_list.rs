@@ -14,18 +14,17 @@ pub struct QueueList {
     pub now_playing: Entity<NowPlaying>,
     pub layout: Entity<Layout>,
     pub simsearch: SimSearch<String>,
+    pub query: Entity<String>,
+    pub tracks: Vec<Track>,
 }
 
 impl Render for QueueList {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let query = cx.new(|_| String::from("miss"));
+        let tracks = self.search(cx, query.read(cx).clone());
 
         let theme = cx.global::<Theme>();
         let layout = self.layout.clone().read(cx);
-        let tracks = self.search(
-            self.now_playing.read(cx).tracks.clone(),
-            query.read(cx).clone(),
-        );
         for track in tracks.clone() {
             println!("{:#?}", track.title);
         }
@@ -118,30 +117,39 @@ impl Render for QueueList {
 }
 
 impl QueueList {
-    pub fn new(now_playing: Entity<NowPlaying>, layout: Entity<Layout>) -> Self {
-        let simsearch = SimSearch::new();
+    pub fn new(
+        now_playing: Entity<NowPlaying>,
+        layout: Entity<Layout>,
+        simsearch: SimSearch<String>,
+        query: Entity<String>,
+    ) -> Self {
         QueueList {
             now_playing,
             layout,
             simsearch,
+            query,
+            tracks: vec![],
         }
     }
 
-    pub fn search(&mut self, tracks: Vec<Track>, query: String) -> Vec<Track> {
-        for track in &tracks {
-            let key = format!(
-                "{} {} {}",
-                track.title,
-                track.artists.join(", "),
-                track.album
-            );
+    pub fn search(&mut self, cx: &mut Context<QueueList>, query: String) -> Vec<Track> {
+        if self.tracks.len() != self.now_playing.read(cx).tracks.len() {
+            self.simsearch = SimSearch::new();
+            for track in &self.tracks {
+                let key = format!(
+                    "{} {} {}",
+                    track.title,
+                    track.artists.join(", "),
+                    track.album
+                );
 
-            self.simsearch.insert(key.clone(), &key);
+                self.simsearch.insert(key.clone(), &key);
+            }
         }
 
         let results = self.simsearch.search(query.as_str());
 
-        tracks
+        self.tracks
             .iter()
             .filter(|track| {
                 let key = format!(
