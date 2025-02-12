@@ -21,3 +21,4 @@ bincode = { git = "https://github.com/bincode-org/bincode", branch = "trunk", fe
 ] }
 rand = "0.9.0"
 nucleo = "0.4.0"
+simsearch = "0.2.5"

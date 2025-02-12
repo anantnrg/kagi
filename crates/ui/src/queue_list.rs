@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use backend::player::Controller;
 use components::theme::Theme;
 use gpui::{prelude::FluentBuilder, *};
-use nucleo::{Config, Matcher, Nucleo};
+use simsearch::SimSearch;
 
 use crate::{
     layout::{Layout, LayoutMode},
@@ -13,16 +13,22 @@ use crate::{
 pub struct QueueList {
     pub now_playing: Entity<NowPlaying>,
     pub layout: Entity<Layout>,
-    pub nucleo: Arc<Mutex<Nucleo<Track>>>,
+    pub simsearch: SimSearch<String>,
 }
 
 impl Render for QueueList {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let query = cx.new(|_| String::new());
+        let query = cx.new(|_| String::from("miss"));
 
         let theme = cx.global::<Theme>();
         let layout = self.layout.clone().read(cx);
-        let tracks = self.search(query.read(cx).clone());
+        let tracks = self.search(
+            self.now_playing.read(cx).tracks.clone(),
+            query.read(cx).clone(),
+        );
+        for track in tracks.clone() {
+            println!("{:#?}", track.title);
+        }
 
         if layout.right_sidebar.show {
             div()
@@ -113,15 +119,40 @@ impl Render for QueueList {
 
 impl QueueList {
     pub fn new(now_playing: Entity<NowPlaying>, layout: Entity<Layout>) -> Self {
-        let matcher = Matcher::new(Config::DEFAULT);
+        let simsearch = SimSearch::new();
         QueueList {
             now_playing,
             layout,
-            matcher,
+            simsearch,
         }
     }
 
     pub fn search(&mut self, tracks: Vec<Track>, query: String) -> Vec<Track> {
-        let mut results: Vec<_> = self.matcher.fuzzy_match(tracks, "");
+        for track in &tracks {
+            let key = format!(
+                "{} {} {}",
+                track.title,
+                track.artists.join(", "),
+                track.album
+            );
+
+            self.simsearch.insert(key.clone(), &key);
+        }
+
+        let results = self.simsearch.search(query.as_str());
+
+        tracks
+            .iter()
+            .filter(|track| {
+                let key = format!(
+                    "{} {} {}",
+                    track.title,
+                    track.artists.join(", "),
+                    track.album
+                );
+                results.contains(&key.clone())
+            })
+            .cloned()
+            .collect()
     }
 }
