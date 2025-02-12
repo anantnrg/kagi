@@ -1,7 +1,9 @@
+use std::sync::{Arc, Mutex};
+
 use backend::player::Controller;
 use components::theme::Theme;
 use gpui::{prelude::FluentBuilder, *};
-use nucleo::{Config, Matcher};
+use nucleo::{Config, Matcher, Nucleo};
 
 use crate::{
     layout::{Layout, LayoutMode},
@@ -11,7 +13,7 @@ use crate::{
 pub struct QueueList {
     pub now_playing: Entity<NowPlaying>,
     pub layout: Entity<Layout>,
-    pub matcher: Matcher,
+    pub nucleo: Arc<Mutex<Nucleo<Track>>>,
 }
 
 impl Render for QueueList {
@@ -119,5 +121,7 @@ impl QueueList {
         }
     }
 
-    pub fn search(&mut self, query: String) -> Vec<Track> {}
+    pub fn search(&mut self, tracks: Vec<Track>, query: String) -> Vec<Track> {
+        let mut results: Vec<_> = self.matcher.fuzzy_match(tracks, "");
+    }
 }
