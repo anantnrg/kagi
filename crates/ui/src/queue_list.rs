@@ -21,7 +21,10 @@ pub struct QueueList {
 impl Render for QueueList {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let query = cx.new(|_| String::from("miss"));
-        let tracks = self.search(cx, query.read(cx).clone());
+        let tracks = self.search(
+            self.now_playing.read(cx).tracks.clone(),
+            query.read(cx).clone(),
+        );
 
         let theme = cx.global::<Theme>();
         let layout = self.layout.clone().read(cx);
@@ -132,10 +135,11 @@ impl QueueList {
         }
     }
 
-    pub fn search(&mut self, cx: &mut Context<QueueList>, query: String) -> Vec<Track> {
-        if self.tracks.len() != self.now_playing.read(cx).tracks.len() {
+    pub fn search(&mut self, tracks: Vec<Track>, query: String) -> Vec<Track> {
+        if self.tracks.len() != tracks.len() {
             self.simsearch = SimSearch::new();
-            for track in &self.tracks {
+            self.tracks = tracks.clone();
+            for track in tracks.clone() {
                 let key = format!(
                     "{} {} {}",
                     track.title,
@@ -149,7 +153,8 @@ impl QueueList {
 
         let results = self.simsearch.search(query.as_str());
 
-        self.tracks
+        tracks
+            .clone()
             .iter()
             .filter(|track| {
                 let key = format!(
