@@ -403,9 +403,9 @@ impl Element for TextElement {
         let style = window.text_style();
 
         let (display_text, text_color) = if content.is_empty() {
-            (input.placeholder.clone(), hsla(0., 0., 0., 0.2))
+            (input.placeholder.clone(), Hsla::from(self.theme.secondary))
         } else {
-            (content.clone(), style.color)
+            (content.clone(), Hsla::from(self.theme.text))
         };
 
         let run = TextRun {
@@ -458,7 +458,7 @@ impl Element for TextElement {
                         point(bounds.left() + cursor_pos, bounds.top()),
                         size(px(2.), bounds.bottom() - bounds.top()),
                     ),
-                    gpui::blue(),
+                    self.theme.accent,
                 )),
             )
         } else {
@@ -474,7 +474,7 @@ impl Element for TextElement {
                             bounds.bottom(),
                         ),
                     ),
-                    rgba(0x3311ff30),
+                    self.theme.highlight,
                 )),
                 None,
             )
@@ -545,13 +545,13 @@ impl Render for TextInput {
             .on_mouse_up_out(MouseButton::Left, cx.listener(Self::on_mouse_up))
             .on_mouse_move(cx.listener(Self::on_mouse_move))
             .bg(self.theme.background)
-            .line_height(px(26.0))
-            .text_size(px(20.0))
+            .line_height(px(24.0))
+            .text_size(px(16.0))
             .child(
                 div()
-                    .h(px(26.0 + 4.0 * 2.0))
+                    .h(px(24.0 + 4.0 * 2.0))
                     .w_full()
-                    .p(px(4.))
+                    .p(px(4.0))
                     .bg(self.theme.background)
                     .child(TextElement {
                         input: cx.entity().clone(),

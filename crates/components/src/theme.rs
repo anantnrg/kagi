@@ -10,6 +10,7 @@ pub struct Theme {
     pub sidebar_bg: Rgba,
     pub main_bg: Rgba,
     pub titlebar_bg: Rgba,
+    pub highlight: Rgba,
 }
 
 impl Theme {
@@ -23,6 +24,7 @@ impl Theme {
             sidebar_bg: rgb(0x11111B),
             main_bg: rgb(0x11111B),
             titlebar_bg: rgb(0x11111B),
+            highlight: rgb(0x52cba6f7),
         }
     }
     pub fn new(
@@ -34,6 +36,7 @@ impl Theme {
         sidebar_bg: Rgba,
         main_bg: Rgba,
         titlebar_bg: Rgba,
+        highlight: Rgba,
     ) -> Self {
         Self {
             accent,
@@ -44,6 +47,7 @@ impl Theme {
             sidebar_bg,
             main_bg,
             titlebar_bg,
+            highlight,
         }
     }
 }
