@@ -26,10 +26,9 @@ impl Focusable for QueueList {
 
 impl Render for QueueList {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let query = cx.new(|_| String::from("miss"));
         let tracks = self.search(
             self.now_playing.read(cx).tracks.clone(),
-            query.read(cx).clone(),
+            self.query.read(cx).clone(),
         );
 
         let theme = cx.global::<Theme>();
@@ -139,6 +138,14 @@ impl QueueList {
         let handle = cx.focus_handle();
 
         let text_input = TextInput::new(cx, handle, None, None);
+        let query_clone = query.clone();
+        cx.subscribe(&text_input, move |_: &mut QueueList, _, text, cx| {
+            query_clone.update(cx, |this, _| {
+                *this = text.to_string();
+            });
+            cx.notify();
+        })
+        .detach();
 
         QueueList {
             now_playing,
