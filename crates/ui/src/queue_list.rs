@@ -3,7 +3,6 @@ use components::{input::TextInput, theme::Theme};
 use gpui::{prelude::FluentBuilder, *};
 use nucleo::pattern::{CaseMatching, Normalization};
 use nucleo::{Config, Nucleo};
-use simsearch::SimSearch;
 use std::collections::HashSet;
 use std::sync::Arc;
 

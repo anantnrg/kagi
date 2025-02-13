@@ -13,5 +13,3 @@ rfd.workspace = true
 image.workspace = true
 smallvec.workspace = true
 nucleo.workspace = true
-simsearch.workspace = true
-strsim.workspace = true

@@ -28,7 +28,6 @@ use now_playing::{NowPlaying, NowPlayingEvent, Thumbnail, Track};
 use queue_list::QueueList;
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
-use simsearch::SimSearch;
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
