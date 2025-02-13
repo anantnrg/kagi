@@ -2,6 +2,8 @@ use gpui::*;
 use std::ops::Range;
 use unicode_segmentation::*;
 
+use crate::theme::Theme;
+
 actions!(text_input, [
     Backspace,
     Delete,
@@ -27,6 +29,7 @@ pub struct TextInput {
     pub last_layout: Option<ShapedLine>,
     pub last_bounds: Option<Bounds<Pixels>>,
     pub is_selecting: bool,
+    pub theme: Theme,
 }
 
 impl TextInput {
@@ -347,6 +350,7 @@ impl EntityInputHandler for TextInput {
 
 struct TextElement {
     input: Entity<TextInput>,
+    pub theme: Theme,
 }
 
 struct PrepaintState {
@@ -540,17 +544,18 @@ impl Render for TextInput {
             .on_mouse_up(MouseButton::Left, cx.listener(Self::on_mouse_up))
             .on_mouse_up_out(MouseButton::Left, cx.listener(Self::on_mouse_up))
             .on_mouse_move(cx.listener(Self::on_mouse_move))
-            .bg(rgb(0xeeeeee))
-            .line_height(px(30.))
-            .text_size(px(24.))
+            .bg(self.theme.background)
+            .line_height(px(26.0))
+            .text_size(px(20.0))
             .child(
                 div()
-                    .h(px(30. + 4. * 2.))
+                    .h(px(26.0 + 4.0 * 2.0))
                     .w_full()
                     .p(px(4.))
-                    .bg(white())
+                    .bg(self.theme.background)
                     .child(TextElement {
                         input: cx.entity().clone(),
+                        theme: self.theme.clone(),
                     }),
             )
     }

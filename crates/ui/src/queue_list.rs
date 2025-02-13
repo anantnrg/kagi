@@ -147,6 +147,7 @@ impl QueueList {
             last_layout: None,
             last_bounds: None,
             is_selecting: false,
+            theme: cx.global::<Theme>().clone(),
         });
 
         QueueList {
