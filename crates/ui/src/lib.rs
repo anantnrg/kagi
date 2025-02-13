@@ -58,20 +58,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
 
     app.run(move |cx: &mut App| {
         let bounds = Bounds::centered(None, size(px(500.0), px(500.0)), cx);
-        cx.bind_keys([
-            KeyBinding::new("backspace", Backspace, None),
-            KeyBinding::new("delete", Delete, None),
-            KeyBinding::new("left", Left, None),
-            KeyBinding::new("right", Right, None),
-            KeyBinding::new("shift-left", SelectLeft, None),
-            KeyBinding::new("shift-right", SelectRight, None),
-            KeyBinding::new("ctrl-a", SelectAll, None),
-            KeyBinding::new("ctrl-v", Paste, None),
-            KeyBinding::new("ctrl-c", Copy, None),
-            KeyBinding::new("ctrl-x", Cut, None),
-            KeyBinding::new("home", Home, None),
-            KeyBinding::new("end", End, None),
-        ]);
+        components::input::bind_actions(cx);
         cx.open_window(
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),

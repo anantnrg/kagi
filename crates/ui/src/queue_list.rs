@@ -136,19 +136,9 @@ impl QueueList {
     ) -> Self {
         let simsearch = SimSearch::new();
         let query = cx.new(|_| String::new());
+        let handle = cx.focus_handle();
 
-        let text_input = cx.new(|cx| TextInput {
-            focus_handle: cx.focus_handle(),
-            content: "".into(),
-            placeholder: "Type here...".into(),
-            selected_range: 0..0,
-            selection_reversed: false,
-            marked_range: None,
-            last_layout: None,
-            last_bounds: None,
-            is_selecting: false,
-            theme: cx.global::<Theme>().clone(),
-        });
+        let text_input = TextInput::new(cx, handle, None, None);
 
         QueueList {
             now_playing,

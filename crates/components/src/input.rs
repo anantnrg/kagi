@@ -1,5 +1,6 @@
-use gpui::*;
 use std::ops::Range;
+
+use gpui::*;
 use unicode_segmentation::*;
 
 use crate::theme::Theme;
@@ -14,23 +15,48 @@ actions!(text_input, [
     SelectAll,
     Home,
     End,
+    ShowCharacterPalette,
     Paste,
     Cut,
     Copy,
+    Next,
+    Previous,
+    Accept
 ]);
 
-pub struct TextInput {
-    pub focus_handle: FocusHandle,
-    pub content: SharedString,
-    pub placeholder: SharedString,
-    pub selected_range: Range<usize>,
-    pub selection_reversed: bool,
-    pub marked_range: Option<Range<usize>>,
-    pub last_layout: Option<ShapedLine>,
-    pub last_bounds: Option<Bounds<Pixels>>,
-    pub is_selecting: bool,
-    pub theme: Theme,
+pub fn bind_actions(cx: &mut App) {
+    cx.bind_keys([
+        KeyBinding::new("backspace", Backspace, None),
+        KeyBinding::new("delete", Delete, None),
+        KeyBinding::new("left", Left, None),
+        KeyBinding::new("right", Right, None),
+        KeyBinding::new("shift-left", SelectLeft, None),
+        KeyBinding::new("shift-right", SelectRight, None),
+        KeyBinding::new("home", Home, None),
+        KeyBinding::new("end", End, None),
+        KeyBinding::new("enter", Accept, None),
+        KeyBinding::new("down", Next, None),
+        KeyBinding::new("up", Previous, None),
+        KeyBinding::new("ctrl-a", SelectAll, None),
+        KeyBinding::new("ctrl-v", Paste, None),
+        KeyBinding::new("ctrl-c", Copy, None),
+        KeyBinding::new("ctrl-x", Cut, None),
+    ]);
 }
+
+pub struct TextInput {
+    focus_handle: FocusHandle,
+    content: SharedString,
+    placeholder: SharedString,
+    selected_range: Range<usize>,
+    selection_reversed: bool,
+    marked_range: Option<Range<usize>>,
+    last_layout: Option<ShapedLine>,
+    last_bounds: Option<Bounds<Pixels>>,
+    is_selecting: bool,
+}
+
+impl EventEmitter<String> for TextInput {}
 
 impl TextInput {
     fn left(&mut self, _: &Left, _: &mut Window, cx: &mut Context<Self>) {
@@ -109,6 +135,15 @@ impl TextInput {
         }
     }
 
+    fn show_character_palette(
+        &mut self,
+        _: &ShowCharacterPalette,
+        window: &mut Window,
+        _: &mut Context<Self>,
+    ) {
+        window.show_character_palette();
+    }
+
     fn paste(&mut self, _: &Paste, window: &mut Window, cx: &mut Context<Self>) {
         if let Some(text) = cx.read_from_clipboard().and_then(|item| item.text()) {
             self.replace_text_in_range(None, &text.replace("\n", " "), window, cx);
@@ -118,14 +153,14 @@ impl TextInput {
     fn copy(&mut self, _: &Copy, _: &mut Window, cx: &mut Context<Self>) {
         if !self.selected_range.is_empty() {
             cx.write_to_clipboard(ClipboardItem::new_string(
-                (&self.content[self.selected_range.clone()]).to_string(),
+                self.content[self.selected_range.clone()].to_string(),
             ));
         }
     }
     fn cut(&mut self, _: &Copy, window: &mut Window, cx: &mut Context<Self>) {
         if !self.selected_range.is_empty() {
             cx.write_to_clipboard(ClipboardItem::new_string(
-                (&self.content[self.selected_range.clone()]).to_string(),
+                self.content[self.selected_range.clone()].to_string(),
             ));
             self.replace_text_in_range(None, "", window, cx)
         }
@@ -228,7 +263,7 @@ impl TextInput {
             .unwrap_or(self.content.len())
     }
 
-    fn reset(&mut self) {
+    pub fn reset(&mut self) {
         self.content = "".into();
         self.selected_range = 0..0;
         self.selection_reversed = false;
@@ -296,6 +331,8 @@ impl EntityInputHandler for TextInput {
                 .into();
         self.selected_range = range.start + new_text.len()..range.start + new_text.len();
         self.marked_range.take();
+
+        cx.emit(self.content.to_string());
         cx.notify();
     }
 
@@ -323,6 +360,7 @@ impl EntityInputHandler for TextInput {
             .map(|new_range| new_range.start + range.start..new_range.end + range.end)
             .unwrap_or_else(|| range.start + new_text.len()..range.start + new_text.len());
 
+        cx.emit(self.content.to_string());
         cx.notify();
     }
 
@@ -350,7 +388,6 @@ impl EntityInputHandler for TextInput {
 
 struct TextElement {
     input: Entity<TextInput>,
-    pub theme: Theme,
 }
 
 struct PrepaintState {
@@ -403,9 +440,9 @@ impl Element for TextElement {
         let style = window.text_style();
 
         let (display_text, text_color) = if content.is_empty() {
-            (input.placeholder.clone(), Hsla::from(self.theme.secondary))
+            (input.placeholder.clone(), hsla(0., 0., 0., 0.2))
         } else {
-            (content.clone(), Hsla::from(self.theme.text))
+            (content.clone(), style.color)
         };
 
         let run = TextRun {
@@ -449,6 +486,8 @@ impl Element for TextElement {
             .shape_line(display_text, font_size, &runs)
             .unwrap();
 
+        let theme = cx.global::<Theme>();
+
         let cursor_pos = line.x_for_index(cursor);
         let (selection, cursor) = if selected_range.is_empty() {
             (
@@ -456,9 +495,9 @@ impl Element for TextElement {
                 Some(fill(
                     Bounds::new(
                         point(bounds.left() + cursor_pos, bounds.top()),
-                        size(px(2.), bounds.bottom() - bounds.top()),
+                        size(px(1.), bounds.bottom() - bounds.top()),
                     ),
-                    self.theme.accent,
+                    theme.accent,
                 )),
             )
         } else {
@@ -474,7 +513,7 @@ impl Element for TextElement {
                             bounds.bottom(),
                         ),
                     ),
-                    self.theme.highlight,
+                    theme.highlight,
                 )),
                 None,
             )
@@ -521,6 +560,27 @@ impl Element for TextElement {
     }
 }
 
+impl TextInput {
+    pub fn new(
+        cx: &mut App,
+        focus_handle: FocusHandle,
+        content: Option<SharedString>,
+        placeholder: Option<SharedString>,
+    ) -> Entity<TextInput> {
+        cx.new(|_| TextInput {
+            focus_handle,
+            content: content.unwrap_or_else(|| "".into()),
+            placeholder: placeholder.unwrap_or_else(|| "".into()),
+            selected_range: 0..0,
+            selection_reversed: false,
+            marked_range: None,
+            last_layout: None,
+            last_bounds: None,
+            is_selecting: false,
+        })
+    }
+}
+
 impl Render for TextInput {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         div()
@@ -537,6 +597,7 @@ impl Render for TextInput {
             .on_action(cx.listener(Self::select_all))
             .on_action(cx.listener(Self::home))
             .on_action(cx.listener(Self::end))
+            .on_action(cx.listener(Self::show_character_palette))
             .on_action(cx.listener(Self::paste))
             .on_action(cx.listener(Self::cut))
             .on_action(cx.listener(Self::copy))
@@ -544,20 +605,9 @@ impl Render for TextInput {
             .on_mouse_up(MouseButton::Left, cx.listener(Self::on_mouse_up))
             .on_mouse_up_out(MouseButton::Left, cx.listener(Self::on_mouse_up))
             .on_mouse_move(cx.listener(Self::on_mouse_move))
-            .bg(self.theme.background)
-            .line_height(px(24.0))
-            .text_size(px(16.0))
-            .child(
-                div()
-                    .h(px(24.0 + 4.0 * 2.0))
-                    .w_full()
-                    .p(px(4.0))
-                    .bg(self.theme.background)
-                    .child(TextElement {
-                        input: cx.entity().clone(),
-                        theme: self.theme.clone(),
-                    }),
-            )
+            .child(div().w_full().child(TextElement {
+                input: cx.entity().clone(),
+            }))
     }
 }
 
