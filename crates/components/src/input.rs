@@ -594,7 +594,7 @@ impl Render for TextInput {
             .on_mouse_up(MouseButton::Left, cx.listener(Self::on_mouse_up))
             .on_mouse_up_out(MouseButton::Left, cx.listener(Self::on_mouse_up))
             .on_mouse_move(cx.listener(Self::on_mouse_move))
-            .child(div().w_full().child(TextElement {
+            .child(div().flex().flex_grow().w_full().child(TextElement {
                 input: cx.entity().clone(),
             }))
     }

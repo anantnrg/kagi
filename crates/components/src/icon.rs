@@ -14,6 +14,7 @@ pub enum Icons {
     Stopped,
     Shuffle,
     Repeat,
+    Search,
 }
 
 impl Icons {
@@ -32,6 +33,7 @@ impl Icons {
             Self::Stopped => "icons/stopped.svg",
             Self::Shuffle => "icons/shuffle.svg",
             Self::Repeat => "icons/repeat.svg",
+            Self::Search => "icons/search.svg",
         }
         .into()
     }

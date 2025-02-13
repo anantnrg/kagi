@@ -53,7 +53,16 @@ impl Render for QueueList {
                 .on_mouse_down(MouseButton::Left, move |_, _, cx| {
                     cx.stop_propagation();
                 })
-                .child(div().w_full().h_8().child(self.text_input.clone()))
+                .child(
+                    div()
+                        .w_full()
+                        .h_10()
+                        .py_1()
+                        .px_1()
+                        .border_b_1()
+                        .border_color(theme.secondary)
+                        .child(self.text_input.clone()),
+                )
                 .child(
                     uniform_list(
                         cx.entity(),
@@ -70,15 +79,14 @@ impl Render for QueueList {
                                         .w_full()
                                         .h_16()
                                         .flex()
-                                        .px_3()
+                                        .mt_2()
                                         .gap_2()
                                         .text_color(theme.text)
                                         .items_center()
                                         .justify_between()
                                         .px_2()
-                                        .border_b_1()
-                                        .border_color(theme.secondary)
-                                        .rounded_md()
+                                        .rounded_lg()
+                                        .overflow_hidden()
                                         .hover(|this| this.bg(theme.secondary))
                                         .on_mouse_down(MouseButton::Left, move |_, _, cx| {
                                             let controller = cx.global::<Controller>().clone();
@@ -122,7 +130,8 @@ impl Render for QueueList {
                                 .collect()
                         },
                     )
-                    .h_full(),
+                    .h_full()
+                    .px_1(),
                 )
         } else {
             div()
@@ -142,7 +151,7 @@ impl QueueList {
         let nucleo: Nucleo<(usize, String)> =
             Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
 
-        let text_input = TextInput::new(cx, handle, None, None);
+        let text_input = TextInput::new(cx, handle, None, Some("Search something...".into()));
         let query_clone = query.clone();
         cx.subscribe(&text_input, move |_: &mut QueueList, _, text, cx| {
             query_clone.update(cx, |this, _| {
@@ -164,7 +173,13 @@ impl QueueList {
     }
 
     pub fn search(&mut self, tracks: Vec<Track>, query: String) -> Vec<Track> {
-        if self.tracks.len() != tracks.len() || self.tracks[0].title != tracks[0].title {
+        if self.tracks.len() != tracks.len()
+            || if self.tracks.len() > 0 && tracks.len() > 0 {
+                self.tracks[0].title != tracks[0].title
+            } else {
+                true
+            }
+        {
             self.nucleo = Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
             let injector = self.nucleo.injector();
 
