@@ -37,9 +37,6 @@ impl Render for QueueList {
 
         let theme = cx.global::<Theme>();
         let layout = self.layout.clone().read(cx);
-        for track in tracks.clone() {
-            println!("{:#?}", track.title);
-        }
 
         if layout.right_sidebar.show {
             div()
@@ -168,7 +165,7 @@ impl QueueList {
     }
 
     pub fn search(&mut self, tracks: Vec<Track>, query: String) -> Vec<Track> {
-        if self.tracks.len() != tracks.len() {
+        if self.tracks.len() != tracks.len() || self.tracks[0].title != tracks[0].title {
             self.nucleo = Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
             let injector = self.nucleo.injector();
 
