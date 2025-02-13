@@ -429,11 +429,12 @@ impl Element for TextElement {
         let selected_range = input.selected_range.clone();
         let cursor = input.cursor_offset();
         let style = window.text_style();
+        let theme = cx.global::<Theme>();
 
         let (display_text, text_color) = if content.is_empty() {
-            (input.placeholder.clone(), hsla(0., 0., 0., 0.2))
+            (input.placeholder.clone(), Hsla::from(theme.secondary))
         } else {
-            (content.clone(), style.color)
+            (content.clone(), Hsla::from(theme.text))
         };
 
         let run = TextRun {
@@ -477,8 +478,6 @@ impl Element for TextElement {
             .shape_line(display_text, font_size, &runs)
             .unwrap();
 
-        let theme = cx.global::<Theme>();
-
         let cursor_pos = line.x_for_index(cursor);
         let (selection, cursor) = if selected_range.is_empty() {
             (
@@ -486,7 +485,7 @@ impl Element for TextElement {
                 Some(fill(
                     Bounds::new(
                         point(bounds.left() + cursor_pos, bounds.top()),
-                        size(px(1.), bounds.bottom() - bounds.top()),
+                        size(px(2.0), bounds.bottom() - bounds.top()),
                     ),
                     theme.accent,
                 )),

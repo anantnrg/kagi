@@ -11,7 +11,7 @@ use crate::{
 pub struct QueueList {
     pub now_playing: Entity<NowPlaying>,
     pub layout: Entity<Layout>,
-    pub simsearch: SimSearch<String>,
+    pub simsearch: SimSearch<usize>,
     pub query: Entity<String>,
     pub tracks: Vec<Track>,
     text_input: Entity<TextInput>,
@@ -162,33 +162,28 @@ impl QueueList {
         if self.tracks.len() != tracks.len() {
             self.simsearch = SimSearch::new();
             self.tracks = tracks.clone();
-            for track in tracks.clone() {
+            for (i, track) in tracks.iter().enumerate() {
                 let key = format!(
                     "{} {} {}",
                     track.title,
                     track.artists.join(", "),
                     track.album
                 );
-
-                self.simsearch.insert(key.clone(), &key);
+                self.simsearch.insert(i, &key);
             }
         }
 
-        let results = self.simsearch.search(query.as_str());
+        if query.trim().is_empty() {
+            return tracks;
+        }
+
+        let result_ids = self.simsearch.search(query.as_str());
 
         tracks
-            .clone()
-            .iter()
-            .filter(|track| {
-                let key = format!(
-                    "{} {} {}",
-                    track.title,
-                    track.artists.join(", "),
-                    track.album
-                );
-                results.contains(&key.clone())
-            })
-            .cloned()
+            .into_iter()
+            .enumerate()
+            .filter(|(id, _)| result_ids.contains(id))
+            .map(|(_, track)| track)
             .collect()
     }
 }

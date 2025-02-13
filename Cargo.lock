@@ -4180,7 +4180,7 @@ version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c869b25830e4824ef7279015cfc298a0674aca6a54eeff2efce8d12bf3701fe"
 dependencies = [
- "strsim",
+ "strsim 0.10.0",
  "triple_accel",
 ]
 
@@ -4285,6 +4285,12 @@ name = "strsim"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
+
+[[package]]
+name = "strsim"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
 
 [[package]]
 name = "strum"
@@ -4781,6 +4787,7 @@ dependencies = [
  "rfd",
  "simsearch",
  "smallvec",
+ "strsim 0.11.1",
 ]
 
 [[package]]
