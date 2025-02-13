@@ -1,7 +1,10 @@
 use backend::player::Controller;
 use components::{input::TextInput, theme::Theme};
 use gpui::{prelude::FluentBuilder, *};
+use nucleo::pattern::{CaseMatching, Normalization};
+use nucleo::{Config, Nucleo};
 use simsearch::SimSearch;
+use std::sync::Arc;
 
 use crate::{
     layout::{Layout, LayoutMode},
@@ -11,7 +14,7 @@ use crate::{
 pub struct QueueList {
     pub now_playing: Entity<NowPlaying>,
     pub layout: Entity<Layout>,
-    pub simsearch: SimSearch<usize>,
+    pub nucleo: Nucleo<(usize, String)>,
     pub query: Entity<String>,
     pub tracks: Vec<Track>,
     text_input: Entity<TextInput>,
@@ -50,6 +53,9 @@ impl Render for QueueList {
                 })
                 .border_l_1()
                 .border_color(theme.secondary)
+                .on_mouse_down(MouseButton::Left, move |_, _, cx| {
+                    cx.stop_propagation();
+                })
                 .child(div().w_full().h_8().child(self.text_input.clone()))
                 .child(
                     uniform_list(
@@ -133,9 +139,11 @@ impl QueueList {
         now_playing: Entity<NowPlaying>,
         layout: Entity<Layout>,
     ) -> Self {
-        let simsearch = SimSearch::new();
         let query = cx.new(|_| String::new());
         let handle = cx.focus_handle();
+
+        let nucleo: Nucleo<(usize, String)> =
+            Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
 
         let text_input = TextInput::new(cx, handle, None, None);
         let query_clone = query.clone();
@@ -150,7 +158,7 @@ impl QueueList {
         QueueList {
             now_playing,
             layout,
-            simsearch,
+            nucleo,
             query,
             tracks: vec![],
             text_input,
@@ -160,8 +168,9 @@ impl QueueList {
 
     pub fn search(&mut self, tracks: Vec<Track>, query: String) -> Vec<Track> {
         if self.tracks.len() != tracks.len() {
-            self.simsearch = SimSearch::new();
-            self.tracks = tracks.clone();
+            self.nucleo = Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
+            let injector = self.nucleo.injector();
+
             for (i, track) in tracks.iter().enumerate() {
                 let key = format!(
                     "{} {} {}",
@@ -169,21 +178,32 @@ impl QueueList {
                     track.artists.join(", "),
                     track.album
                 );
-                self.simsearch.insert(i, &key);
+                injector.push((i, key.clone()), |&(_id, ref string), row| {
+                    row[0] = string.as_str().into();
+                });
             }
+
+            self.tracks = tracks;
         }
 
         if query.trim().is_empty() {
-            return tracks;
+            return self.tracks.clone();
         }
 
-        let result_ids = self.simsearch.search(query.as_str());
+        self.nucleo
+            .pattern
+            .reparse(0, &query, CaseMatching::Ignore, Normalization::Smart, false);
 
-        tracks
-            .into_iter()
+        self.nucleo.tick(500);
+
+        let snapshot = self.nucleo.snapshot();
+        let results: Vec<usize> = snapshot.matched_items(..).map(|item| item.data.0).collect();
+
+        self.tracks
+            .iter()
             .enumerate()
-            .filter(|(id, _)| result_ids.contains(id))
-            .map(|(_, track)| track)
+            .filter(|(id, _)| results.contains(id))
+            .map(|(_, track)| track.clone())
             .collect()
     }
 }

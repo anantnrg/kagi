@@ -20,6 +20,6 @@ bincode = { git = "https://github.com/bincode-org/bincode", branch = "trunk", fe
     "serde",
 ] }
 rand = "0.9.0"
-nucleo = "0.4.0"
+nucleo = "0.5.0"
 simsearch = "0.2.5"
 strsim = "0.11.1"
