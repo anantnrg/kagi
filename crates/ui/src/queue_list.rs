@@ -4,6 +4,7 @@ use gpui::{prelude::FluentBuilder, *};
 use nucleo::pattern::{CaseMatching, Normalization};
 use nucleo::{Config, Nucleo};
 use simsearch::SimSearch;
+use std::collections::HashSet;
 use std::sync::Arc;
 
 use crate::{
@@ -197,13 +198,22 @@ impl QueueList {
         self.nucleo.tick(500);
 
         let snapshot = self.nucleo.snapshot();
-        let results: Vec<usize> = snapshot.matched_items(..).map(|item| item.data.0).collect();
-
-        self.tracks
-            .iter()
+        let results: HashSet<usize> = snapshot.matched_items(..).map(|item| item.data.0).collect();
+        let mut filtered_tracks: Vec<Track> = self
+            .tracks
+            .clone()
+            .into_iter()
             .enumerate()
-            .filter(|(id, _)| results.contains(id))
-            .map(|(_, track)| track.clone())
-            .collect()
+            .filter_map(|(index, track)| {
+                if results.contains(&index) {
+                    Some(track)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        filtered_tracks.reverse();
+
+        filtered_tracks
     }
 }
