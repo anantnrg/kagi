@@ -39,6 +39,7 @@ impl Render for QueueList {
 
         if layout.right_sidebar.show {
             div()
+                .track_focus(&cx.focus_handle())
                 .bg(theme.background)
                 .h_full()
                 .w(px(layout.right_sidebar.width))
@@ -134,7 +135,7 @@ impl Render for QueueList {
                     .px_1(),
                 )
         } else {
-            div()
+            div().track_focus(&cx.focus_handle())
         }
     }
 }
@@ -174,7 +175,7 @@ impl QueueList {
 
     pub fn search(&mut self, tracks: Vec<Track>, query: String) -> Vec<Track> {
         if self.tracks.len() != tracks.len()
-            || if self.tracks.len() > 0 && tracks.len() > 0 {
+            && if self.tracks.len() > 0 && tracks.len() > 0 {
                 self.tracks[0].title != tracks[0].title
             } else {
                 true

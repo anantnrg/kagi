@@ -16,6 +16,7 @@ impl Render for MainView {
         let layout = self.layout.clone().read(cx);
 
         div()
+            .track_focus(&cx.focus_handle())
             .w(px(layout.central_width))
             .h_full()
             .flex()
