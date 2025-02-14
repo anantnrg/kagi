@@ -35,6 +35,21 @@ use std::{
 };
 use titlebar::Titlebar;
 
+actions!(text_input, [
+    Backspace,
+    Delete,
+    Left,
+    Right,
+    SelectLeft,
+    SelectRight,
+    SelectAll,
+    Home,
+    End,
+    Paste,
+    Cut,
+    Copy,
+]);
+
 pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
     let app = Application::new().with_assets(Assets {
         base: PathBuf::from("assets"),
@@ -42,7 +57,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
 
     app.run(move |cx: &mut App| {
         let bounds = Bounds::centered(None, size(px(500.0), px(500.0)), cx);
-
+        components::input::bind_actions(cx);
         cx.open_window(
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
@@ -306,7 +321,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let control_bar = cx
                         .new(|_| ControlBar::new(np.clone(), vol_slider.clone(), playbar.clone()));
                     let main_view = cx.new(|_| MainView::new(np.clone(), layout.clone()));
-                    let queue_list = cx.new(|_| QueueList::new(np.clone(), layout.clone()));
+                    let queue_list = cx.new(|cx| QueueList::new(cx, np.clone(), layout.clone()));
                     let layout_sidebar = layout.clone();
                     let np_sidebar = np.clone();
                     let left_sidebar = cx.new(move |_| {

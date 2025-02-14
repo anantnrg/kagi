@@ -327,9 +327,6 @@ impl Player {
                             };
                             let playlist =
                                 Playlist::from_dir(&backend, PathBuf::from(path.clone())).await;
-                            self.load(&backend, 0)
-                                .await
-                                .expect("Could not load first item");
 
                             self.loaded = true;
                             self.playlist = Arc::new(Mutex::new(playlist.clone()));
@@ -341,7 +338,9 @@ impl Player {
                             self.tx
                                 .send(Response::PlaylistName(playlist.name))
                                 .expect("Could not send message");
-
+                            self.load(&backend, 0)
+                                .await
+                                .expect("Could not load first item");
                             if !self
                                 .saved_playlists
                                 .playlists

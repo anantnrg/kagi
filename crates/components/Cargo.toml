@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 gpui.workspace = true
+unicode-segmentation = "1.12.0"

@@ -24,6 +24,7 @@ impl Render for LeftSidebar {
 
         if layout.left_sidebar.show {
             div()
+                .track_focus(&cx.focus_handle())
                 .bg(theme.background)
                 .h_full()
                 .w(px(layout.left_sidebar.width))
@@ -93,7 +94,7 @@ impl Render for LeftSidebar {
                         }),
                 )
         } else {
-            div()
+            div().track_focus(&cx.focus_handle())
         }
     }
 }

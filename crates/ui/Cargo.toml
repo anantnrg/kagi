@@ -12,3 +12,4 @@ gstreamer.workspace = true
 rfd.workspace = true
 image.workspace = true
 smallvec.workspace = true
+nucleo.workspace = true

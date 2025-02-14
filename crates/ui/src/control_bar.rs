@@ -25,6 +25,7 @@ impl Render for ControlBar {
         let np_write = self.now_playing.clone();
 
         div()
+            .track_focus(&cx.focus_handle())
             .w_full()
             .h_24()
             .border_t_1()
