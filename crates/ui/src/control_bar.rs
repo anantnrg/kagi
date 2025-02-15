@@ -35,6 +35,7 @@ impl Render for ControlBar {
             .flex_col()
             .justify_center()
             .justify_between()
+            .occlude()
             .px_4()
             .child(
                 div()

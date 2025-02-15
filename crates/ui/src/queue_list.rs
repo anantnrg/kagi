@@ -51,9 +51,7 @@ impl Render for QueueList {
                 })
                 .border_l_1()
                 .border_color(theme.secondary)
-                .on_mouse_down(MouseButton::Left, move |_, _, cx| {
-                    cx.stop_propagation();
-                })
+                .occlude()
                 .child(
                     div()
                         .w_full()
