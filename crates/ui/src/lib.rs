@@ -1,6 +1,7 @@
 pub mod app;
 pub mod assets;
 pub mod control_bar;
+mod keybinds;
 pub mod layout;
 pub mod main_view;
 pub mod now_playing;
