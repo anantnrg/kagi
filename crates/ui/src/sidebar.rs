@@ -32,6 +32,7 @@ impl Render for LeftSidebar {
                 .when(layout.mode == LayoutMode::Overlay, |this| {
                     this.absolute().border_0()
                 })
+                .occlude()
                 .border_r_1()
                 .border_color(theme.secondary)
                 .px_3()
