@@ -1,5 +1,5 @@
 use crate::layout::Layout;
-use crate::now_playing::NowPlaying;
+use crate::now_playing::PlayerContext;
 use components::theme::Theme;
 
 use components::icon::*;
@@ -8,7 +8,7 @@ use prelude::FluentBuilder;
 
 #[derive(Clone)]
 pub struct Titlebar {
-    now_playing: Entity<NowPlaying>,
+    now_playing: Entity<PlayerContext>,
     pub layout: Entity<Layout>,
 }
 
@@ -200,7 +200,7 @@ impl Render for Titlebar {
 }
 
 impl Titlebar {
-    pub fn new(now_playing: Entity<NowPlaying>, layout: Entity<Layout>) -> Titlebar {
+    pub fn new(now_playing: Entity<PlayerContext>, layout: Entity<Layout>) -> Titlebar {
         Titlebar {
             now_playing,
             layout,

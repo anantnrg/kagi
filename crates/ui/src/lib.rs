@@ -24,7 +24,7 @@ use control_bar::ControlBar;
 use gpui::*;
 use layout::Layout;
 use main_view::MainView;
-use now_playing::{NowPlaying, NowPlayingEvent, Thumbnail, Track};
+use now_playing::{PlayerContext, PlayerContextEvent, Thumbnail, Track};
 use queue_list::QueueList;
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
@@ -73,7 +73,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             |_, cx| {
                 cx.new(|cx| {
                     let theme = Theme::default();
-                    let now_playing = NowPlaying::new();
+                    let now_playing = PlayerContext::new();
                     let np = cx.new(|_| now_playing.clone());
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
@@ -160,10 +160,10 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         &np,
                         move |this: &mut Kagi,
                               _,
-                              event: &NowPlayingEvent,
+                              event: &PlayerContextEvent,
                               cx: &mut Context<Kagi>| {
                             match event {
-                                NowPlayingEvent::Meta(title, album, artists, duration) => {
+                                PlayerContextEvent::Meta(title, album, artists, duration) => {
                                     this.now_playing.update(cx, |this, _| {
                                         this.title = title.clone();
                                         this.album = album.clone();
@@ -172,7 +172,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     });
                                     cx.notify();
                                 }
-                                NowPlayingEvent::Position(pos) => {
+                                PlayerContextEvent::Position(pos) => {
                                     let np = &this.now_playing;
                                     np.update(cx, |this, _| {
                                         this.position = *pos;
@@ -185,43 +185,43 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     });
                                     cx.notify();
                                 }
-                                NowPlayingEvent::Thumbnail(img) => {
+                                PlayerContextEvent::Thumbnail(img) => {
                                     this.now_playing.update(cx, |this, _| {
                                         this.thumbnail = Some(img.clone());
                                     });
                                     cx.notify();
                                 }
-                                NowPlayingEvent::State(state) => {
+                                PlayerContextEvent::State(state) => {
                                     this.now_playing.update(cx, |this, _| {
                                         this.state = state.clone();
                                     });
                                     cx.notify();
                                 }
-                                NowPlayingEvent::Volume(vol) => {
+                                PlayerContextEvent::Volume(vol) => {
                                     this.now_playing.update(cx, |this, _| {
                                         this.volume = vol.clone();
                                     });
                                     cx.notify();
                                 }
-                                NowPlayingEvent::Tracks(tracks) => {
+                                PlayerContextEvent::Tracks(tracks) => {
                                     this.now_playing.update(cx, |this, _| {
                                         this.tracks = tracks.clone();
                                     });
                                     cx.notify();
                                 }
-                                NowPlayingEvent::PlaylistName(name) => {
+                                PlayerContextEvent::PlaylistName(name) => {
                                     this.now_playing.update(cx, |this, _| {
                                         this.playlist_name = name.into();
                                     });
                                     cx.notify();
                                 }
-                                NowPlayingEvent::Shuffle(shuffle) => {
+                                PlayerContextEvent::Shuffle(shuffle) => {
                                     this.now_playing.update(cx, |this, _| {
                                         this.shuffle = shuffle.clone();
                                     });
                                     cx.notify();
                                 }
-                                NowPlayingEvent::Repeat(repeat) => {
+                                PlayerContextEvent::Repeat(repeat) => {
                                     this.now_playing.update(cx, |this, _| {
                                         this.repeat = repeat.clone();
                                     });

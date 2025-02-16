@@ -8,11 +8,11 @@ use std::sync::Arc;
 
 use crate::{
     layout::{Layout, LayoutMode},
-    now_playing::{NowPlaying, Track},
+    now_playing::{PlayerContext, Track},
 };
 
 pub struct QueueList {
-    pub now_playing: Entity<NowPlaying>,
+    pub now_playing: Entity<PlayerContext>,
     pub layout: Entity<Layout>,
     pub nucleo: Nucleo<(usize, String)>,
     pub query: Entity<String>,
@@ -141,7 +141,7 @@ impl Render for QueueList {
 impl QueueList {
     pub fn new(
         cx: &mut Context<QueueList>,
-        now_playing: Entity<NowPlaying>,
+        now_playing: Entity<PlayerContext>,
         layout: Entity<Layout>,
     ) -> Self {
         let query = cx.new(|_| String::new());

@@ -7,11 +7,11 @@ use components::{
 use gpui::{prelude::FluentBuilder, *};
 use gstreamer::State;
 
-use crate::now_playing::NowPlaying;
+use crate::now_playing::PlayerContext;
 
 #[derive(Clone)]
 pub struct ControlBar {
-    now_playing: Entity<NowPlaying>,
+    now_playing: Entity<PlayerContext>,
     vol_slider: Entity<Slider>,
     playbar: Entity<Slider>,
 }
@@ -252,7 +252,7 @@ impl Render for ControlBar {
 
 impl ControlBar {
     pub fn new(
-        now_playing: Entity<NowPlaying>,
+        now_playing: Entity<PlayerContext>,
         vol_slider: Entity<Slider>,
         playbar: Entity<Slider>,
     ) -> Self {

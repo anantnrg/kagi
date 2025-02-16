@@ -2,7 +2,7 @@ use gpui::*;
 use gstreamer::State;
 
 #[derive(Clone)]
-pub struct NowPlaying {
+pub struct PlayerContext {
     pub playlist_name: SharedString,
     pub title: SharedString,
     pub album: SharedString,
@@ -34,7 +34,7 @@ pub struct Track {
     pub thumbnail: Option<Thumbnail>,
 }
 
-pub enum NowPlayingEvent {
+pub enum PlayerContextEvent {
     Meta(SharedString, SharedString, Vec<SharedString>, u64),
     Position(u64),
     Thumbnail(Thumbnail),
@@ -46,9 +46,9 @@ pub enum NowPlayingEvent {
     Repeat(bool),
 }
 
-impl NowPlaying {
+impl PlayerContext {
     pub fn new() -> Self {
-        NowPlaying {
+        PlayerContext {
             playlist_name: "".into(),
             title: "".into(),
             artists: vec!["".into()],
@@ -72,50 +72,50 @@ impl NowPlaying {
         artists: Vec<SharedString>,
         duration: u64,
     ) {
-        cx.emit(NowPlayingEvent::Meta(title, album, artists, duration));
+        cx.emit(PlayerContextEvent::Meta(title, album, artists, duration));
         cx.notify();
     }
 
     pub fn update_pos(&mut self, cx: &mut Context<Self>, pos: u64) {
-        cx.emit(NowPlayingEvent::Position(pos));
+        cx.emit(PlayerContextEvent::Position(pos));
         cx.notify();
     }
 
     pub fn update_thumbnail(&mut self, cx: &mut Context<Self>, thumbnail: Thumbnail) {
-        cx.emit(NowPlayingEvent::Thumbnail(thumbnail));
+        cx.emit(PlayerContextEvent::Thumbnail(thumbnail));
         cx.notify();
     }
 
     pub fn update_state(&mut self, cx: &mut Context<Self>, state: State) {
-        cx.emit(NowPlayingEvent::State(state));
+        cx.emit(PlayerContextEvent::State(state));
         cx.notify();
     }
 
     pub fn update_vol(&mut self, cx: &mut Context<Self>, vol: f64) {
-        cx.emit(NowPlayingEvent::Volume(vol));
+        cx.emit(PlayerContextEvent::Volume(vol));
         cx.notify();
     }
 
     pub fn update_tracks(&mut self, cx: &mut Context<Self>, tracks: Vec<Track>) {
-        cx.emit(NowPlayingEvent::Tracks(tracks));
+        cx.emit(PlayerContextEvent::Tracks(tracks));
         cx.notify();
     }
 
     pub fn update_playlist_name(&mut self, cx: &mut Context<Self>, name: String) {
-        cx.emit(NowPlayingEvent::PlaylistName(name));
+        cx.emit(PlayerContextEvent::PlaylistName(name));
         cx.notify();
     }
 
     pub fn update_shuffle(&mut self, cx: &mut Context<Self>, shuffle: bool) {
-        cx.emit(NowPlayingEvent::Shuffle(shuffle));
+        cx.emit(PlayerContextEvent::Shuffle(shuffle));
         cx.notify();
     }
 
     pub fn update_repeat(&mut self, cx: &mut Context<Self>, repeat: bool) {
-        cx.emit(NowPlayingEvent::Repeat(repeat));
+        cx.emit(PlayerContextEvent::Repeat(repeat));
         cx.notify();
     }
 }
 
-impl EventEmitter<NowPlayingEvent> for NowPlaying {}
-impl Global for NowPlaying {}
+impl EventEmitter<PlayerContextEvent> for PlayerContext {}
+impl Global for PlayerContext {}

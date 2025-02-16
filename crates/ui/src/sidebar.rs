@@ -4,13 +4,13 @@ use gpui::{prelude::FluentBuilder, *};
 
 use crate::{
     layout::{Layout, LayoutMode},
-    now_playing::NowPlaying,
+    now_playing::PlayerContext,
 };
 
 #[derive(Clone)]
 pub struct LeftSidebar {
     pub playlists: Entity<SavedPlaylists>,
-    pub now_playing: Entity<NowPlaying>,
+    pub now_playing: Entity<PlayerContext>,
     pub layout: Entity<Layout>,
 }
 
@@ -104,7 +104,7 @@ impl LeftSidebar {
     pub fn new(
         playlists: Entity<SavedPlaylists>,
         layout: Entity<Layout>,
-        now_playing: Entity<NowPlaying>,
+        now_playing: Entity<PlayerContext>,
     ) -> Self {
         LeftSidebar {
             playlists,
