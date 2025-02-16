@@ -3,16 +3,26 @@ use gstreamer::State;
 
 #[derive(Clone)]
 pub struct PlayerContext {
+    pub metadata: Entity<Metadata>,
+    pub state: Entity<PlayerState>,
+    pub tracks: Entity<Vec<Track>>,
+}
+
+#[derive(Clone)]
+pub struct Metadata {
     pub playlist_name: SharedString,
     pub title: SharedString,
     pub album: SharedString,
     pub artists: Vec<SharedString>,
-    pub position: u64,
     pub duration: u64,
     pub thumbnail: Option<Thumbnail>,
+}
+
+#[derive(Clone)]
+pub struct PlayerState {
+    pub position: u64,
     pub state: State,
     pub volume: f64,
-    pub tracks: Vec<Track>,
     pub shuffle: bool,
     pub repeat: bool,
 }

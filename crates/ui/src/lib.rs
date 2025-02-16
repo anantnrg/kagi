@@ -99,6 +99,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
 
                     cx.set_global(controller);
                     cx.set_global(theme);
+                    cx.set_global(now_playing);
                     cx.background_executor()
                         .spawn(async move {
                             player.run().await;
