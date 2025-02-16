@@ -12,7 +12,6 @@ use crate::{
 };
 
 pub struct QueueList {
-    pub now_playing: Entity<PlayerContext>,
     pub layout: Entity<Layout>,
     pub nucleo: Nucleo<(usize, String)>,
     pub query: Entity<String>,
@@ -29,10 +28,8 @@ impl Focusable for QueueList {
 
 impl Render for QueueList {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let tracks = self.search(
-            self.now_playing.read(cx).tracks.clone(),
-            self.query.read(cx).clone(),
-        );
+        let tracks = cx.global::<PlayerContext>().tracks.clone();
+        let tracks = self.search(tracks.read(cx).clone(), self.query.read(cx).clone());
 
         let theme = cx.global::<Theme>();
         let layout = self.layout.clone().read(cx);
@@ -139,11 +136,7 @@ impl Render for QueueList {
 }
 
 impl QueueList {
-    pub fn new(
-        cx: &mut Context<QueueList>,
-        now_playing: Entity<PlayerContext>,
-        layout: Entity<Layout>,
-    ) -> Self {
+    pub fn new(cx: &mut Context<QueueList>, layout: Entity<Layout>) -> Self {
         let query = cx.new(|_| String::new());
         let handle = cx.focus_handle();
 
@@ -161,7 +154,6 @@ impl QueueList {
         .detach();
 
         QueueList {
-            now_playing,
             layout,
             nucleo,
             query,

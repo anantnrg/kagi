@@ -11,18 +11,18 @@ use crate::now_playing::PlayerContext;
 
 #[derive(Clone)]
 pub struct ControlBar {
-    now_playing: Entity<PlayerContext>,
     vol_slider: Entity<Slider>,
     playbar: Entity<Slider>,
 }
 
 impl Render for ControlBar {
     fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let state_write = cx.global_mut::<PlayerContext>().state.clone();
         let controller = cx.global::<Controller>();
         let theme = cx.global::<Theme>();
 
-        let np = self.now_playing.read(cx);
-        let np_write = self.now_playing.clone();
+        let meta = cx.global::<PlayerContext>().metadata.read(cx);
+        let state = cx.global::<PlayerContext>().state.read(cx);
 
         div()
             .track_focus(&cx.focus_handle())
@@ -52,7 +52,11 @@ impl Render for ControlBar {
                     .pb_1()
                     .text_color(theme.text)
                     .font_weight(FontWeight::MEDIUM)
-                    .child(format!("{:02}:{:02}", np.position / 60, np.position % 60))
+                    .child(format!(
+                        "{:02}:{:02}",
+                        state.position / 60,
+                        state.position % 60
+                    ))
                     .child(
                         div()
                             .mx_3()
@@ -61,7 +65,11 @@ impl Render for ControlBar {
                             .pt(px(10.0))
                             .child(self.playbar.clone()),
                     )
-                    .child(format!("{:02}:{:02}", np.duration / 60, np.duration % 60)),
+                    .child(format!(
+                        "{:02}:{:02}",
+                        meta.duration / 60,
+                        meta.duration % 60
+                    )),
             )
             .child(
                 div()
@@ -99,7 +107,7 @@ impl Render for ControlBar {
                                             .size(24.0)
                                             .color(theme.text)
                                             .hover(theme.accent)
-                                            .when(np.shuffle, |this| this.color(theme.accent)),
+                                            .when(state.shuffle, |this| this.color(theme.accent)),
                                     )
                                     .on_mouse_down(MouseButton::Left, {
                                         {
@@ -140,7 +148,7 @@ impl Render for ControlBar {
                                     .flex_col()
                                     .items_center()
                                     .justify_center()
-                                    .when(np.state == State::Null, |this| {
+                                    .when(state.state == State::Null, |this| {
                                         this.child(
                                             Icon::new(Icons::Stopped)
                                                 .size(24.0)
@@ -148,7 +156,7 @@ impl Render for ControlBar {
                                                 .hover(theme.accent),
                                         )
                                     })
-                                    .when(np.state == State::Playing, |this| {
+                                    .when(state.state == State::Playing, |this| {
                                         this.child(
                                             Icon::new(Icons::Pause)
                                                 .size(24.0)
@@ -156,7 +164,7 @@ impl Render for ControlBar {
                                                 .hover(theme.accent),
                                         )
                                     })
-                                    .when(np.state == State::Paused, |this| {
+                                    .when(state.state == State::Paused, |this| {
                                         this.child(
                                             Icon::new(Icons::Play)
                                                 .size(24.0)
@@ -168,7 +176,7 @@ impl Render for ControlBar {
                                     .on_mouse_down(MouseButton::Left, {
                                         {
                                             let controller = controller.clone();
-                                            let np = np.clone();
+                                            let np = state.clone();
                                             move |_, _, _| {
                                                 if np.state == State::Playing {
                                                     controller.pause();
@@ -215,12 +223,12 @@ impl Render for ControlBar {
                                             .size(24.0)
                                             .color(theme.text)
                                             .hover(theme.accent)
-                                            .when(np.repeat, |this| this.color(theme.accent)),
+                                            .when(state.repeat, |this| this.color(theme.accent)),
                                     )
                                     .on_mouse_down(MouseButton::Left, {
                                         {
                                             move |_, _, cx| {
-                                                np_write.update(cx, |this, _| {
+                                                state_write.update(cx, |this, _| {
                                                     this.repeat = !this.repeat
                                                 })
                                             }
@@ -239,7 +247,7 @@ impl Render for ControlBar {
                             .child(div().w_20().child(self.vol_slider.clone()))
                             .child(
                                 div()
-                                    .child(format!("{:.0}%", np.volume * 100.0))
+                                    .child(format!("{:.0}%", state.volume * 100.0))
                                     .text_color(theme.text)
                                     .ml_4()
                                     .w_10()
@@ -251,13 +259,8 @@ impl Render for ControlBar {
 }
 
 impl ControlBar {
-    pub fn new(
-        now_playing: Entity<PlayerContext>,
-        vol_slider: Entity<Slider>,
-        playbar: Entity<Slider>,
-    ) -> Self {
+    pub fn new(vol_slider: Entity<Slider>, playbar: Entity<Slider>) -> Self {
         ControlBar {
-            now_playing,
             vol_slider,
             playbar,
         }
