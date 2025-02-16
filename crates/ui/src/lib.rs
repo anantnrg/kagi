@@ -126,8 +126,9 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             SliderEvent::Change(vol) => {
                                 let volume = (vol * 100.0).round() as f64 / 100.0;
                                 let state = cx.global_mut::<PlayerContext>().state.clone();
-                                state.update(cx, |this, _| {
+                                state.update(cx, |this, cx| {
                                     this.volume = volume.clone();
+                                    cx.notify();
                                 });
                                 cx.global::<Controller>().volume(volume);
 
@@ -149,6 +150,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     controller.seek(seek_time);
                                     state_write.update(cx, |this, cx| {
                                         this.position = seek_time;
+                                        cx.notify();
                                     });
                                 }
 
@@ -170,43 +172,47 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             }
                             Response::Position(pos) => {
                                 let state = cx.global_mut::<PlayerContext>().state.clone();
-                                state.update(cx, |state, _| {
+                                state.update(cx, |state, cx| {
                                     state.position = *pos;
+                                    cx.notify();
                                 });
                             }
                             Response::StreamStart => cx.global::<Controller>().get_meta(),
                             Response::Metadata(track) => {
                                 let metadata = cx.global_mut::<PlayerContext>().metadata.clone();
-                                metadata.update(cx, |meta, _| {
+                                metadata.update(cx, |meta, cx| {
                                     let track = track.clone();
                                     meta.title = track.title.into();
                                     meta.album = track.album.into();
                                     meta.artists =
                                         track.artists.iter().map(|s| s.clone().into()).collect();
                                     meta.duration = track.duration;
+                                    cx.notify();
                                 });
                             }
                             Response::Thumbnail(thumbnail) => {
                                 let metadata = cx.global_mut::<PlayerContext>().metadata.clone();
-                                metadata.update(cx, |meta, _| {
+                                metadata.update(cx, |meta, cx| {
                                     meta.thumbnail = Some(Thumbnail {
                                         img: ImageSource::Render(
                                             RenderImage::new(thumbnail.clone().to_frame()).into(),
                                         ),
                                         width: thumbnail.width,
                                         height: thumbnail.height,
-                                    })
+                                    });
+                                    cx.notify();
                                 });
                             }
                             Response::StateChanged(new_state) => {
                                 let state = cx.global_mut::<PlayerContext>().state.clone();
-                                state.update(cx, |state, _| {
+                                state.update(cx, |state, cx| {
                                     state.state = new_state.clone();
+                                    cx.notify();
                                 });
                             }
                             Response::Tracks(new_tracks) => {
                                 let tracks = cx.global_mut::<PlayerContext>().tracks.clone();
-                                tracks.update(cx, |tracks, _| {
+                                tracks.update(cx, |tracks, cx| {
                                     let mut np_tracks = vec![];
                                     for track in new_tracks {
                                         if let Some(thumbnail) = track.thumbnail.clone() {
@@ -228,23 +234,27 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                         }
                                     }
                                     *tracks = np_tracks;
+                                    cx.notify();
                                 });
                             }
                             Response::SavedPlaylists(playlists) => {
-                                saved_playlists.update(cx, |this, _| {
+                                saved_playlists.update(cx, |this, cx| {
                                     *this = playlists.clone();
+                                    cx.notify();
                                 })
                             }
                             Response::PlaylistName(name) => {
                                 let meta = cx.global_mut::<PlayerContext>().metadata.clone();
-                                meta.update(cx, |meta, _| {
+                                meta.update(cx, |meta, cx| {
                                     meta.playlist_name = name.clone().into();
+                                    cx.notify();
                                 });
                             }
                             Response::Shuffle(shuffle) => {
                                 let state = cx.global_mut::<PlayerContext>().state.clone();
-                                state.update(cx, |state, _| {
+                                state.update(cx, |state, cx| {
                                     state.shuffle = shuffle.clone();
+                                    cx.notify();
                                 });
                             }
                             _ => {}
