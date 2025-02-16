@@ -160,6 +160,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     })
                     .detach();
 
+                    let playbar_clone = playbar.clone();
                     cx.subscribe(
                         &res_handler,
                         move |_: &mut Kagi, _, event: &Response, cx| match event {
@@ -176,6 +177,17 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     state.position = *pos;
                                     cx.notify();
                                 });
+                                let duration = cx
+                                    .global::<PlayerContext>()
+                                    .metadata
+                                    .read(cx)
+                                    .duration
+                                    .clone();
+                                let slider_value = (*pos as f64 / duration as f64) as f32;
+                                playbar_clone.update(cx, |this, cx| {
+                                    this.value(slider_value, cx);
+                                });
+                                cx.notify();
                             }
                             Response::StreamStart => cx.global::<Controller>().get_meta(),
                             Response::Metadata(track) => {
