@@ -1,4 +1,4 @@
-use super::{now_playing::*, res_handler::*, titlebar::Titlebar};
+use super::{res_handler::*, titlebar::Titlebar};
 use crate::{
     control_bar::ControlBar, layout::Layout, main_view::MainView, queue_list::QueueList, sidebar::*,
 };

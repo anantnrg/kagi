@@ -24,7 +24,7 @@ use control_bar::ControlBar;
 use gpui::*;
 use layout::Layout;
 use main_view::MainView;
-use now_playing::{PlayerContext, PlayerContextEvent, Thumbnail, Track};
+use now_playing::{PlayerContext, Thumbnail, Track};
 use queue_list::QueueList;
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
@@ -74,7 +74,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                 cx.new(|cx| {
                     let theme = Theme::default();
                     let now_playing = PlayerContext::new(cx);
-                    let np = cx.new(|_| now_playing.clone());
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
                     let (mut player, controller) =
@@ -158,85 +157,10 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         }
                     })
                     .detach();
-                    let pb_clone = playbar.clone();
-                    // cx.subscribe(
-                    //     &np,
-                    //     move |this: &mut Kagi,
-                    //           _,
-                    //           event: &PlayerContextEvent,
-                    //           cx: &mut Context<Kagi>| {
-                    //         match event {
-                    //             PlayerContextEvent::Meta(title, album, artists, duration) => {
-                    //                 this.now_playing.update(cx, |this, _| {
-                    //                     this.title = title.clone();
-                    //                     this.album = album.clone();
-                    //                     this.artists = artists.clone();
-                    //                     this.duration = duration.clone();
-                    //                 });
-                    //                 cx.notify();
-                    //             }
-                    //             PlayerContextEvent::Position(pos) => {
-                    //                 let np = &this.now_playing;
-                    //                 np.update(cx, |this, _| {
-                    //                     this.position = *pos;
-                    //                 });
-                    //                 let total_duration = np.read(cx).duration;
-                    //                 let slider_value = (*pos as f64 / total_duration as f64) as f32;
 
-                    //                 pb_clone.update(cx, |this, cx| {
-                    //                     this.value(slider_value, cx);
-                    //                 });
-                    //                 cx.notify();
-                    //             }
-                    //             PlayerContextEvent::Thumbnail(img) => {
-                    //                 this.now_playing.update(cx, |this, _| {
-                    //                     this.thumbnail = Some(img.clone());
-                    //                 });
-                    //                 cx.notify();
-                    //             }
-                    //             PlayerContextEvent::State(state) => {
-                    //                 this.now_playing.update(cx, |this, _| {
-                    //                     this.state = state.clone();
-                    //                 });
-                    //                 cx.notify();
-                    //             }
-                    //             PlayerContextEvent::Volume(vol) => {
-                    //                 this.now_playing.update(cx, |this, _| {
-                    //                     this.volume = vol.clone();
-                    //                 });
-                    //                 cx.notify();
-                    //             }
-                    //             PlayerContextEvent::Tracks(tracks) => {
-                    //                 this.now_playing.update(cx, |this, _| {
-                    //                     this.tracks = tracks.clone();
-                    //                 });
-                    //                 cx.notify();
-                    //             }
-                    //             PlayerContextEvent::PlaylistName(name) => {
-                    //                 this.now_playing.update(cx, |this, _| {
-                    //                     this.playlist_name = name.into();
-                    //                 });
-                    //                 cx.notify();
-                    //             }
-                    //             PlayerContextEvent::Shuffle(shuffle) => {
-                    //                 this.now_playing.update(cx, |this, _| {
-                    //                     this.shuffle = shuffle.clone();
-                    //                 });
-                    //                 cx.notify();
-                    //             }
-                    //             PlayerContextEvent::Repeat(repeat) => {
-                    //                 this.now_playing.update(cx, |this, _| {
-                    //                     this.repeat = repeat.clone();
-                    //                 });
-                    //                 cx.notify();
-                    //             }
-                    //         }
-                    //     },
-                    // )
-                    // .detach();
                     cx.subscribe(
                         &res_handler,
-                        move |this: &mut Kagi, _, event: &Response, cx| match event {
+                        move |_: &mut Kagi, _, event: &Response, cx| match event {
                             Response::Eos => {
                                 if cx.global::<PlayerContext>().state.read(cx).repeat {
                                     cx.global::<Controller>().seek(0);
@@ -264,7 +188,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             }
                             Response::Thumbnail(thumbnail) => {
                                 let metadata = cx.global_mut::<PlayerContext>().metadata.clone();
-                                metadata.update(cx, |meta, cx| {
+                                metadata.update(cx, |meta, _| {
                                     meta.thumbnail = Some(Thumbnail {
                                         img: ImageSource::Render(
                                             RenderImage::new(thumbnail.clone().to_frame()).into(),
