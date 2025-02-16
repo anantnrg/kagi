@@ -1,17 +1,16 @@
 use components::theme::Theme;
 use gpui::*;
 
-use crate::{layout::Layout, now_playing::NowPlaying};
+use crate::{layout::Layout, now_playing::PlayerContext};
 
 #[derive(Clone)]
 pub struct MainView {
-    pub now_playing: Entity<NowPlaying>,
     pub layout: Entity<Layout>,
 }
 
 impl Render for MainView {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let np = self.now_playing.clone();
+        let meta = cx.global::<PlayerContext>().metadata.clone();
         let theme = cx.global::<Theme>();
         let layout = self.layout.clone().read(cx);
 
@@ -26,7 +25,7 @@ impl Render for MainView {
             .flex_col()
             .overflow_hidden()
             .child({
-                if let Some(thumbnail) = np.read(cx).thumbnail.clone() {
+                if let Some(thumbnail) = meta.read(cx).thumbnail.clone() {
                     div()
                         .w(px(layout.central_width))
                         .max_h(px(layout.central_width))
@@ -55,11 +54,11 @@ impl Render for MainView {
                     .flex_shrink_0()
                     .gap_2()
                     .child({
-                        let np = np.read(cx);
-                        if !np.title.is_empty() {
+                        let meta = meta.read(cx);
+                        if !meta.title.is_empty() {
                             div()
                                 .text_color(theme.accent)
-                                .child(np.title.clone())
+                                .child(meta.title.clone())
                                 .text_3xl()
                                 .font_weight(FontWeight::EXTRA_BOLD)
                                 .w_full()
@@ -70,14 +69,14 @@ impl Render for MainView {
                         }
                     })
                     .child({
-                        let np = np.read(cx);
-                        if !np.title.is_empty() {
+                        let meta = meta.read(cx);
+                        if !meta.title.is_empty() {
                             div()
                                 .text_color(theme.text)
                                 .text_xl()
                                 .font_weight(FontWeight::MEDIUM)
                                 .whitespace_normal()
-                                .child(format!("{} • {}", np.artists.join(", "), np.album))
+                                .child(format!("{} • {}", meta.artists.join(", "), meta.album))
                                 .w_full()
                                 .max_w_full()
                                 .text_align(TextAlign::Center)
@@ -90,10 +89,7 @@ impl Render for MainView {
 }
 
 impl MainView {
-    pub fn new(now_playing: Entity<NowPlaying>, layout: Entity<Layout>) -> Self {
-        MainView {
-            now_playing,
-            layout,
-        }
+    pub fn new(layout: Entity<Layout>) -> Self {
+        MainView { layout }
     }
 }

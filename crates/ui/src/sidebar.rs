@@ -4,13 +4,12 @@ use gpui::{prelude::FluentBuilder, *};
 
 use crate::{
     layout::{Layout, LayoutMode},
-    now_playing::NowPlaying,
+    now_playing::PlayerContext,
 };
 
 #[derive(Clone)]
 pub struct LeftSidebar {
     pub playlists: Entity<SavedPlaylists>,
-    pub now_playing: Entity<NowPlaying>,
     pub layout: Entity<Layout>,
 }
 
@@ -19,7 +18,7 @@ impl Render for LeftSidebar {
         let theme = cx.global::<Theme>();
         let controller = cx.global::<Controller>().clone();
         let playlists = self.playlists.read(cx).clone().playlists;
-        let current_index = self.now_playing.clone();
+        let current_index = cx.global::<PlayerContext>().metadata.clone();
         let layout = self.layout.clone().read(cx);
 
         if layout.left_sidebar.show {
@@ -66,8 +65,8 @@ impl Render for LeftSidebar {
                         .truncate()
                         .on_mouse_down(MouseButton::Left, {
                             move |_, _, cx| {
-                                curr_index.update(cx, |this, cx| {
-                                    this.update_playlist_name(cx, playlist.name.clone());
+                                curr_index.update(cx, |this, _| {
+                                    this.playlist_name = playlist.name.clone().into();
                                 });
                                 controller.load(playlist.clone());
                                 controller.get_queue();
@@ -101,15 +100,7 @@ impl Render for LeftSidebar {
 }
 
 impl LeftSidebar {
-    pub fn new(
-        playlists: Entity<SavedPlaylists>,
-        layout: Entity<Layout>,
-        now_playing: Entity<NowPlaying>,
-    ) -> Self {
-        LeftSidebar {
-            playlists,
-            layout,
-            now_playing,
-        }
+    pub fn new(playlists: Entity<SavedPlaylists>, layout: Entity<Layout>) -> Self {
+        LeftSidebar { playlists, layout }
     }
 }

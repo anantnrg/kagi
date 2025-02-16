@@ -1,5 +1,5 @@
 use crate::layout::Layout;
-use crate::now_playing::NowPlaying;
+use crate::now_playing::PlayerContext;
 use components::theme::Theme;
 
 use components::icon::*;
@@ -8,7 +8,6 @@ use prelude::FluentBuilder;
 
 #[derive(Clone)]
 pub struct Titlebar {
-    now_playing: Entity<NowPlaying>,
     pub layout: Entity<Layout>,
 }
 
@@ -66,7 +65,7 @@ impl Render for Titlebar {
                     .items_center()
                     .justify_center()
                     .child({
-                        let np = self.now_playing.read(cx);
+                        let meta = cx.global::<PlayerContext>().metadata.read(cx);
                         let window_width = win.window_bounds().get_bounds().size.width.0;
 
                         let truncate = |text: &str, limit: usize| -> String {
@@ -84,42 +83,42 @@ impl Render for Titlebar {
                             .when(window_width < 200.0, |this| this.child("Kagi"))
                             .when((200.0..400.0).contains(&window_width), |this| {
                                 this.child({
-                                    if np.title.is_empty() {
+                                    if meta.title.is_empty() {
                                         "Kagi".to_string()
                                     } else {
-                                        truncate(&np.title, 30)
+                                        truncate(&meta.title, 30)
                                     }
                                 })
                             })
                             .when((400.0..600.0).contains(&window_width), |this| {
-                                if np.title.is_empty() {
+                                if meta.title.is_empty() {
                                     this.child("No Song Playing".to_string())
                                 } else {
-                                    let artists = if np.artists.is_empty() {
+                                    let artists = if meta.artists.is_empty() {
                                         "".to_string()
                                     } else {
-                                        format!(" - {}", np.artists.join(", "))
+                                        format!(" - {}", meta.artists.join(", "))
                                     };
-                                    this.child(format!("{}{}", truncate(&np.title, 30), artists))
+                                    this.child(format!("{}{}", truncate(&meta.title, 30), artists))
                                 }
                             })
                             .when(window_width >= 600.0, |this| {
-                                if np.title.is_empty() {
+                                if meta.title.is_empty() {
                                     this.child("Kagi".to_string())
                                 } else {
-                                    let artists = if np.artists.is_empty() {
+                                    let artists = if meta.artists.is_empty() {
                                         "".to_string()
                                     } else {
-                                        format!(" - {}", np.artists.join(", "))
+                                        format!(" - {}", meta.artists.join(", "))
                                     };
-                                    let album = if np.album.is_empty() {
+                                    let album = if meta.album.is_empty() {
                                         "".to_string()
                                     } else {
-                                        format!(" ({})", np.album)
+                                        format!(" ({})", meta.album)
                                     };
                                     this.child(format!(
                                         "{}{}{}",
-                                        truncate(&np.title, 30),
+                                        truncate(&meta.title, 30),
                                         artists,
                                         album
                                     ))
@@ -200,10 +199,7 @@ impl Render for Titlebar {
 }
 
 impl Titlebar {
-    pub fn new(now_playing: Entity<NowPlaying>, layout: Entity<Layout>) -> Titlebar {
-        Titlebar {
-            now_playing,
-            layout,
-        }
+    pub fn new(layout: Entity<Layout>) -> Titlebar {
+        Titlebar { layout }
     }
 }
