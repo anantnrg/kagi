@@ -73,7 +73,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             |_, cx| {
                 cx.new(|cx| {
                     let theme = Theme::default();
-                    let now_playing = PlayerContext::new();
+                    let now_playing = PlayerContext::new(cx);
                     let np = cx.new(|_| now_playing.clone());
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());

@@ -56,21 +56,37 @@ pub enum PlayerContextEvent {
     Repeat(bool),
 }
 
-impl PlayerContext {
+impl Metadata {
     pub fn new() -> Self {
-        PlayerContext {
+        Metadata {
             playlist_name: "".into(),
             title: "".into(),
-            artists: vec!["".into()],
             album: "".into(),
-            position: 0,
+            artists: vec!["".into()],
             duration: 0,
             thumbnail: None,
+        }
+    }
+}
+
+impl PlayerState {
+    pub fn new() -> Self {
+        PlayerState {
+            position: 0,
             state: State::Null,
             volume: 0.2,
-            tracks: vec![],
             shuffle: false,
             repeat: false,
+        }
+    }
+}
+
+impl PlayerContext {
+    pub fn new(cx: &mut App) -> Self {
+        PlayerContext {
+            metadata: cx.new(|_| Metadata::new()),
+            state: cx.new(|_| PlayerState::new()),
+            tracks: cx.new(|_| vec![]),
         }
     }
 
