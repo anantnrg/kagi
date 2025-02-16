@@ -238,80 +238,98 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         &res_handler,
                         move |this: &mut Kagi, _, event: &Response, cx| match event {
                             Response::Eos => {
-                                if this.now_playing.read(cx).repeat {
+                                if cx.global::<PlayerContext>().state.read(cx).repeat {
                                     cx.global::<Controller>().seek(0);
                                 } else {
                                     cx.global::<Controller>().next();
                                 }
                             }
-                            Response::Position(pos) => this.now_playing.update(cx, |np, cx| {
-                                np.update_pos(cx, *pos);
-                            }),
+                            Response::Position(pos) => {
+                                cx.global::<PlayerContext>().state.update(cx, |state, cx| {
+                                    state.position = *pos;
+                                })
+                            }
                             Response::StreamStart => cx.global::<Controller>().get_meta(),
                             Response::Metadata(track) => {
-                                this.now_playing.update(cx, |np, cx| {
-                                    let track = track.clone();
-                                    np.update_meta(
-                                        cx,
-                                        track.title.into(),
-                                        track.album.into(),
-                                        track.artists.iter().map(|s| s.clone().into()).collect(),
-                                        track.duration,
-                                    );
-                                });
+                                cx.global_mut::<PlayerContext>()
+                                    .metadata
+                                    .update(cx, |meta, cx| {
+                                        let track = track.clone();
+                                        meta.title = track.title.into();
+                                        meta.album = track.album.into();
+                                        meta.artists = track
+                                            .artists
+                                            .iter()
+                                            .map(|s| s.clone().into())
+                                            .collect();
+                                        meta.duration = track.duration;
+                                    });
                             }
                             Response::Thumbnail(thumbnail) => {
-                                this.now_playing.update(cx, |np, cx| {
-                                    np.update_thumbnail(cx, Thumbnail {
-                                        img: ImageSource::Render(
-                                            RenderImage::new(thumbnail.clone().to_frame()).into(),
-                                        ),
-                                        width: thumbnail.width,
-                                        height: thumbnail.height,
+                                cx.global_mut::<PlayerContext>()
+                                    .metadata
+                                    .update(cx, |meta, cx| {
+                                        meta.thumbnail = Some(Thumbnail {
+                                            img: ImageSource::Render(
+                                                RenderImage::new(thumbnail.clone().to_frame())
+                                                    .into(),
+                                            ),
+                                            width: thumbnail.width,
+                                            height: thumbnail.height,
+                                        })
                                     });
-                                });
                             }
-                            Response::StateChanged(state) => {
-                                this.now_playing.update(cx, |np, cx| {
-                                    np.update_state(cx, state.clone());
-                                });
+                            Response::StateChanged(new_state) => {
+                                cx.global_mut::<PlayerContext>()
+                                    .state
+                                    .update(cx, |state, cx| {
+                                        state.state = new_state.clone();
+                                    });
                             }
-                            Response::Tracks(tracks) => this.now_playing.update(cx, |np, cx| {
-                                let mut np_tracks = vec![];
-                                for track in tracks {
-                                    if let Some(thumbnail) = track.thumbnail.clone() {
-                                        np_tracks.push(Track {
-                                            album: track.album.clone(),
-                                            artists: track.artists.clone(),
-                                            duration: track.duration,
-                                            thumbnail: Some(Thumbnail {
-                                                img: ImageSource::Render(
-                                                    RenderImage::new(thumbnail.to_frame()).into(),
-                                                ),
-                                                width: thumbnail.width,
-                                                height: thumbnail.height,
-                                            }),
-                                            title: track.title.clone(),
-                                            uri: track.uri.clone(),
-                                        });
+                            Response::Tracks(new_tracks) => cx
+                                .global_mut::<PlayerContext>()
+                                .tracks
+                                .update(cx, |tracks, cx| {
+                                    let mut np_tracks = vec![];
+                                    for track in new_tracks {
+                                        if let Some(thumbnail) = track.thumbnail.clone() {
+                                            np_tracks.push(Track {
+                                                album: track.album.clone(),
+                                                artists: track.artists.clone(),
+                                                duration: track.duration,
+                                                thumbnail: Some(Thumbnail {
+                                                    img: ImageSource::Render(
+                                                        RenderImage::new(thumbnail.to_frame())
+                                                            .into(),
+                                                    ),
+                                                    width: thumbnail.width,
+                                                    height: thumbnail.height,
+                                                }),
+                                                title: track.title.clone(),
+                                                uri: track.uri.clone(),
+                                            });
+                                        }
                                     }
-                                }
-                                np.update_tracks(cx, np_tracks);
-                            }),
+                                    *tracks = np_tracks;
+                                }),
                             Response::SavedPlaylists(playlists) => {
                                 saved_playlists.update(cx, |this, _| {
                                     *this = playlists.clone();
                                 })
                             }
                             Response::PlaylistName(name) => {
-                                this.now_playing.update(cx, |np, cx| {
-                                    np.update_playlist_name(cx, name.clone());
-                                });
+                                cx.global_mut::<PlayerContext>()
+                                    .metadata
+                                    .update(cx, |meta, cx| {
+                                        meta.playlist_name = name.clone().into();
+                                    });
                             }
                             Response::Shuffle(shuffle) => {
-                                this.now_playing.update(cx, |np, cx| {
-                                    np.update_shuffle(cx, shuffle.clone());
-                                });
+                                cx.global_mut::<PlayerContext>()
+                                    .state
+                                    .update(cx, |state, cx| {
+                                        state.shuffle = shuffle.clone();
+                                    });
                             }
                             _ => {}
                         },
@@ -334,7 +352,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
 
                     Kagi {
                         layout,
-                        now_playing: np,
                         titlebar,
                         res_handler,
                         left_sidebar,
