@@ -13,7 +13,6 @@ pub struct Kagi {
     pub control_bar: Entity<ControlBar>,
     pub main_view: Entity<MainView>,
     pub layout: Entity<Layout>,
-    pub now_playing: Entity<PlayerContext>,
     pub res_handler: Entity<ResHandler>,
 }
 

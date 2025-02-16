@@ -81,6 +81,8 @@ impl PlayerState {
     }
 }
 
+impl Metadata {}
+
 impl PlayerContext {
     pub fn new(cx: &mut App) -> Self {
         PlayerContext {

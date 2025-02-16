@@ -127,111 +127,113 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             SliderEvent::Change(vol) => {
                                 let volume = (vol * 100.0).round() as f64 / 100.0;
                                 cx.global::<Controller>().volume(volume);
-                                this.now_playing.update(cx, |this, cx| {
-                                    this.update_vol(cx, volume.clone());
-                                });
+                                cx.global_mut::<PlayerContext>()
+                                    .state
+                                    .update(cx, |this, cx| {
+                                        this.volume = volume.clone();
+                                    });
                                 cx.notify();
                             }
                         },
                     )
                     .detach();
-                    cx.subscribe(
-                        &playbar,
-                        move |this: &mut Kagi, _, event: &SliderEvent, cx| match event {
+                    cx.subscribe(&playbar, move |_: &mut Kagi, _, event: &SliderEvent, cx| {
+                        match event {
                             SliderEvent::Change(time) => {
                                 let controller = cx.global::<Controller>();
-                                let np = this.now_playing.read(cx);
-                                let total_duration = np.duration as f32;
+                                let meta = cx.global::<PlayerContext>().metadata.read(cx);
+                                let state_write = cx.global_mut::<PlayerContext>().state;
+                                let total_duration = meta.duration as f32;
                                 if total_duration > 0.0 {
                                     let seek_time =
                                         (total_duration * (*time as f32)).round() as u64;
                                     controller.seek(seek_time);
-                                    this.now_playing.update(cx, |this, cx| {
-                                        this.update_pos(cx, seek_time);
+                                    state_write.update(cx, |this, cx| {
+                                        this.position = seek_time;
                                     });
                                 }
 
                                 cx.notify();
                             }
-                        },
-                    )
+                        }
+                    })
                     .detach();
                     let pb_clone = playbar.clone();
-                    cx.subscribe(
-                        &np,
-                        move |this: &mut Kagi,
-                              _,
-                              event: &PlayerContextEvent,
-                              cx: &mut Context<Kagi>| {
-                            match event {
-                                PlayerContextEvent::Meta(title, album, artists, duration) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.title = title.clone();
-                                        this.album = album.clone();
-                                        this.artists = artists.clone();
-                                        this.duration = duration.clone();
-                                    });
-                                    cx.notify();
-                                }
-                                PlayerContextEvent::Position(pos) => {
-                                    let np = &this.now_playing;
-                                    np.update(cx, |this, _| {
-                                        this.position = *pos;
-                                    });
-                                    let total_duration = np.read(cx).duration;
-                                    let slider_value = (*pos as f64 / total_duration as f64) as f32;
+                    // cx.subscribe(
+                    //     &np,
+                    //     move |this: &mut Kagi,
+                    //           _,
+                    //           event: &PlayerContextEvent,
+                    //           cx: &mut Context<Kagi>| {
+                    //         match event {
+                    //             PlayerContextEvent::Meta(title, album, artists, duration) => {
+                    //                 this.now_playing.update(cx, |this, _| {
+                    //                     this.title = title.clone();
+                    //                     this.album = album.clone();
+                    //                     this.artists = artists.clone();
+                    //                     this.duration = duration.clone();
+                    //                 });
+                    //                 cx.notify();
+                    //             }
+                    //             PlayerContextEvent::Position(pos) => {
+                    //                 let np = &this.now_playing;
+                    //                 np.update(cx, |this, _| {
+                    //                     this.position = *pos;
+                    //                 });
+                    //                 let total_duration = np.read(cx).duration;
+                    //                 let slider_value = (*pos as f64 / total_duration as f64) as f32;
 
-                                    pb_clone.update(cx, |this, cx| {
-                                        this.value(slider_value, cx);
-                                    });
-                                    cx.notify();
-                                }
-                                PlayerContextEvent::Thumbnail(img) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.thumbnail = Some(img.clone());
-                                    });
-                                    cx.notify();
-                                }
-                                PlayerContextEvent::State(state) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.state = state.clone();
-                                    });
-                                    cx.notify();
-                                }
-                                PlayerContextEvent::Volume(vol) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.volume = vol.clone();
-                                    });
-                                    cx.notify();
-                                }
-                                PlayerContextEvent::Tracks(tracks) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.tracks = tracks.clone();
-                                    });
-                                    cx.notify();
-                                }
-                                PlayerContextEvent::PlaylistName(name) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.playlist_name = name.into();
-                                    });
-                                    cx.notify();
-                                }
-                                PlayerContextEvent::Shuffle(shuffle) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.shuffle = shuffle.clone();
-                                    });
-                                    cx.notify();
-                                }
-                                PlayerContextEvent::Repeat(repeat) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.repeat = repeat.clone();
-                                    });
-                                    cx.notify();
-                                }
-                            }
-                        },
-                    )
-                    .detach();
+                    //                 pb_clone.update(cx, |this, cx| {
+                    //                     this.value(slider_value, cx);
+                    //                 });
+                    //                 cx.notify();
+                    //             }
+                    //             PlayerContextEvent::Thumbnail(img) => {
+                    //                 this.now_playing.update(cx, |this, _| {
+                    //                     this.thumbnail = Some(img.clone());
+                    //                 });
+                    //                 cx.notify();
+                    //             }
+                    //             PlayerContextEvent::State(state) => {
+                    //                 this.now_playing.update(cx, |this, _| {
+                    //                     this.state = state.clone();
+                    //                 });
+                    //                 cx.notify();
+                    //             }
+                    //             PlayerContextEvent::Volume(vol) => {
+                    //                 this.now_playing.update(cx, |this, _| {
+                    //                     this.volume = vol.clone();
+                    //                 });
+                    //                 cx.notify();
+                    //             }
+                    //             PlayerContextEvent::Tracks(tracks) => {
+                    //                 this.now_playing.update(cx, |this, _| {
+                    //                     this.tracks = tracks.clone();
+                    //                 });
+                    //                 cx.notify();
+                    //             }
+                    //             PlayerContextEvent::PlaylistName(name) => {
+                    //                 this.now_playing.update(cx, |this, _| {
+                    //                     this.playlist_name = name.into();
+                    //                 });
+                    //                 cx.notify();
+                    //             }
+                    //             PlayerContextEvent::Shuffle(shuffle) => {
+                    //                 this.now_playing.update(cx, |this, _| {
+                    //                     this.shuffle = shuffle.clone();
+                    //                 });
+                    //                 cx.notify();
+                    //             }
+                    //             PlayerContextEvent::Repeat(repeat) => {
+                    //                 this.now_playing.update(cx, |this, _| {
+                    //                     this.repeat = repeat.clone();
+                    //                 });
+                    //                 cx.notify();
+                    //             }
+                    //         }
+                    //     },
+                    // )
+                    // .detach();
                     cx.subscribe(
                         &res_handler,
                         move |this: &mut Kagi, _, event: &Response, cx| match event {
