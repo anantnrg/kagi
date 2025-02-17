@@ -21,13 +21,15 @@ pub fn register(cx: &mut App) {
     cx.on_action(vol_down);
     cx.on_action(seek_forward);
     cx.on_action(seek_backward);
-    cx.bind_keys([KeyBinding::new("space", ChangeState, None)]);
-    cx.bind_keys([KeyBinding::new("ctrl-left", Prev, None)]);
-    cx.bind_keys([KeyBinding::new("ctrl-right", Next, None)]);
-    cx.bind_keys([KeyBinding::new("left", SeekBackward, None)]);
-    cx.bind_keys([KeyBinding::new("right", SeekForward, None)]);
-    cx.bind_keys([KeyBinding::new("up", VolUp, None)]);
-    cx.bind_keys([KeyBinding::new("down", VolDown, None)]);
+    cx.bind_keys([
+        KeyBinding::new("space", ChangeState, None),
+        KeyBinding::new("ctrl-left", Prev, None),
+        KeyBinding::new("ctrl-right", Next, None),
+        KeyBinding::new("left", SeekBackward, None),
+        KeyBinding::new("right", SeekForward, None),
+        KeyBinding::new("up", VolUp, None),
+        KeyBinding::new("down", VolDown, None),
+    ]);
 }
 
 pub fn change_state(_: &ChangeState, cx: &mut App) {
