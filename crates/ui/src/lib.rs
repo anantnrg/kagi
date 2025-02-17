@@ -25,7 +25,7 @@ use control_bar::ControlBar;
 use gpui::*;
 use layout::Layout;
 use main_view::MainView;
-use now_playing::{NowPlaying, NowPlayingEvent, Thumbnail, Track};
+use now_playing::{PlayerContext, Thumbnail, Track};
 use queue_list::QueueList;
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
@@ -74,8 +74,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             |_, cx| {
                 cx.new(|cx| {
                     let theme = Theme::default();
-                    let now_playing = NowPlaying::new();
-                    let np = cx.new(|_| now_playing.clone());
+                    let now_playing = PlayerContext::new(cx);
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
                     let (mut player, controller) =
@@ -100,6 +99,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
 
                     cx.set_global(controller);
                     cx.set_global(theme);
+                    cx.set_global(now_playing);
                     cx.background_executor()
                         .spawn(async move {
                             player.run().await;
@@ -123,192 +123,151 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
                     cx.subscribe(
                         &vol_slider,
-                        move |this: &mut Kagi, _, event: &SliderEvent, cx| match event {
+                        move |_: &mut Kagi, _, event: &SliderEvent, cx| match event {
                             SliderEvent::Change(vol) => {
                                 let volume = (vol * 100.0).round() as f64 / 100.0;
-                                cx.global::<Controller>().volume(volume);
-                                this.now_playing.update(cx, |this, cx| {
-                                    this.update_vol(cx, volume.clone());
+                                let state = cx.global_mut::<PlayerContext>().state.clone();
+                                state.update(cx, |this, cx| {
+                                    this.volume = volume.clone();
+                                    cx.notify();
                                 });
+                                cx.global::<Controller>().volume(volume);
+
                                 cx.notify();
                             }
                         },
                     )
                     .detach();
-                    cx.subscribe(
-                        &playbar,
-                        move |this: &mut Kagi, _, event: &SliderEvent, cx| match event {
+                    cx.subscribe(&playbar, move |_: &mut Kagi, _, event: &SliderEvent, cx| {
+                        match event {
                             SliderEvent::Change(time) => {
+                                let state_write = cx.global_mut::<PlayerContext>().state.clone();
                                 let controller = cx.global::<Controller>();
-                                let np = this.now_playing.read(cx);
-                                let total_duration = np.duration as f32;
+                                let meta = cx.global::<PlayerContext>().metadata.read(cx);
+                                let total_duration = meta.duration as f32;
                                 if total_duration > 0.0 {
                                     let seek_time =
                                         (total_duration * (*time as f32)).round() as u64;
                                     controller.seek(seek_time);
-                                    this.now_playing.update(cx, |this, cx| {
-                                        this.update_pos(cx, seek_time);
+                                    state_write.update(cx, |this, cx| {
+                                        this.position = seek_time;
+                                        cx.notify();
                                     });
                                 }
 
                                 cx.notify();
                             }
-                        },
-                    )
+                        }
+                    })
                     .detach();
-                    let pb_clone = playbar.clone();
-                    cx.subscribe(
-                        &np,
-                        move |this: &mut Kagi,
-                              _,
-                              event: &NowPlayingEvent,
-                              cx: &mut Context<Kagi>| {
-                            match event {
-                                NowPlayingEvent::Meta(title, album, artists, duration) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.title = title.clone();
-                                        this.album = album.clone();
-                                        this.artists = artists.clone();
-                                        this.duration = duration.clone();
-                                    });
-                                    cx.notify();
-                                }
-                                NowPlayingEvent::Position(pos) => {
-                                    let np = &this.now_playing;
-                                    np.update(cx, |this, _| {
-                                        this.position = *pos;
-                                    });
-                                    let total_duration = np.read(cx).duration;
-                                    let slider_value = (*pos as f64 / total_duration as f64) as f32;
 
-                                    pb_clone.update(cx, |this, cx| {
-                                        this.value(slider_value, cx);
-                                    });
-                                    cx.notify();
-                                }
-                                NowPlayingEvent::Thumbnail(img) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.thumbnail = Some(img.clone());
-                                    });
-                                    cx.notify();
-                                }
-                                NowPlayingEvent::State(state) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.state = state.clone();
-                                    });
-                                    cx.notify();
-                                }
-                                NowPlayingEvent::Volume(vol) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.volume = vol.clone();
-                                    });
-                                    cx.notify();
-                                }
-                                NowPlayingEvent::Tracks(tracks) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.tracks = tracks.clone();
-                                    });
-                                    cx.notify();
-                                }
-                                NowPlayingEvent::PlaylistName(name) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.playlist_name = name.into();
-                                    });
-                                    cx.notify();
-                                }
-                                NowPlayingEvent::Shuffle(shuffle) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.shuffle = shuffle.clone();
-                                    });
-                                    cx.notify();
-                                }
-                                NowPlayingEvent::Repeat(repeat) => {
-                                    this.now_playing.update(cx, |this, _| {
-                                        this.repeat = repeat.clone();
-                                    });
-                                    cx.notify();
-                                }
-                            }
-                        },
-                    )
-                    .detach();
+                    let playbar_clone = playbar.clone();
                     cx.subscribe(
                         &res_handler,
-                        move |this: &mut Kagi, _, event: &Response, cx| match event {
+                        move |_: &mut Kagi, _, event: &Response, cx| match event {
                             Response::Eos => {
-                                if this.now_playing.read(cx).repeat {
+                                if cx.global::<PlayerContext>().state.read(cx).repeat {
                                     cx.global::<Controller>().seek(0);
                                 } else {
                                     cx.global::<Controller>().next();
                                 }
                             }
-                            Response::Position(pos) => this.now_playing.update(cx, |np, cx| {
-                                np.update_pos(cx, *pos);
-                            }),
+                            Response::Position(pos) => {
+                                let state = cx.global_mut::<PlayerContext>().state.clone();
+                                state.update(cx, |state, cx| {
+                                    state.position = *pos;
+                                    cx.notify();
+                                });
+                                let duration = cx
+                                    .global::<PlayerContext>()
+                                    .metadata
+                                    .read(cx)
+                                    .duration
+                                    .clone();
+                                let slider_value = (*pos as f64 / duration as f64) as f32;
+                                playbar_clone.update(cx, |this, cx| {
+                                    this.value(slider_value, cx);
+                                });
+                                cx.notify();
+                            }
                             Response::StreamStart => cx.global::<Controller>().get_meta(),
                             Response::Metadata(track) => {
-                                this.now_playing.update(cx, |np, cx| {
+                                let metadata = cx.global_mut::<PlayerContext>().metadata.clone();
+                                metadata.update(cx, |meta, cx| {
                                     let track = track.clone();
-                                    np.update_meta(
-                                        cx,
-                                        track.title.into(),
-                                        track.album.into(),
-                                        track.artists.iter().map(|s| s.clone().into()).collect(),
-                                        track.duration,
-                                    );
+                                    meta.title = track.title.into();
+                                    meta.album = track.album.into();
+                                    meta.artists =
+                                        track.artists.iter().map(|s| s.clone().into()).collect();
+                                    meta.duration = track.duration;
+                                    cx.notify();
                                 });
                             }
                             Response::Thumbnail(thumbnail) => {
-                                this.now_playing.update(cx, |np, cx| {
-                                    np.update_thumbnail(cx, Thumbnail {
+                                let metadata = cx.global_mut::<PlayerContext>().metadata.clone();
+                                metadata.update(cx, |meta, cx| {
+                                    meta.thumbnail = Some(Thumbnail {
                                         img: ImageSource::Render(
                                             RenderImage::new(thumbnail.clone().to_frame()).into(),
                                         ),
                                         width: thumbnail.width,
                                         height: thumbnail.height,
                                     });
+                                    cx.notify();
                                 });
                             }
-                            Response::StateChanged(state) => {
-                                this.now_playing.update(cx, |np, cx| {
-                                    np.update_state(cx, state.clone());
+                            Response::StateChanged(new_state) => {
+                                let state = cx.global_mut::<PlayerContext>().state.clone();
+                                state.update(cx, |state, cx| {
+                                    state.state = new_state.clone();
+                                    cx.notify();
                                 });
                             }
-                            Response::Tracks(tracks) => this.now_playing.update(cx, |np, cx| {
-                                let mut np_tracks = vec![];
-                                for track in tracks {
-                                    if let Some(thumbnail) = track.thumbnail.clone() {
-                                        np_tracks.push(Track {
-                                            album: track.album.clone(),
-                                            artists: track.artists.clone(),
-                                            duration: track.duration,
-                                            thumbnail: Some(Thumbnail {
-                                                img: ImageSource::Render(
-                                                    RenderImage::new(thumbnail.to_frame()).into(),
-                                                ),
-                                                width: thumbnail.width,
-                                                height: thumbnail.height,
-                                            }),
-                                            title: track.title.clone(),
-                                            uri: track.uri.clone(),
-                                        });
+                            Response::Tracks(new_tracks) => {
+                                let tracks = cx.global_mut::<PlayerContext>().tracks.clone();
+                                tracks.update(cx, |tracks, cx| {
+                                    let mut np_tracks = vec![];
+                                    for track in new_tracks {
+                                        if let Some(thumbnail) = track.thumbnail.clone() {
+                                            np_tracks.push(Track {
+                                                album: track.album.clone(),
+                                                artists: track.artists.clone(),
+                                                duration: track.duration,
+                                                thumbnail: Some(Thumbnail {
+                                                    img: ImageSource::Render(
+                                                        RenderImage::new(thumbnail.to_frame())
+                                                            .into(),
+                                                    ),
+                                                    width: thumbnail.width,
+                                                    height: thumbnail.height,
+                                                }),
+                                                title: track.title.clone(),
+                                                uri: track.uri.clone(),
+                                            });
+                                        }
                                     }
-                                }
-                                np.update_tracks(cx, np_tracks);
-                            }),
+                                    *tracks = np_tracks;
+                                    cx.notify();
+                                });
+                            }
                             Response::SavedPlaylists(playlists) => {
-                                saved_playlists.update(cx, |this, _| {
+                                saved_playlists.update(cx, |this, cx| {
                                     *this = playlists.clone();
+                                    cx.notify();
                                 })
                             }
                             Response::PlaylistName(name) => {
-                                this.now_playing.update(cx, |np, cx| {
-                                    np.update_playlist_name(cx, name.clone());
+                                let meta = cx.global_mut::<PlayerContext>().metadata.clone();
+                                meta.update(cx, |meta, cx| {
+                                    meta.playlist_name = name.clone().into();
+                                    cx.notify();
                                 });
                             }
                             Response::Shuffle(shuffle) => {
-                                this.now_playing.update(cx, |np, cx| {
-                                    np.update_shuffle(cx, shuffle.clone());
+                                let state = cx.global_mut::<PlayerContext>().state.clone();
+                                state.update(cx, |state, cx| {
+                                    state.shuffle = shuffle.clone();
+                                    cx.notify();
                                 });
                             }
                             _ => {}
@@ -317,22 +276,19 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
                     let layout = cx.new(|_| Layout::new());
 
-                    let titlebar = cx.new(|_| Titlebar::new(np.clone(), layout.clone()));
+                    let titlebar = cx.new(|_| Titlebar::new(layout.clone()));
 
-                    let control_bar = cx
-                        .new(|_| ControlBar::new(np.clone(), vol_slider.clone(), playbar.clone()));
-                    let main_view = cx.new(|_| MainView::new(np.clone(), layout.clone()));
-                    let queue_list = cx.new(|cx| QueueList::new(cx, np.clone(), layout.clone()));
+                    let control_bar =
+                        cx.new(|_| ControlBar::new(vol_slider.clone(), playbar.clone()));
+                    let main_view = cx.new(|_| MainView::new(layout.clone()));
+                    let queue_list = cx.new(|cx| QueueList::new(cx, layout.clone()));
                     let layout_sidebar = layout.clone();
-                    let np_sidebar = np.clone();
-                    let left_sidebar = cx.new(move |_| {
-                        LeftSidebar::new(playlists.clone(), layout_sidebar.clone(), np_sidebar)
-                    });
+                    let left_sidebar = cx
+                        .new(move |_| LeftSidebar::new(playlists.clone(), layout_sidebar.clone()));
                     cx.global::<Controller>().load_saved_playlists();
 
                     Kagi {
                         layout,
-                        now_playing: np,
                         titlebar,
                         res_handler,
                         left_sidebar,

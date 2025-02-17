@@ -1,4 +1,4 @@
-use super::{now_playing::*, res_handler::*, titlebar::Titlebar};
+use super::{res_handler::*, titlebar::Titlebar};
 use crate::{
     control_bar::ControlBar, layout::Layout, main_view::MainView, queue_list::QueueList, sidebar::*,
 };
@@ -13,7 +13,6 @@ pub struct Kagi {
     pub control_bar: Entity<ControlBar>,
     pub main_view: Entity<MainView>,
     pub layout: Entity<Layout>,
-    pub now_playing: Entity<NowPlaying>,
     pub res_handler: Entity<ResHandler>,
 }
 
