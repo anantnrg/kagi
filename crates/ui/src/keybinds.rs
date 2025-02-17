@@ -40,13 +40,7 @@ fn vol_up(_: &VolUp, cx: &mut App) {
     let state = cx.global_mut::<PlayerContext>().state.clone();
 
     let curr_vol = cx.global::<PlayerContext>().state.read(cx).volume;
-    let mut new_vol: f64;
-
-    if curr_vol < 1.0 {
-        new_vol = curr_vol + 0.05;
-    } else {
-        new_vol = curr_vol;
-    }
+    let new_vol = (curr_vol + 0.05).clamp(0.0, 1.0);
 
     state.update(cx, |this, cx| {
         this.volume = new_vol.clone();
@@ -59,13 +53,7 @@ fn vol_down(_: &VolDown, cx: &mut App) {
     let state = cx.global_mut::<PlayerContext>().state.clone();
 
     let curr_vol = cx.global::<PlayerContext>().state.read(cx).volume;
-    let new_vol: f64;
-
-    if curr_vol > 0.0 {
-        new_vol = curr_vol - 0.05;
-    } else {
-        new_vol = curr_vol;
-    }
+    let new_vol = (curr_vol - 0.05).clamp(0.0, 1.0);
 
     state.update(cx, |this, cx| {
         this.volume = new_vol.clone();
