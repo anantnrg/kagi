@@ -97,6 +97,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let saved_playlists = cx.new(|_| SavedPlaylists::default());
                     let playlists = saved_playlists.clone();
 
+                    keybinds::register(cx);
                     cx.set_global(controller);
                     cx.set_global(theme);
                     cx.set_global(now_playing);
