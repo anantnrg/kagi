@@ -44,6 +44,7 @@ fn vol_up(_: &VolUp, cx: &mut App) {
 
     state.update(cx, |this, cx| {
         this.volume = new_vol.clone();
+        this.vol(cx, new_vol);
         cx.notify();
     });
     cx.global::<Controller>().volume(new_vol);
@@ -57,6 +58,7 @@ fn vol_down(_: &VolDown, cx: &mut App) {
 
     state.update(cx, |this, cx| {
         this.volume = new_vol.clone();
+        this.vol(cx, new_vol);
         cx.notify();
     });
     cx.global::<Controller>().volume(new_vol);

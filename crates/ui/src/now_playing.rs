@@ -56,6 +56,10 @@ pub enum PlayerContextEvent {
     Repeat(bool),
 }
 
+pub enum PlayerStateEvent {
+    Volume(f64),
+}
+
 impl Metadata {
     pub fn new() -> Self {
         Metadata {
@@ -79,9 +83,11 @@ impl PlayerState {
             repeat: false,
         }
     }
+    pub fn vol(&mut self, cx: &mut Context<Self>, vol: f64) {
+        cx.emit(PlayerStateEvent::Volume(vol));
+        cx.notify();
+    }
 }
-
-impl Metadata {}
 
 impl PlayerContext {
     pub fn new(cx: &mut App) -> Self {
@@ -146,4 +152,5 @@ impl PlayerContext {
 }
 
 impl EventEmitter<PlayerContextEvent> for PlayerContext {}
+impl EventEmitter<PlayerStateEvent> for PlayerState {}
 impl Global for PlayerContext {}
