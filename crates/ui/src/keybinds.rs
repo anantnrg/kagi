@@ -78,10 +78,13 @@ fn vol_down(_: &VolDown, cx: &mut App) {
 
 fn seek_forward(_: &SeekForward, cx: &mut App) {
     let current_pos = cx.global::<PlayerContext>().state.read(cx).position;
-    cx.global::<Controller>().seek(current_pos + 5);
+    let total_duration = cx.global::<PlayerContext>().metadata.read(cx).duration;
+    cx.global::<Controller>()
+        .seek((current_pos + 5).clamp(0, total_duration));
 }
 
 fn seek_backward(_: &SeekBackward, cx: &mut App) {
     let current_pos = cx.global::<PlayerContext>().state.read(cx).position;
-    cx.global::<Controller>().seek(current_pos - 5);
+    cx.global::<Controller>()
+        .seek(current_pos.saturating_sub(5));
 }
