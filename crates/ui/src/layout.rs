@@ -164,3 +164,5 @@ impl Layout {
         self
     }
 }
+
+impl Global for Layout {}

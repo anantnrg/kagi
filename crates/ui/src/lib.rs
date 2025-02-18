@@ -93,6 +93,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .step(0.005)
                             .default(0.0)
                     });
+                    let layout = Layout::new(cx);
                     let recv_controller = controller.clone();
                     let saved_playlists = cx.new(|_| SavedPlaylists::default());
                     let playlists = saved_playlists.clone();
@@ -101,6 +102,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     cx.set_global(controller);
                     cx.set_global(theme);
                     cx.set_global(player_context.clone());
+                    cx.set_global(layout);
                     cx.background_executor()
                         .spawn(async move {
                             player.run().await;
@@ -288,21 +290,17 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         },
                     )
                     .detach();
-                    let layout = cx.new(|cx| Layout::new(cx));
 
-                    let titlebar = cx.new(|_| Titlebar::new(layout.clone()));
+                    let titlebar = cx.new(|_| Titlebar::new());
 
                     let control_bar =
                         cx.new(|_| ControlBar::new(vol_slider.clone(), playbar.clone()));
-                    let main_view = cx.new(|_| MainView::new(layout.clone()));
-                    let queue_list = cx.new(|cx| QueueList::new(cx, layout.clone()));
-                    let layout_sidebar = layout.clone();
-                    let left_sidebar = cx
-                        .new(move |_| LeftSidebar::new(playlists.clone(), layout_sidebar.clone()));
+                    let main_view = cx.new(|_| MainView::new());
+                    let queue_list = cx.new(|cx| QueueList::new(cx));
+                    let left_sidebar = cx.new(move |_| LeftSidebar::new(playlists.clone()));
                     cx.global::<Controller>().load_saved_playlists();
 
                     Kagi {
-                        layout,
                         titlebar,
                         res_handler,
                         left_sidebar,
