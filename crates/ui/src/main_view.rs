@@ -16,7 +16,7 @@ impl Render for MainView {
 
         div()
             .track_focus(&cx.focus_handle())
-            .w(px(layout.central_width))
+            .w(px(layout.central_width.read(cx).clone()))
             .h_full()
             .flex()
             .flex_grow()
@@ -27,8 +27,8 @@ impl Render for MainView {
             .child({
                 if let Some(thumbnail) = meta.read(cx).thumbnail.clone() {
                     div()
-                        .w(px(layout.central_width))
-                        .max_h(px(layout.central_width))
+                        .w(px(layout.central_width.read(cx).clone()))
+                        .max_h(px(layout.central_width.read(cx).clone()))
                         .flex_col()
                         .flex()
                         .items_end()

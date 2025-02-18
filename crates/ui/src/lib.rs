@@ -288,7 +288,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         },
                     )
                     .detach();
-                    let layout = cx.new(|_| Layout::new());
+                    let layout = cx.new(|cx| Layout::new(cx));
 
                     let titlebar = cx.new(|_| Titlebar::new(layout.clone()));
 

@@ -34,19 +34,20 @@ impl Render for QueueList {
         let theme = cx.global::<Theme>();
         let layout = self.layout.clone().read(cx);
 
-        if layout.right_sidebar.show {
+        if layout.right_sidebar.read(cx).clone().show {
             deferred(
                 div()
                     .track_focus(&cx.focus_handle())
                     .bg(theme.background)
                     .h_full()
-                    .w(px(layout.right_sidebar.width))
+                    .w(px(layout.right_sidebar.read(cx).clone().width))
                     .flex()
                     .flex_col()
                     .min_w(px(280.0))
-                    .when(layout.mode == LayoutMode::Overlay, |this| {
-                        this.absolute().border_0()
-                    })
+                    .when(
+                        layout.mode.read(cx).clone() == LayoutMode::Overlay,
+                        |this| this.absolute().border_0(),
+                    )
                     .border_l_1()
                     .border_color(theme.secondary)
                     .occlude()

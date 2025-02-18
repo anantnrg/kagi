@@ -21,17 +21,18 @@ impl Render for LeftSidebar {
         let current_index = cx.global::<PlayerContext>().metadata.clone();
         let layout = self.layout.clone().read(cx);
 
-        if layout.left_sidebar.show {
+        if layout.left_sidebar.read(cx).clone().show {
             deferred(
                 div()
                     .track_focus(&cx.focus_handle())
                     .bg(theme.background)
                     .h_full()
-                    .w(px(layout.left_sidebar.width))
+                    .w(px(layout.left_sidebar.read(cx).clone().width))
                     .min_w(px(200.0))
-                    .when(layout.mode == LayoutMode::Overlay, |this| {
-                        this.absolute().border_0()
-                    })
+                    .when(
+                        layout.mode.read(cx).clone() == LayoutMode::Overlay,
+                        |this| this.absolute().border_0(),
+                    )
                     .occlude()
                     .border_r_1()
                     .border_color(theme.secondary)

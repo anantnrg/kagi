@@ -23,8 +23,8 @@ impl Render for Kagi {
         let control_bar = self.clone().control_bar;
         let main_view = self.clone().main_view;
         let queue_list = self.clone().queue_list;
-        self.layout.update(cx, |layout, _| {
-            *layout = layout.clone().layout(win.bounds().size.width.0);
+        self.layout.update(cx, |layout, cx| {
+            *layout = layout.clone().layout(win.bounds().size.width.0, cx);
         });
         let theme = cx.global::<Theme>();
 

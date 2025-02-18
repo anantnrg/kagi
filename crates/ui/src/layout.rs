@@ -68,6 +68,7 @@ impl Layout {
         let central_width: f32;
         let mut left_sidebar = SidebarLayout::new();
         let mut right_sidebar = SidebarLayout::new();
+
         if window_width < OVERLAY_THRESHOLD {
             // Enter overlay mode
             layout_mode = LayoutMode::Overlay;
@@ -142,11 +143,11 @@ impl Layout {
                 right_sidebar.width = 0.0;
             }
 
-            let used_width = if self.left_sidebar.read(cx).show {
+            let used_width = if left_sidebar.show {
                 left_sidebar.width
             } else {
                 0.0
-            } + if self.right_sidebar.read(cx).show {
+            } + if right_sidebar.show {
                 right_sidebar.width
             } else {
                 0.0
@@ -155,11 +156,11 @@ impl Layout {
             central_width = computed_central.max(MIN_CENTRAL_WIDTH);
         }
 
-        self.central_width
-            .update(cx, |this, _| *this = central_width);
-        self.left_sidebar.update(cx, |this, _| *this = left_sidebar);
-        self.right_sidebar
-            .update(cx, |this, _| *this = right_sidebar);
+        self.central_width.update(cx, |v, _| *v = central_width);
+        self.left_sidebar.update(cx, |ls, _| *ls = left_sidebar);
+        self.right_sidebar.update(cx, |rs, _| *rs = right_sidebar);
+        self.mode.update(cx, |m, _| *m = layout_mode);
+
         self
     }
 }
