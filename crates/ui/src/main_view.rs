@@ -4,15 +4,13 @@ use gpui::*;
 use crate::{layout::Layout, player_context::PlayerContext};
 
 #[derive(Clone)]
-pub struct MainView {
-    pub layout: Entity<Layout>,
-}
+pub struct MainView;
 
 impl Render for MainView {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let meta = cx.global::<PlayerContext>().metadata.clone();
         let theme = cx.global::<Theme>();
-        let layout = self.layout.clone().read(cx);
+        let layout = cx.global::<Layout>().clone();
 
         div()
             .track_focus(&cx.focus_handle())
@@ -89,7 +87,7 @@ impl Render for MainView {
 }
 
 impl MainView {
-    pub fn new(layout: Entity<Layout>) -> Self {
-        MainView { layout }
+    pub fn new() -> Self {
+        MainView {}
     }
 }

@@ -7,12 +7,12 @@ use gpui::*;
 use prelude::FluentBuilder;
 
 #[derive(Clone)]
-pub struct Titlebar {
-    pub layout: Entity<Layout>,
-}
+pub struct Titlebar;
 
 impl Render for Titlebar {
     fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let left_sidebar = cx.global_mut::<Layout>().left_sidebar.clone();
+        let right_sidebar = cx.global_mut::<Layout>().right_sidebar.clone();
         let theme = cx.global::<Theme>();
         div()
             .w_full()
@@ -46,13 +46,11 @@ impl Render for Titlebar {
                                     .color(theme.icon.into()),
                             )
                             .on_mouse_down(MouseButton::Left, {
-                                let layout = self.layout.clone();
                                 move |_, _, cx| {
-                                    layout.update(cx, |this, cx| {
-                                        this.left_sidebar.update(cx, |this, _| {
-                                            this.should_show = !this.should_show.clone();
-                                        })
-                                    })
+                                    left_sidebar.update(cx, |sidebar, cx| {
+                                        sidebar.show = !sidebar.show;
+                                        cx.notify();
+                                    });
                                 }
                             }),
                     ),
@@ -150,13 +148,15 @@ impl Render for Titlebar {
                                     .color(theme.icon.into()),
                             )
                             .on_mouse_down(MouseButton::Left, {
-                                let layout = self.layout.clone();
                                 move |_, _, cx| {
-                                    layout.update(cx, |this, cx| {
-                                        this.right_sidebar.update(cx, |this, _| {
-                                            this.should_show = !this.should_show.clone();
-                                        })
-                                    })
+                                    let right_sidebar =
+                                        cx.global_mut::<Layout>().clone().right_sidebar;
+                                    let show = cx.global::<Layout>().right_sidebar.read(cx).show;
+                                    println!("{}", show);
+                                    right_sidebar.update(cx, |this, cx| {
+                                        this.show = !show;
+                                        cx.notify()
+                                    });
                                 }
                             }),
                     )
@@ -201,7 +201,7 @@ impl Render for Titlebar {
 }
 
 impl Titlebar {
-    pub fn new(layout: Entity<Layout>) -> Titlebar {
-        Titlebar { layout }
+    pub fn new() -> Titlebar {
+        Titlebar {}
     }
 }

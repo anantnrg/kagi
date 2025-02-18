@@ -12,7 +12,6 @@ use crate::{
 };
 
 pub struct QueueList {
-    pub layout: Entity<Layout>,
     pub nucleo: Nucleo<(usize, String)>,
     pub query: Entity<String>,
     pub tracks: Vec<Track>,
@@ -32,7 +31,7 @@ impl Render for QueueList {
         let tracks = self.search(tracks.read(cx).clone(), self.query.read(cx).clone());
 
         let theme = cx.global::<Theme>();
-        let layout = self.layout.clone().read(cx);
+        let layout = cx.global::<Layout>().clone();
 
         if layout.right_sidebar.read(cx).clone().show {
             deferred(
@@ -140,7 +139,7 @@ impl Render for QueueList {
 }
 
 impl QueueList {
-    pub fn new(cx: &mut Context<QueueList>, layout: Entity<Layout>) -> Self {
+    pub fn new(cx: &mut Context<QueueList>) -> Self {
         let query = cx.new(|_| String::new());
         let handle = cx.focus_handle();
 
@@ -158,7 +157,6 @@ impl QueueList {
         .detach();
 
         QueueList {
-            layout,
             nucleo,
             query,
             tracks: vec![],

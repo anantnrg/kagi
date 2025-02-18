@@ -10,7 +10,6 @@ use crate::{
 #[derive(Clone)]
 pub struct LeftSidebar {
     pub playlists: Entity<SavedPlaylists>,
-    pub layout: Entity<Layout>,
 }
 
 impl Render for LeftSidebar {
@@ -19,7 +18,7 @@ impl Render for LeftSidebar {
         let controller = cx.global::<Controller>().clone();
         let playlists = self.playlists.read(cx).clone().playlists;
         let current_index = cx.global::<PlayerContext>().metadata.clone();
-        let layout = self.layout.clone().read(cx);
+        let layout = cx.global::<Layout>().clone();
 
         if layout.left_sidebar.read(cx).clone().show {
             deferred(
@@ -104,7 +103,7 @@ impl Render for LeftSidebar {
 }
 
 impl LeftSidebar {
-    pub fn new(playlists: Entity<SavedPlaylists>, layout: Entity<Layout>) -> Self {
-        LeftSidebar { playlists, layout }
+    pub fn new(playlists: Entity<SavedPlaylists>) -> Self {
+        LeftSidebar { playlists }
     }
 }
