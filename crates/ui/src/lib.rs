@@ -1,6 +1,7 @@
 pub mod app;
 pub mod assets;
 pub mod control_bar;
+mod keybinds;
 pub mod layout;
 pub mod main_view;
 pub mod now_playing;
@@ -24,7 +25,7 @@ use control_bar::ControlBar;
 use gpui::*;
 use layout::Layout;
 use main_view::MainView;
-use now_playing::{PlayerContext, Thumbnail, Track};
+use now_playing::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
 use queue_list::QueueList;
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
@@ -96,9 +97,10 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let saved_playlists = cx.new(|_| SavedPlaylists::default());
                     let playlists = saved_playlists.clone();
 
+                    keybinds::register(cx);
                     cx.set_global(controller);
                     cx.set_global(theme);
-                    cx.set_global(now_playing);
+                    cx.set_global(now_playing.clone());
                     cx.background_executor()
                         .spawn(async move {
                             player.run().await;
@@ -158,6 +160,19 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             }
                         }
                     })
+                    .detach();
+                    let vol_slider_clone = vol_slider.clone();
+                    cx.subscribe(
+                        &now_playing.state,
+                        move |_: &mut Kagi, _, event: &PlayerStateEvent, cx| match event {
+                            PlayerStateEvent::Volume(vol) => {
+                                vol_slider_clone.update(cx, |this, cx| {
+                                    this.value(*vol as f32, cx);
+                                });
+                                cx.notify();
+                            }
+                        },
+                    )
                     .detach();
 
                     let playbar_clone = playbar.clone();
