@@ -1,3 +1,5 @@
+use gpui::*;
+
 const MIN_CENTRAL_WIDTH: f32 = 200.0;
 const LEFT_PCT: f32 = 0.20;
 const RIGHT_PCT: f32 = 0.33;
@@ -11,11 +13,11 @@ pub enum LayoutMode {
 
 #[derive(Clone)]
 pub struct Layout {
-    pub left_sidebar: SidebarLayout,
-    pub central: CentralLayout,
-    pub right_sidebar: SidebarLayout,
-    pub central_width: f32,
-    pub mode: LayoutMode,
+    pub left_sidebar: Entity<SidebarLayout>,
+    pub central: Entity<CentralLayout>,
+    pub right_sidebar: Entity<SidebarLayout>,
+    pub central_width: Entity<f32>,
+    pub mode: Entity<LayoutMode>,
 }
 
 #[derive(Clone)]
@@ -42,18 +44,18 @@ impl SidebarLayout {
 }
 
 impl Layout {
-    pub fn new() -> Layout {
+    pub fn new(cx: &mut App) -> Layout {
         Layout {
-            left_sidebar: SidebarLayout::new(),
-            central: CentralLayout::List,
-            right_sidebar: SidebarLayout::new(),
-            central_width: 0.0,
-            mode: LayoutMode::Inline,
+            left_sidebar: cx.new(|_| SidebarLayout::new()),
+            central: cx.new(|_| CentralLayout::List),
+            right_sidebar: cx.new(|_| SidebarLayout::new()),
+            central_width: cx.new(|_| 0.0),
+            mode: cx.new(|_| LayoutMode::Inline),
         }
     }
 
-    pub fn get_left_sidebar(&mut self) -> SidebarLayout {
-        self.left_sidebar.clone()
+    pub fn get_left_sidebar(&mut self, cx: &mut App) -> SidebarLayout {
+        self.left_sidebar.read(cx).clone()
     }
 
     pub fn get_right_sidebar(&mut self) -> SidebarLayout {
