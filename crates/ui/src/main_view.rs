@@ -1,7 +1,7 @@
 use components::theme::Theme;
 use gpui::*;
 
-use crate::{layout::Layout, now_playing::PlayerContext};
+use crate::{layout::Layout, player_context::PlayerContext};
 
 #[derive(Clone)]
 pub struct MainView {

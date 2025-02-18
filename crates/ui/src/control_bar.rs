@@ -7,7 +7,7 @@ use components::{
 use gpui::{prelude::FluentBuilder, *};
 use gstreamer::State;
 
-use crate::now_playing::PlayerContext;
+use crate::player_context::PlayerContext;
 
 #[derive(Clone)]
 pub struct ControlBar {

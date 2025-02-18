@@ -4,7 +4,7 @@ pub mod control_bar;
 mod keybinds;
 pub mod layout;
 pub mod main_view;
-pub mod now_playing;
+pub mod player_context;
 pub mod queue_list;
 pub mod res_handler;
 pub mod sidebar;
@@ -25,7 +25,7 @@ use control_bar::ControlBar;
 use gpui::*;
 use layout::Layout;
 use main_view::MainView;
-use now_playing::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
+use player_context::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
 use queue_list::QueueList;
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
@@ -74,7 +74,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             |_, cx| {
                 cx.new(|cx| {
                     let theme = Theme::default();
-                    let now_playing = PlayerContext::new(cx);
+                    let player_context = PlayerContext::new(cx);
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
                     let (mut player, controller) =
@@ -100,7 +100,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     keybinds::register(cx);
                     cx.set_global(controller);
                     cx.set_global(theme);
-                    cx.set_global(now_playing.clone());
+                    cx.set_global(player_context.clone());
                     cx.background_executor()
                         .spawn(async move {
                             player.run().await;
@@ -163,7 +163,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
                     let vol_slider_clone = vol_slider.clone();
                     cx.subscribe(
-                        &now_playing.state,
+                        &player_context.state,
                         move |_: &mut Kagi, _, event: &PlayerStateEvent, cx| match event {
                             PlayerStateEvent::Volume(vol) => {
                                 vol_slider_clone.update(cx, |this, cx| {

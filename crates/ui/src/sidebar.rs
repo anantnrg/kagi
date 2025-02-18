@@ -4,7 +4,7 @@ use gpui::{prelude::FluentBuilder, *};
 
 use crate::{
     layout::{Layout, LayoutMode},
-    now_playing::PlayerContext,
+    player_context::PlayerContext,
 };
 
 #[derive(Clone)]

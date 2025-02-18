@@ -1,5 +1,5 @@
 use crate::layout::Layout;
-use crate::now_playing::PlayerContext;
+use crate::player_context::PlayerContext;
 use components::theme::Theme;
 
 use components::icon::*;

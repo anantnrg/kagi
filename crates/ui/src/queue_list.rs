@@ -8,7 +8,7 @@ use std::sync::Arc;
 
 use crate::{
     layout::{Layout, LayoutMode},
-    now_playing::{PlayerContext, Track},
+    player_context::{PlayerContext, Track},
 };
 
 pub struct QueueList {

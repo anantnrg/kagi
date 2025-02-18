@@ -1,4 +1,4 @@
-use crate::now_playing::PlayerContext;
+use crate::player_context::PlayerContext;
 use backend::player::Controller;
 use gpui::*;
 use gstreamer::State;
