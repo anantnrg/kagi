@@ -35,102 +35,105 @@ impl Render for QueueList {
         let layout = self.layout.clone().read(cx);
 
         if layout.right_sidebar.show {
-            div()
-                .track_focus(&cx.focus_handle())
-                .bg(theme.background)
-                .h_full()
-                .w(px(layout.right_sidebar.width))
-                .flex()
-                .flex_col()
-                .min_w(px(280.0))
-                .when(layout.mode == LayoutMode::Overlay, |this| {
-                    this.absolute().border_0()
-                })
-                .border_l_1()
-                .border_color(theme.secondary)
-                .occlude()
-                .child(
-                    div()
-                        .w_full()
-                        .h_10()
-                        .py_1()
-                        .px_1()
-                        .border_b_1()
-                        .border_color(theme.secondary)
-                        .child(self.text_input.clone()),
-                )
-                .child(
-                    uniform_list(
-                        cx.entity(),
-                        "queue_list",
-                        tracks.len(),
-                        move |_, range, _, cx| {
-                            let theme = cx.global::<Theme>();
-
-                            range
-                                .map(|id| {
-                                    let track = &tracks[id];
-
-                                    div()
-                                        .w_full()
-                                        .h_16()
-                                        .flex()
-                                        .mt_2()
-                                        .gap_2()
-                                        .text_color(theme.text)
-                                        .items_center()
-                                        .justify_between()
-                                        .px_2()
-                                        .rounded_lg()
-                                        .overflow_hidden()
-                                        .hover(|this| this.bg(theme.secondary))
-                                        .on_mouse_down(MouseButton::Left, move |_, _, cx| {
-                                            let controller = cx.global::<Controller>().clone();
-                                            controller.play_id(id);
-                                        })
-                                        .child({
-                                            if let Some(thumbnail) = &track.thumbnail {
-                                                img(thumbnail.img.clone())
-                                                    .min_h(px(56.0))
-                                                    .min_w(px(56.0))
-                                                    .rounded_md()
-                                            } else {
-                                                img("")
-                                            }
-                                        })
-                                        .child(
-                                            div()
-                                                .w_full()
-                                                .h(px(56.0))
-                                                .flex()
-                                                .flex_col()
-                                                .gap(px(1.0))
-                                                .child(
-                                                    div()
-                                                        .child(track.title.clone())
-                                                        .truncate()
-                                                        .text_ellipsis()
-                                                        .text_base()
-                                                        .font_weight(FontWeight::MEDIUM),
-                                                )
-                                                .child(
-                                                    div()
-                                                        .child(track.artists.join(", "))
-                                                        .truncate()
-                                                        .text_ellipsis()
-                                                        .text_sm()
-                                                        .font_weight(FontWeight::NORMAL),
-                                                ),
-                                        )
-                                })
-                                .collect()
-                        },
-                    )
+            deferred(
+                div()
+                    .track_focus(&cx.focus_handle())
+                    .bg(theme.background)
                     .h_full()
-                    .px_1(),
-                )
+                    .w(px(layout.right_sidebar.width))
+                    .flex()
+                    .flex_col()
+                    .min_w(px(280.0))
+                    .when(layout.mode == LayoutMode::Overlay, |this| {
+                        this.absolute().border_0()
+                    })
+                    .border_l_1()
+                    .border_color(theme.secondary)
+                    .occlude()
+                    .child(
+                        div()
+                            .w_full()
+                            .h_10()
+                            .py_1()
+                            .px_1()
+                            .border_b_1()
+                            .border_color(theme.secondary)
+                            .child(self.text_input.clone()),
+                    )
+                    .child(
+                        uniform_list(
+                            cx.entity(),
+                            "queue_list",
+                            tracks.len(),
+                            move |_, range, _, cx| {
+                                let theme = cx.global::<Theme>();
+
+                                range
+                                    .map(|id| {
+                                        let track = &tracks[id];
+
+                                        div()
+                                            .w_full()
+                                            .h_16()
+                                            .flex()
+                                            .mt_2()
+                                            .gap_2()
+                                            .text_color(theme.text)
+                                            .items_center()
+                                            .justify_between()
+                                            .px_2()
+                                            .rounded_lg()
+                                            .overflow_hidden()
+                                            .hover(|this| this.bg(theme.secondary))
+                                            .on_mouse_down(MouseButton::Left, move |_, _, cx| {
+                                                let controller = cx.global::<Controller>().clone();
+                                                controller.play_id(id);
+                                            })
+                                            .child({
+                                                if let Some(thumbnail) = &track.thumbnail {
+                                                    img(thumbnail.img.clone())
+                                                        .min_h(px(56.0))
+                                                        .min_w(px(56.0))
+                                                        .rounded_md()
+                                                } else {
+                                                    img("")
+                                                }
+                                            })
+                                            .child(
+                                                div()
+                                                    .w_full()
+                                                    .h(px(56.0))
+                                                    .flex()
+                                                    .flex_col()
+                                                    .gap(px(1.0))
+                                                    .child(
+                                                        div()
+                                                            .child(track.title.clone())
+                                                            .truncate()
+                                                            .text_ellipsis()
+                                                            .text_base()
+                                                            .font_weight(FontWeight::MEDIUM),
+                                                    )
+                                                    .child(
+                                                        div()
+                                                            .child(track.artists.join(", "))
+                                                            .truncate()
+                                                            .text_ellipsis()
+                                                            .text_sm()
+                                                            .font_weight(FontWeight::NORMAL),
+                                                    ),
+                                            )
+                                    })
+                                    .collect()
+                            },
+                        )
+                        .h_full()
+                        .px_1(),
+                    ),
+            )
+            .with_priority(2)
         } else {
-            div().track_focus(&cx.focus_handle())
+            deferred(div().track_focus(&cx.focus_handle())).with_priority(2)
         }
     }
 }
