@@ -48,7 +48,7 @@ impl Render for Titlebar {
                             .on_mouse_down(MouseButton::Left, {
                                 move |_, _, cx| {
                                     left_sidebar.update(cx, |sidebar, cx| {
-                                        sidebar.show = !sidebar.show;
+                                        sidebar.should_show = !sidebar.should_show;
                                         cx.notify();
                                     });
                                 }
