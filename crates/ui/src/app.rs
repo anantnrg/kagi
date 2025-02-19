@@ -23,6 +23,7 @@ impl Render for Kagi {
         let main_view = self.clone().main_view;
         let queue_list = self.clone().queue_list;
         let old_layout = cx.global::<Layout>().clone();
+        println!("{:#?}", old_layout.left_sidebar.read(cx).clone());
         *cx.global_mut::<Layout>() = old_layout.layout(win.bounds().size.width.0, cx);
         // let new_layout = {
         //     let layout_clone = cx.global::<Layout>().clone();

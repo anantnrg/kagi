@@ -5,13 +5,13 @@ const LEFT_PCT: f32 = 0.20;
 const RIGHT_PCT: f32 = 0.33;
 const OVERLAY_THRESHOLD: f32 = 640.0;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum LayoutMode {
     Inline,
     Overlay,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Layout {
     pub left_sidebar: Entity<SidebarLayout>,
     pub central: Entity<CentralLayout>,
@@ -20,14 +20,14 @@ pub struct Layout {
     pub mode: Entity<LayoutMode>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SidebarLayout {
     pub show: bool,
     pub width: f32,
     pub should_show: bool,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum CentralLayout {
     List,
     Art,
@@ -63,11 +63,13 @@ impl Layout {
     }
 
     /// Recalculates the layout based on the provided window_width.
-    pub fn layout(mut self, window_width: f32, cx: &mut App) -> Self {
+    pub fn layout(self, window_width: f32, cx: &mut App) -> Self {
         let layout_mode: LayoutMode;
         let central_width: f32;
         let mut left_sidebar = SidebarLayout::new();
         let mut right_sidebar = SidebarLayout::new();
+        left_sidebar.should_show = self.left_sidebar.read(cx).should_show;
+        right_sidebar.should_show = self.right_sidebar.read(cx).should_show;
 
         if window_width < OVERLAY_THRESHOLD {
             // Enter overlay mode
