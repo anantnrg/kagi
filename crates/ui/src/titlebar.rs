@@ -11,10 +11,6 @@ pub struct Titlebar;
 
 impl Render for Titlebar {
     fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let layout_write = cx.global_mut::<Layout>().clone();
-        let layout = cx.global::<Layout>().clone();
-        // let left_sidebar = cx.global_mut::<Layout>().left_sidebar.read(cx).clone();
-        let right_sidebar = cx.global_mut::<Layout>().right_sidebar.clone();
         let theme = cx.global::<Theme>();
         div()
             .w_full()
@@ -52,7 +48,6 @@ impl Render for Titlebar {
                                     let layout = cx.global_mut::<Layout>().clone();
                                     layout.left_sidebar.update(cx, |this, _| {
                                         this.should_show = !this.should_show.clone();
-                                        println!("{}", this.should_show);
                                     });
                                 }
                             }),
@@ -155,7 +150,6 @@ impl Render for Titlebar {
                                     let layout = cx.global_mut::<Layout>().clone();
                                     layout.right_sidebar.update(cx, |this, _| {
                                         this.should_show = !this.should_show.clone();
-                                        println!("{}", this.should_show);
                                     });
                                 }
                             }),
