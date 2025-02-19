@@ -48,9 +48,8 @@ impl Render for Titlebar {
                                     .color(theme.icon.into()),
                             )
                             .on_mouse_down(MouseButton::Left, {
-                                let layout = layout.clone();
                                 move |_, _, cx| {
-                                    // let layout = cx.global_mut::<Layout>().clone();
+                                    let layout = cx.global_mut::<Layout>().clone();
                                     layout.left_sidebar.update(cx, |this, _| {
                                         this.should_show = !this.should_show.clone();
                                         println!("{}", this.should_show);
@@ -153,13 +152,10 @@ impl Render for Titlebar {
                             )
                             .on_mouse_down(MouseButton::Left, {
                                 move |_, _, cx| {
-                                    let right_sidebar =
-                                        cx.global_mut::<Layout>().clone().right_sidebar;
-                                    let show = cx.global::<Layout>().right_sidebar.read(cx).show;
-                                    println!("{}", show);
-                                    right_sidebar.update(cx, |this, cx| {
-                                        this.show = !show;
-                                        cx.notify()
+                                    let layout = cx.global_mut::<Layout>().clone();
+                                    layout.right_sidebar.update(cx, |this, _| {
+                                        this.should_show = !this.should_show.clone();
+                                        println!("{}", this.should_show);
                                     });
                                 }
                             }),
