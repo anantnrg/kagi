@@ -4,13 +4,12 @@ use gpui::{prelude::FluentBuilder, *};
 
 use crate::{
     layout::{Layout, LayoutMode},
-    now_playing::PlayerContext,
+    player_context::PlayerContext,
 };
 
 #[derive(Clone)]
 pub struct LeftSidebar {
     pub playlists: Entity<SavedPlaylists>,
-    pub layout: Entity<Layout>,
 }
 
 impl Render for LeftSidebar {
@@ -19,19 +18,20 @@ impl Render for LeftSidebar {
         let controller = cx.global::<Controller>().clone();
         let playlists = self.playlists.read(cx).clone().playlists;
         let current_index = cx.global::<PlayerContext>().metadata.clone();
-        let layout = self.layout.clone().read(cx);
+        let layout = cx.global::<Layout>().clone();
 
-        if layout.left_sidebar.show {
+        if layout.left_sidebar.read(cx).clone().show {
             deferred(
                 div()
                     .track_focus(&cx.focus_handle())
                     .bg(theme.background)
                     .h_full()
-                    .w(px(layout.left_sidebar.width))
+                    .w(px(layout.left_sidebar.read(cx).clone().width))
                     .min_w(px(200.0))
-                    .when(layout.mode == LayoutMode::Overlay, |this| {
-                        this.absolute().border_0()
-                    })
+                    .when(
+                        layout.mode.read(cx).clone() == LayoutMode::Overlay,
+                        |this| this.absolute().border_0(),
+                    )
                     .occlude()
                     .border_r_1()
                     .border_color(theme.secondary)
@@ -103,7 +103,7 @@ impl Render for LeftSidebar {
 }
 
 impl LeftSidebar {
-    pub fn new(playlists: Entity<SavedPlaylists>, layout: Entity<Layout>) -> Self {
-        LeftSidebar { playlists, layout }
+    pub fn new(playlists: Entity<SavedPlaylists>) -> Self {
+        LeftSidebar { playlists }
     }
 }

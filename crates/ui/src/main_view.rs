@@ -1,22 +1,20 @@
 use components::theme::Theme;
 use gpui::*;
 
-use crate::{layout::Layout, now_playing::PlayerContext};
+use crate::{layout::Layout, player_context::PlayerContext};
 
 #[derive(Clone)]
-pub struct MainView {
-    pub layout: Entity<Layout>,
-}
+pub struct MainView;
 
 impl Render for MainView {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let meta = cx.global::<PlayerContext>().metadata.clone();
         let theme = cx.global::<Theme>();
-        let layout = self.layout.clone().read(cx);
+        let layout = cx.global::<Layout>().clone();
 
         div()
             .track_focus(&cx.focus_handle())
-            .w(px(layout.central_width))
+            .w(px(layout.central_width.read(cx).clone()))
             .h_full()
             .flex()
             .flex_grow()
@@ -27,8 +25,8 @@ impl Render for MainView {
             .child({
                 if let Some(thumbnail) = meta.read(cx).thumbnail.clone() {
                     div()
-                        .w(px(layout.central_width))
-                        .max_h(px(layout.central_width))
+                        .w(px(layout.central_width.read(cx).clone()))
+                        .max_h(px(layout.central_width.read(cx).clone()))
                         .flex_col()
                         .flex()
                         .items_end()
@@ -89,7 +87,7 @@ impl Render for MainView {
 }
 
 impl MainView {
-    pub fn new(layout: Entity<Layout>) -> Self {
-        MainView { layout }
+    pub fn new() -> Self {
+        MainView {}
     }
 }

@@ -4,7 +4,7 @@ pub mod control_bar;
 mod keybinds;
 pub mod layout;
 pub mod main_view;
-pub mod now_playing;
+pub mod player_context;
 pub mod queue_list;
 pub mod res_handler;
 pub mod sidebar;
@@ -25,7 +25,7 @@ use control_bar::ControlBar;
 use gpui::*;
 use layout::Layout;
 use main_view::MainView;
-use now_playing::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
+use player_context::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
 use queue_list::QueueList;
 use res_handler::ResHandler;
 use sidebar::LeftSidebar;
@@ -74,7 +74,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             |_, cx| {
                 cx.new(|cx| {
                     let theme = Theme::default();
-                    let now_playing = PlayerContext::new(cx);
+                    let player_context = PlayerContext::new(cx);
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
                     let (mut player, controller) =
@@ -93,6 +93,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             .step(0.005)
                             .default(0.0)
                     });
+                    let layout = Layout::new(cx);
                     let recv_controller = controller.clone();
                     let saved_playlists = cx.new(|_| SavedPlaylists::default());
                     let playlists = saved_playlists.clone();
@@ -100,7 +101,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     keybinds::register(cx);
                     cx.set_global(controller);
                     cx.set_global(theme);
-                    cx.set_global(now_playing.clone());
+                    cx.set_global(player_context.clone());
+                    cx.set_global(layout);
                     cx.background_executor()
                         .spawn(async move {
                             player.run().await;
@@ -163,7 +165,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
                     let vol_slider_clone = vol_slider.clone();
                     cx.subscribe(
-                        &now_playing.state,
+                        &player_context.state,
                         move |_: &mut Kagi, _, event: &PlayerStateEvent, cx| match event {
                             PlayerStateEvent::Volume(vol) => {
                                 vol_slider_clone.update(cx, |this, cx| {
@@ -238,6 +240,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 });
                             }
                             Response::Tracks(new_tracks) => {
+                                println!("upating tracks");
                                 let tracks = cx.global_mut::<PlayerContext>().tracks.clone();
                                 tracks.update(cx, |tracks, cx| {
                                     let mut np_tracks = vec![];
@@ -288,21 +291,17 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         },
                     )
                     .detach();
-                    let layout = cx.new(|_| Layout::new());
 
-                    let titlebar = cx.new(|_| Titlebar::new(layout.clone()));
+                    let titlebar = cx.new(|_| Titlebar::new());
 
                     let control_bar =
                         cx.new(|_| ControlBar::new(vol_slider.clone(), playbar.clone()));
-                    let main_view = cx.new(|_| MainView::new(layout.clone()));
-                    let queue_list = cx.new(|cx| QueueList::new(cx, layout.clone()));
-                    let layout_sidebar = layout.clone();
-                    let left_sidebar = cx
-                        .new(move |_| LeftSidebar::new(playlists.clone(), layout_sidebar.clone()));
+                    let main_view = cx.new(|_| MainView::new());
+                    let queue_list = cx.new(|cx| QueueList::new(cx));
+                    let left_sidebar = cx.new(move |_| LeftSidebar::new(playlists.clone()));
                     cx.global::<Controller>().load_saved_playlists();
 
                     Kagi {
-                        layout,
                         titlebar,
                         res_handler,
                         left_sidebar,

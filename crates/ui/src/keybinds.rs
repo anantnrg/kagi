@@ -1,17 +1,22 @@
-use crate::now_playing::PlayerContext;
+use crate::{layout::Layout, player_context::PlayerContext};
 use backend::player::Controller;
 use gpui::*;
 use gstreamer::State;
 
-actions!(kagi, [
-    ChangeState,
-    Prev,
-    Next,
-    VolUp,
-    VolDown,
-    SeekForward,
-    SeekBackward
-]);
+actions!(
+    kagi,
+    [
+        ChangeState,
+        Prev,
+        Next,
+        VolUp,
+        VolDown,
+        SeekForward,
+        SeekBackward,
+        LeftSidebar,
+        RightSidebar
+    ]
+);
 
 pub fn register(cx: &mut App) {
     cx.on_action(change_state);
@@ -21,6 +26,8 @@ pub fn register(cx: &mut App) {
     cx.on_action(vol_down);
     cx.on_action(seek_forward);
     cx.on_action(seek_backward);
+    cx.on_action(left_sidebar);
+    cx.on_action(right_sidebar);
     cx.bind_keys([
         KeyBinding::new("space", ChangeState, None),
         KeyBinding::new("ctrl-left", Prev, None),
@@ -29,6 +36,8 @@ pub fn register(cx: &mut App) {
         KeyBinding::new("right", SeekForward, None),
         KeyBinding::new("up", VolUp, None),
         KeyBinding::new("down", VolDown, None),
+        KeyBinding::new("ctrl-b", LeftSidebar, None),
+        KeyBinding::new("ctrl-l", RightSidebar, None),
     ]);
 }
 
@@ -89,4 +98,20 @@ fn seek_backward(_: &SeekBackward, cx: &mut App) {
     let current_pos = cx.global::<PlayerContext>().state.read(cx).position;
     cx.global::<Controller>()
         .seek(current_pos.saturating_sub(5));
+}
+
+fn left_sidebar(_: &LeftSidebar, cx: &mut App) {
+    let layout = cx.global_mut::<Layout>().clone();
+    layout.left_sidebar.update(cx, |this, cx| {
+        this.should_show = !this.should_show.clone();
+        cx.notify();
+    });
+}
+
+fn right_sidebar(_: &RightSidebar, cx: &mut App) {
+    let layout = cx.global_mut::<Layout>().clone();
+    layout.right_sidebar.update(cx, |this, cx| {
+        this.should_show = !this.should_show.clone();
+        cx.notify();
+    });
 }

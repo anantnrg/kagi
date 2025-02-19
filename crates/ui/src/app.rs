@@ -12,7 +12,6 @@ pub struct Kagi {
     pub queue_list: Entity<QueueList>,
     pub control_bar: Entity<ControlBar>,
     pub main_view: Entity<MainView>,
-    pub layout: Entity<Layout>,
     pub res_handler: Entity<ResHandler>,
 }
 
@@ -23,9 +22,11 @@ impl Render for Kagi {
         let control_bar = self.clone().control_bar;
         let main_view = self.clone().main_view;
         let queue_list = self.clone().queue_list;
-        self.layout.update(cx, |layout, _| {
-            *layout = layout.clone().layout(win.bounds().size.width.0);
-        });
+        let old_layout = cx.global::<Layout>().clone();
+
+        // Recalculate layout
+        *cx.global_mut::<Layout>() = old_layout.layout(win.bounds().size.width.0, cx);
+
         let theme = cx.global::<Theme>();
 
         div()

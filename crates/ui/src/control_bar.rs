@@ -7,7 +7,7 @@ use components::{
 use gpui::{prelude::FluentBuilder, *};
 use gstreamer::State;
 
-use crate::now_playing::PlayerContext;
+use crate::player_context::PlayerContext;
 
 #[derive(Clone)]
 pub struct ControlBar {
@@ -18,7 +18,6 @@ pub struct ControlBar {
 impl Render for ControlBar {
     fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let state_write = cx.global_mut::<PlayerContext>().state.clone();
-        let controller = cx.global::<Controller>();
         let theme = cx.global::<Theme>();
 
         let meta = cx.global::<PlayerContext>().metadata.read(cx);
@@ -111,9 +110,8 @@ impl Render for ControlBar {
                                     )
                                     .on_mouse_down(MouseButton::Left, {
                                         {
-                                            let controller = controller.clone();
-                                            move |_, _, _| {
-                                                controller.shuffle();
+                                            move |_, _, cx| {
+                                                cx.global::<Controller>().shuffle();
                                             }
                                         }
                                     }),
@@ -134,9 +132,8 @@ impl Render for ControlBar {
                                     .hover(|this| this.text_color(theme.accent))
                                     .on_mouse_down(MouseButton::Left, {
                                         {
-                                            let controller = controller.clone();
-                                            move |_, _, _| {
-                                                controller.prev();
+                                            move |_, _, cx| {
+                                                cx.global::<Controller>().prev();
                                             }
                                         }
                                     }),
@@ -175,15 +172,14 @@ impl Render for ControlBar {
                                     .hover(|this| this.text_color(theme.accent))
                                     .on_mouse_down(MouseButton::Left, {
                                         {
-                                            let controller = controller.clone();
                                             let np = state.clone();
-                                            move |_, _, _| {
+                                            move |_, _, cx| {
                                                 if np.state == State::Playing {
-                                                    controller.pause();
+                                                    cx.global::<Controller>().pause();
                                                 } else if np.state == State::Null
                                                     || np.state == State::Paused
                                                 {
-                                                    controller.play();
+                                                    cx.global::<Controller>().play();
                                                 }
                                             }
                                         }
@@ -204,9 +200,8 @@ impl Render for ControlBar {
                                     )
                                     .on_mouse_down(MouseButton::Left, {
                                         {
-                                            let controller = controller.clone();
-                                            move |_, _, _| {
-                                                controller.next();
+                                            move |_, _, cx| {
+                                                cx.global::<Controller>().next();
                                             }
                                         }
                                     }),

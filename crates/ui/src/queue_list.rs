@@ -8,11 +8,10 @@ use std::sync::Arc;
 
 use crate::{
     layout::{Layout, LayoutMode},
-    now_playing::{PlayerContext, Track},
+    player_context::{PlayerContext, Track},
 };
 
 pub struct QueueList {
-    pub layout: Entity<Layout>,
     pub nucleo: Nucleo<(usize, String)>,
     pub query: Entity<String>,
     pub tracks: Vec<Track>,
@@ -32,21 +31,22 @@ impl Render for QueueList {
         let tracks = self.search(tracks.read(cx).clone(), self.query.read(cx).clone());
 
         let theme = cx.global::<Theme>();
-        let layout = self.layout.clone().read(cx);
+        let layout = cx.global::<Layout>().clone();
 
-        if layout.right_sidebar.show {
+        if layout.right_sidebar.read(cx).clone().show {
             deferred(
                 div()
                     .track_focus(&cx.focus_handle())
                     .bg(theme.background)
                     .h_full()
-                    .w(px(layout.right_sidebar.width))
+                    .w(px(layout.right_sidebar.read(cx).clone().width))
                     .flex()
                     .flex_col()
                     .min_w(px(280.0))
-                    .when(layout.mode == LayoutMode::Overlay, |this| {
-                        this.absolute().border_0()
-                    })
+                    .when(
+                        layout.mode.read(cx).clone() == LayoutMode::Overlay,
+                        |this| this.absolute().border_0(),
+                    )
                     .border_l_1()
                     .border_color(theme.secondary)
                     .occlude()
@@ -139,7 +139,7 @@ impl Render for QueueList {
 }
 
 impl QueueList {
-    pub fn new(cx: &mut Context<QueueList>, layout: Entity<Layout>) -> Self {
+    pub fn new(cx: &mut Context<QueueList>) -> Self {
         let query = cx.new(|_| String::new());
         let handle = cx.focus_handle();
 
@@ -157,7 +157,6 @@ impl QueueList {
         .detach();
 
         QueueList {
-            layout,
             nucleo,
             query,
             tracks: vec![],
@@ -167,13 +166,11 @@ impl QueueList {
     }
 
     pub fn search(&mut self, tracks: Vec<Track>, query: String) -> Vec<Track> {
-        if self.tracks.len() != tracks.len()
-            && if self.tracks.len() > 0 && tracks.len() > 0 {
-                self.tracks[0].title != tracks[0].title
-            } else {
-                true
-            }
-        {
+        if if self.tracks.len() > 0 && tracks.len() > 0 {
+            self.tracks[0].title != tracks[0].title
+        } else {
+            true
+        } {
             self.nucleo = Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
             let injector = self.nucleo.injector();
 
