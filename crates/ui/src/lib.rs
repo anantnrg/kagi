@@ -240,7 +240,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 });
                             }
                             Response::Tracks(new_tracks) => {
-                                println!("upating tracks");
                                 let tracks = cx.global_mut::<PlayerContext>().tracks.clone();
                                 tracks.update(cx, |tracks, cx| {
                                     let mut np_tracks = vec![];

@@ -166,11 +166,7 @@ impl QueueList {
     }
 
     pub fn search(&mut self, tracks: Vec<Track>, query: String) -> Vec<Track> {
-        if if self.tracks.len() > 0 && tracks.len() > 0 {
-            self.tracks[0].title != tracks[0].title
-        } else {
-            true
-        } {
+        if self.tracks != tracks {
             self.nucleo = Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1);
             let injector = self.nucleo.injector();
 

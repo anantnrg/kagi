@@ -154,3 +154,13 @@ impl PlayerContext {
 impl EventEmitter<PlayerContextEvent> for PlayerContext {}
 impl EventEmitter<PlayerStateEvent> for PlayerState {}
 impl Global for PlayerContext {}
+
+impl PartialEq for Track {
+    fn eq(&self, other: &Self) -> bool {
+        self.title == other.title
+            && self.artists == other.artists
+            && self.album == other.album
+            && self.uri == other.uri
+            && self.duration == other.duration
+    }
+}
