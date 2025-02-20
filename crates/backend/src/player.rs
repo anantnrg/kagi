@@ -14,6 +14,7 @@ use smallvec::SmallVec;
 use crate::{
     Backend,
     playback::{Playlist, SavedPlaylist, SavedPlaylists, Track},
+    theme::Theme,
 };
 
 pub enum Command {
@@ -49,6 +50,7 @@ pub enum Response {
     SavedPlaylists(SavedPlaylists),
     PlaylistName(String),
     Shuffle(bool),
+    Theme(Theme),
 }
 
 #[derive(Clone)]
