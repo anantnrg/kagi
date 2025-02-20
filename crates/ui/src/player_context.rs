@@ -157,10 +157,10 @@ impl Global for PlayerContext {}
 
 impl PartialEq for Track {
     fn eq(&self, other: &Self) -> bool {
-        true
-    }
-
-    fn ne(&self, other: &Self) -> bool {
-        false
+        self.title == other.title
+            && self.artists == other.artists
+            && self.album == other.album
+            && self.uri == other.uri
+            && self.duration == other.duration
     }
 }
