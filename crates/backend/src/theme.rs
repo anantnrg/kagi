@@ -1,4 +1,8 @@
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    io::{self, Write},
+    path::PathBuf,
+};
 
 use directories::UserDirs;
 use serde::{Deserialize, Serialize};
@@ -67,5 +71,14 @@ impl Theme {
         } else {
             Theme::default()
         }
+    }
+
+    pub fn write(new: &Theme) -> io::Result<()> {
+        if let Some(file_path) = Self::get_file() {
+            let toml_str = toml::to_string_pretty(new).expect("Failed to serialize Theme");
+            let mut file = fs::File::create(file_path)?;
+            file.write_all(toml_str.as_bytes())?;
+        }
+        Ok(())
     }
 }
