@@ -154,3 +154,13 @@ impl PlayerContext {
 impl EventEmitter<PlayerContextEvent> for PlayerContext {}
 impl EventEmitter<PlayerStateEvent> for PlayerState {}
 impl Global for PlayerContext {}
+
+impl PartialEq for Track {
+    fn eq(&self, other: &Self) -> bool {
+        true
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        false
+    }
+}
