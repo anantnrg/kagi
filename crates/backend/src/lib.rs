@@ -8,6 +8,7 @@ use player::Response;
 pub mod gstreamer;
 pub mod playback;
 pub mod player;
+pub mod theme;
 
 /// Common backend trait. Can be used to implement multple backends.
 #[async_trait]
