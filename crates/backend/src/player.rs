@@ -509,6 +509,12 @@ impl Controller {
             .send(Command::Shuffle)
             .expect("Could not send command");
     }
+
+    pub fn load_theme(&self) {
+        self.tx
+            .send(Command::LoadTheme)
+            .expect("Could not send command");
+    }
 }
 
 impl Thumbnail {

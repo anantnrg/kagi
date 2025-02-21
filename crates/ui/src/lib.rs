@@ -78,7 +78,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let arc_res = Arc::new(res_handler.clone());
                     let (mut player, controller) =
                         Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
-                    let theme = Theme::default();
+                    controller.load_theme();
                     let vol_slider =
                         cx.new(|_| Slider::new().min(0.0).max(1.0).step(0.005).default(0.2));
                     let playbar =
@@ -90,7 +90,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
 
                     keybinds::register(cx);
                     cx.set_global(controller);
-                    cx.set_global(theme);
                     cx.set_global(player_context.clone());
                     cx.set_global(layout);
                     cx.background_executor()
@@ -275,6 +274,9 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     state.shuffle = shuffle.clone();
                                     cx.notify();
                                 });
+                            }
+                            Response::Theme(theme) => {
+                                cx.set_global::<Theme>(theme.clone().into());
                             }
                             _ => {}
                         },

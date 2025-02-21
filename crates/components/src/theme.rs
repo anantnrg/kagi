@@ -52,4 +52,20 @@ impl Theme {
     }
 }
 
+impl From<backend::theme::Theme> for Theme {
+    fn from(theme: backend::theme::Theme) -> Self {
+        Self {
+            accent: rgb(theme.accent),
+            text: rgb(theme.text),
+            icon: rgb(theme.icon),
+            background: rgb(theme.background),
+            secondary: rgb(theme.secondary),
+            sidebar_bg: rgb(theme.sidebar_bg),
+            main_bg: rgb(theme.main_bg),
+            titlebar_bg: rgb(theme.titlebar_bg),
+            highlight: rgb(theme.highlight),
+        }
+    }
+}
+
 impl Global for Theme {}
