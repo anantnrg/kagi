@@ -7,31 +7,31 @@ use std::{
 use directories::UserDirs;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Theme {
-    pub accent: u32,
-    pub text: u32,
-    pub icon: u32,
-    pub background: u32,
-    pub secondary: u32,
-    pub sidebar_bg: u32,
-    pub main_bg: u32,
-    pub titlebar_bg: u32,
-    pub highlight: u32,
+    pub accent: String,
+    pub text: String,
+    pub icon: String,
+    pub background: String,
+    pub secondary: String,
+    pub sidebar_bg: String,
+    pub main_bg: String,
+    pub titlebar_bg: String,
+    pub highlight: String,
 }
 
 impl Theme {
     pub fn default() -> Self {
         Theme {
-            accent: 0xcba6f7,
-            text: 0xcdd6f4,
-            icon: 0xcdd6f4,
-            background: 0x11111B,
-            secondary: 0x1e1e2d,
-            sidebar_bg: 0x11111B,
-            main_bg: 0x11111B,
-            titlebar_bg: 0x11111B,
-            highlight: 0x52cba6f7,
+            accent: String::from("#cba6f7"),
+            text: String::from("#cdd6f4"),
+            icon: String::from("#cdd6f4"),
+            background: String::from("#11111B"),
+            secondary: String::from("#1e1e2d"),
+            sidebar_bg: String::from("#11111B"),
+            main_bg: String::from("#11111B"),
+            titlebar_bg: String::from("#11111B"),
+            highlight: String::from("#52cba6f7"),
         }
     }
     pub fn get_file() -> Option<PathBuf> {

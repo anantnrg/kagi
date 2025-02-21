@@ -55,15 +55,15 @@ impl Theme {
 impl From<backend::theme::Theme> for Theme {
     fn from(theme: backend::theme::Theme) -> Self {
         Self {
-            accent: rgb(theme.accent),
-            text: rgb(theme.text),
-            icon: rgb(theme.icon),
-            background: rgb(theme.background),
-            secondary: rgb(theme.secondary),
-            sidebar_bg: rgb(theme.sidebar_bg),
-            main_bg: rgb(theme.main_bg),
-            titlebar_bg: rgb(theme.titlebar_bg),
-            highlight: rgb(theme.highlight),
+            accent: hex_to_rgba(&theme.accent),
+            text: hex_to_rgba(&theme.text),
+            icon: hex_to_rgba(&theme.icon),
+            background: hex_to_rgba(&theme.background),
+            secondary: hex_to_rgba(&theme.secondary),
+            sidebar_bg: hex_to_rgba(&theme.sidebar_bg),
+            main_bg: hex_to_rgba(&theme.main_bg),
+            titlebar_bg: hex_to_rgba(&theme.titlebar_bg),
+            highlight: hex_to_rgba(&theme.highlight),
         }
     }
 }
@@ -71,25 +71,52 @@ impl From<backend::theme::Theme> for Theme {
 impl Into<backend::theme::Theme> for Theme {
     fn into(self) -> backend::theme::Theme {
         backend::theme::Theme {
-            accent: rgba_to_u32(self.accent),
-            text: rgba_to_u32(self.text),
-            icon: rgba_to_u32(self.icon),
-            background: rgba_to_u32(self.background),
-            secondary: rgba_to_u32(self.secondary),
-            sidebar_bg: rgba_to_u32(self.sidebar_bg),
-            main_bg: rgba_to_u32(self.main_bg),
-            titlebar_bg: rgba_to_u32(self.titlebar_bg),
-            highlight: rgba_to_u32(self.highlight),
+            accent: rgba_to_hex(self.accent),
+            text: rgba_to_hex(self.text),
+            icon: rgba_to_hex(self.icon),
+            background: rgba_to_hex(self.background),
+            secondary: rgba_to_hex(self.secondary),
+            sidebar_bg: rgba_to_hex(self.sidebar_bg),
+            main_bg: rgba_to_hex(self.main_bg),
+            titlebar_bg: rgba_to_hex(self.titlebar_bg),
+            highlight: rgba_to_hex(self.highlight),
         }
     }
 }
 
 impl Global for Theme {}
 
-pub fn rgba_to_u32(color: Rgba) -> u32 {
+pub fn rgba_to_hex(color: Rgba) -> String {
     let a = (color.a * 255.0) as u32;
     let r = (color.r * 255.0) as u32;
     let g = (color.g * 255.0) as u32;
     let b = (color.b * 255.0) as u32;
-    (a << 24) | (r << 16) | (g << 8) | b
+    format!("#{:02X}{:02X}{:02X}{:02X}", a, r, g, b)
+}
+
+pub fn hex_to_rgba(hex: &str) -> Rgba {
+    let hex = hex.trim_start_matches('#');
+
+    let (a, r, g, b) = match hex.len() {
+        6 => (
+            255,
+            u8::from_str_radix(&hex[0..2], 16).unwrap(),
+            u8::from_str_radix(&hex[2..4], 16).unwrap(),
+            u8::from_str_radix(&hex[4..6], 16).unwrap(),
+        ),
+        8 => (
+            u8::from_str_radix(&hex[0..2], 16).unwrap(),
+            u8::from_str_radix(&hex[2..4], 16).unwrap(),
+            u8::from_str_radix(&hex[4..6], 16).unwrap(),
+            u8::from_str_radix(&hex[6..8], 16).unwrap(),
+        ),
+        _ => panic!("Invalid hex color: {}", hex),
+    };
+
+    Rgba {
+        a: a as f32 / 255.0,
+        r: r as f32 / 255.0,
+        g: g as f32 / 255.0,
+        b: b as f32 / 255.0,
+    }
 }
