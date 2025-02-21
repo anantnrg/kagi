@@ -53,6 +53,18 @@ impl SubTheme {
     }
 }
 
+impl Theme {
+    pub fn default() -> Self {
+        Theme {
+            main: SubTheme::default(),
+            titlebar: SubTheme::default(),
+            left_sidebar: SubTheme::default(),
+            right_sidebar: SubTheme::default(),
+            control_bar: SubTheme::default(),
+        }
+    }
+}
+
 impl From<backend::theme::SubTheme> for SubTheme {
     fn from(theme: backend::theme::SubTheme) -> Self {
         Self {
@@ -79,6 +91,10 @@ impl Into<backend::theme::SubTheme> for SubTheme {
             highlight: rgba_to_hex(self.highlight),
         }
     }
+}
+
+impl Into<backend::theme::Theme> for Theme {
+    fn into(self) -> backend::theme::Theme {}
 }
 
 impl Global for Theme {}

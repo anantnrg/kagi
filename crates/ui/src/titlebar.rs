@@ -15,9 +15,9 @@ impl Render for Titlebar {
         div()
             .w_full()
             .h_8()
-            .bg(theme.titlebar_bg)
+            .bg(theme.titlebar.background)
             .border_b_1()
-            .border_color(theme.secondary)
+            .border_color(theme.titlebar.secondary)
             .flex()
             .items_center()
             .justify_between()
@@ -41,7 +41,7 @@ impl Render for Titlebar {
                             .child(
                                 Icon::new(Icons::LeftSidebar)
                                     .size(18.0)
-                                    .color(theme.icon.into()),
+                                    .color(theme.titlebar.icon.into()),
                             )
                             .on_mouse_down(MouseButton::Left, {
                                 move |_, _, cx| {
@@ -75,7 +75,7 @@ impl Render for Titlebar {
                         };
 
                         div()
-                            .text_color(theme.accent)
+                            .text_color(theme.titlebar.accent)
                             .text_sm()
                             .overflow_hidden()
                             .when(window_width < 200.0, |this| this.child("Kagi"))
@@ -144,7 +144,7 @@ impl Render for Titlebar {
                             .child(
                                 Icon::new(Icons::RightSidebar)
                                     .size(18.0)
-                                    .color(theme.icon.into()),
+                                    .color(theme.titlebar.icon.into()),
                             )
                             .on_mouse_down(MouseButton::Left, {
                                 move |_, _, cx| {
@@ -163,7 +163,7 @@ impl Render for Titlebar {
                             .flex()
                             .items_center()
                             .justify_center()
-                            .hover(|this| this.bg(theme.secondary))
+                            .hover(|this| this.bg(theme.titlebar.secondary))
                             .child(Icon::new(Icons::Minimize).size(20.0).color(rgb(0xffffff))),
                     )
                     .child(
@@ -173,7 +173,7 @@ impl Render for Titlebar {
                             .flex()
                             .items_center()
                             .justify_center()
-                            .hover(|this| this.bg(theme.secondary))
+                            .hover(|this| this.bg(theme.titlebar.secondary))
                             .child({
                                 if win.is_maximized() {
                                     Icon::new(Icons::Restore).size(20.0).color(rgb(0xffffff))

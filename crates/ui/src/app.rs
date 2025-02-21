@@ -40,7 +40,7 @@ impl Render for Kagi {
                     .h(px(
                         win.window_bounds().get_bounds().size.height.0 - (32.0 + 96.0)
                     ))
-                    .bg(theme.background)
+                    .bg(theme.main.background)
                     .flex()
                     .overflow_hidden()
                     .child(sidebar)

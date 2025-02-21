@@ -55,7 +55,7 @@ impl Render for MainView {
                         let meta = meta.read(cx);
                         if !meta.title.is_empty() {
                             div()
-                                .text_color(theme.accent)
+                                .text_color(theme.main.accent)
                                 .child(meta.title.clone())
                                 .text_3xl()
                                 .font_weight(FontWeight::EXTRA_BOLD)
@@ -70,7 +70,7 @@ impl Render for MainView {
                         let meta = meta.read(cx);
                         if !meta.title.is_empty() {
                             div()
-                                .text_color(theme.text)
+                                .text_color(theme.main.text)
                                 .text_xl()
                                 .font_weight(FontWeight::MEDIUM)
                                 .whitespace_normal()
