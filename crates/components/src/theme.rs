@@ -68,4 +68,28 @@ impl From<backend::theme::Theme> for Theme {
     }
 }
 
+impl Into<backend::theme::Theme> for Theme {
+    fn into(self) -> backend::theme::Theme {
+        backend::theme::Theme {
+            accent: rgba_to_u32(self.accent),
+            text: rgba_to_u32(self.text),
+            icon: rgba_to_u32(self.icon),
+            background: rgba_to_u32(self.background),
+            secondary: rgba_to_u32(self.secondary),
+            sidebar_bg: rgba_to_u32(self.sidebar_bg),
+            main_bg: rgba_to_u32(self.main_bg),
+            titlebar_bg: rgba_to_u32(self.titlebar_bg),
+            highlight: rgba_to_u32(self.highlight),
+        }
+    }
+}
+
 impl Global for Theme {}
+
+pub fn rgba_to_u32(color: Rgba) -> u32 {
+    let a = (color.a * 255.0) as u32;
+    let r = (color.r * 255.0) as u32;
+    let g = (color.g * 255.0) as u32;
+    let b = (color.b * 255.0) as u32;
+    (a << 24) | (r << 16) | (g << 8) | b
+}
