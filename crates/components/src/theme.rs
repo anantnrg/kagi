@@ -14,6 +14,17 @@ pub struct Theme {
     pub highlight: Rgba,
 }
 
+#[derive(Clone, Copy)]
+pub struct SubTheme {
+    pub accent: Rgba,
+    pub text: Rgba,
+    pub icon: Rgba,
+    pub background: Rgba,
+    pub secondary: Rgba,
+    pub border: Rgba,
+    pub highlight: Rgba,
+}
+
 impl Theme {
     pub fn default() -> Self {
         Theme {
