@@ -515,6 +515,12 @@ impl Controller {
             .send(Command::LoadTheme)
             .expect("Could not send command");
     }
+
+    pub fn write_theme(&self, theme: Theme) {
+        self.tx
+            .send(Command::WriteTheme(theme))
+            .expect("Could not send command");
+    }
 }
 
 impl Thumbnail {

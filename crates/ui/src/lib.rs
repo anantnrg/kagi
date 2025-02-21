@@ -88,8 +88,18 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let saved_playlists = cx.new(|_| SavedPlaylists::default());
                     let playlists = saved_playlists.clone();
 
+                    cx.on_app_quit(|_, cx| {
+                        let theme: u32 = cx.global::<Theme>().accent.into();
+
+                        async move {
+                            println!("{}", theme);
+                        }
+                    })
+                    .detach();
+
                     keybinds::register(cx);
                     cx.set_global(controller);
+                    cx.set_global(Theme::default());
                     cx.set_global(player_context.clone());
                     cx.set_global(layout);
                     cx.background_executor()
@@ -291,7 +301,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let queue_list = cx.new(|cx| QueueList::new(cx));
                     let left_sidebar = cx.new(move |_| LeftSidebar::new(playlists.clone()));
                     cx.global::<Controller>().load_saved_playlists();
-
+                    cx.global::<Controller>().load_theme();
                     Kagi {
                         titlebar,
                         res_handler,
