@@ -303,8 +303,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let left_sidebar = cx.new(move |_| LeftSidebar::new(playlists.clone()));
                     cx.global::<Controller>().load_saved_playlists();
                     cx.global::<Controller>().load_theme();
-                    cx.global::<Controller>()
-                        .write_theme(Theme::default().into());
                     Kagi {
                         titlebar,
                         res_handler,

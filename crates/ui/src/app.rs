@@ -30,6 +30,7 @@ impl Render for Kagi {
         let theme = cx.global::<Theme>();
 
         div()
+            .bg(theme.left_sidebar.background)
             .w_full()
             .h_full()
             .flex_col()
@@ -40,7 +41,6 @@ impl Render for Kagi {
                     .h(px(
                         win.window_bounds().get_bounds().size.height.0 - (32.0 + 96.0)
                     ))
-                    .bg(theme.main.background)
                     .flex()
                     .overflow_hidden()
                     .child(sidebar)

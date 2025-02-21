@@ -48,7 +48,7 @@ impl Render for QueueList {
                         |this| this.absolute().border_0(),
                     )
                     .border_l_1()
-                    .border_color(theme.right_sidebar.secondary)
+                    .border_color(theme.right_sidebar.border)
                     .occlude()
                     .child(
                         div()
@@ -57,7 +57,7 @@ impl Render for QueueList {
                             .py_1()
                             .px_1()
                             .border_b_1()
-                            .border_color(theme.right_sidebar.secondary)
+                            .border_color(theme.right_sidebar.border)
                             .child(self.text_input.clone()),
                     )
                     .child(

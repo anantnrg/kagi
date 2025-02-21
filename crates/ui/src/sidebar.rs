@@ -34,7 +34,7 @@ impl Render for LeftSidebar {
                     )
                     .occlude()
                     .border_r_1()
-                    .border_color(theme.left_sidebar.secondary)
+                    .border_color(theme.left_sidebar.border)
                     .px_3()
                     .py_3()
                     .flex()
@@ -48,7 +48,7 @@ impl Render for LeftSidebar {
                         div()
                             .bg(theme.left_sidebar.background)
                             .border_1()
-                            .border_color(theme.left_sidebar.secondary)
+                            .border_color(theme.left_sidebar.border)
                             .hover(|this| this.border_color(theme.left_sidebar.accent))
                             .when(playlist.name == current_index.clone(), |this| {
                                 this.bg(theme.left_sidebar.secondary)
@@ -85,7 +85,7 @@ impl Render for LeftSidebar {
                             .rounded_lg()
                             .text_color(theme.left_sidebar.text)
                             .border_1()
-                            .border_color(theme.left_sidebar.secondary)
+                            .border_color(theme.left_sidebar.border)
                             .hover(|this| {
                                 this.bg(theme.left_sidebar.secondary)
                                     .border_color(theme.left_sidebar.accent)

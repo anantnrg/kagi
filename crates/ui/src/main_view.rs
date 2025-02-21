@@ -14,9 +14,11 @@ impl Render for MainView {
 
         div()
             .track_focus(&cx.focus_handle())
+            .bg(theme.main.background)
             .w(px(layout.central_width.read(cx).clone()))
             .h_full()
             .flex()
+            .rounded_lg()
             .flex_grow()
             .items_center()
             .justify_center()

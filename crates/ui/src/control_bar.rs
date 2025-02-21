@@ -29,7 +29,7 @@ impl Render for ControlBar {
             .h_24()
             .border_t_1()
             .bg(theme.control_bar.background)
-            .border_color(theme.control_bar.secondary)
+            .border_color(theme.control_bar.border)
             .flex()
             .flex_col()
             .justify_center()

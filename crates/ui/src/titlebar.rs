@@ -17,7 +17,7 @@ impl Render for Titlebar {
             .h_8()
             .bg(theme.titlebar.background)
             .border_b_1()
-            .border_color(theme.titlebar.secondary)
+            .border_color(theme.titlebar.border)
             .flex()
             .items_center()
             .justify_between()
