@@ -33,6 +33,8 @@ pub enum Command {
     WriteSavedPlaylists,
     RetrieveSavedPlaylists,
     Shuffle,
+    LoadTheme,
+    WriteTheme(Theme),
 }
 
 #[derive(Clone)]
@@ -394,6 +396,15 @@ impl Player {
                         self.tx
                             .send(Response::Shuffle(self.shuffle.clone()))
                             .expect("Could not send message");
+                    }
+                    Command::LoadTheme => {
+                        let theme = Theme::load();
+                        self.tx
+                            .send(Response::Theme(theme))
+                            .expect("Could not send message");
+                    }
+                    Command::WriteTheme(theme) => {
+                        Theme::write(&theme).expect("Could not write theme");
                     }
                 }
             }
