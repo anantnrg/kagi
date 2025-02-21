@@ -118,8 +118,8 @@ impl Slider {
             .size_4()
             .rounded_full()
             .border(px(1.5))
-            .border_color(theme.secondary)
-            .bg(theme.accent)
+            .border_color(theme.control_bar.secondary)
+            .bg(theme.control_bar.accent)
     }
 }
 
@@ -137,8 +137,8 @@ impl Render for Slider {
                     .relative()
                     .w_full()
                     .h_1p5()
-                    .bg(theme.secondary)
-                    .active(|this| this.bg(theme.accent))
+                    .bg(theme.control_bar.secondary)
+                    .active(|this| this.bg(theme.control_bar.accent))
                     .rounded(px(3.))
                     .child(
                         div()
@@ -147,7 +147,7 @@ impl Render for Slider {
                             .left_0()
                             .h_full()
                             .w(relative(self.relative_value()))
-                            .bg(theme.accent)
+                            .bg(theme.control_bar.accent)
                             .rounded_l(px(3.)),
                     )
                     .child(self.render_thumb(cx))

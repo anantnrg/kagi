@@ -21,6 +21,17 @@ pub struct Theme {
     pub highlight: String,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SubTheme {
+    pub accent: String,
+    pub text: String,
+    pub icon: String,
+    pub background: String,
+    pub secondary: String,
+    pub border: String,
+    pub highlight: String,
+}
+
 impl Theme {
     pub fn default() -> Self {
         Theme {
