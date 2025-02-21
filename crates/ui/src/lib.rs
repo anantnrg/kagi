@@ -73,26 +73,16 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             },
             |_, cx| {
                 cx.new(|cx| {
-                    let theme = Theme::default();
                     let player_context = PlayerContext::new(cx);
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
                     let (mut player, controller) =
                         Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
-                    let vol_slider = cx.new(|_| {
-                        Slider::new(theme)
-                            .min(0.0)
-                            .max(1.0)
-                            .step(0.005)
-                            .default(0.2)
-                    });
-                    let playbar = cx.new(|_| {
-                        Slider::new(theme)
-                            .min(0.0)
-                            .max(1.0)
-                            .step(0.005)
-                            .default(0.0)
-                    });
+                    let theme = Theme::default();
+                    let vol_slider =
+                        cx.new(|_| Slider::new().min(0.0).max(1.0).step(0.005).default(0.2));
+                    let playbar =
+                        cx.new(|_| Slider::new().min(0.0).max(1.0).step(0.005).default(0.0));
                     let layout = Layout::new(cx);
                     let recv_controller = controller.clone();
                     let saved_playlists = cx.new(|_| SavedPlaylists::default());
