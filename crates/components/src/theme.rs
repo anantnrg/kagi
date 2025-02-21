@@ -7,6 +7,7 @@ pub struct Theme {
     pub icon: Rgba,
     pub background: Rgba,
     pub secondary: Rgba,
+    pub border: Rgba,
     pub sidebar_bg: Rgba,
     pub main_bg: Rgba,
     pub titlebar_bg: Rgba,
@@ -21,6 +22,7 @@ impl Theme {
             icon: rgb(0xcdd6f4),
             background: rgb(0x11111B),
             secondary: rgb(0x1e1e2d),
+            border: rgb(0x11111B),
             sidebar_bg: rgb(0x11111B),
             main_bg: rgb(0x11111B),
             titlebar_bg: rgb(0x11111B),
@@ -33,6 +35,7 @@ impl Theme {
         icon: Rgba,
         background: Rgba,
         secondary: Rgba,
+        border: Rgba,
         sidebar_bg: Rgba,
         main_bg: Rgba,
         titlebar_bg: Rgba,
@@ -48,6 +51,7 @@ impl Theme {
             main_bg,
             titlebar_bg,
             highlight,
+            border,
         }
     }
 }
@@ -60,6 +64,7 @@ impl From<backend::theme::Theme> for Theme {
             icon: hex_to_rgba(&theme.icon),
             background: hex_to_rgba(&theme.background),
             secondary: hex_to_rgba(&theme.secondary),
+            border: hex_to_rgba(&theme.border),
             sidebar_bg: hex_to_rgba(&theme.sidebar_bg),
             main_bg: hex_to_rgba(&theme.main_bg),
             titlebar_bg: hex_to_rgba(&theme.titlebar_bg),
@@ -76,6 +81,7 @@ impl Into<backend::theme::Theme> for Theme {
             icon: rgba_to_hex(self.icon),
             background: rgba_to_hex(self.background),
             secondary: rgba_to_hex(self.secondary),
+            border: rgba_to_hex(self.border),
             sidebar_bg: rgba_to_hex(self.sidebar_bg),
             main_bg: rgba_to_hex(self.main_bg),
             titlebar_bg: rgba_to_hex(self.titlebar_bg),
