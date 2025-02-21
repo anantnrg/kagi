@@ -93,8 +93,28 @@ impl Into<backend::theme::SubTheme> for SubTheme {
     }
 }
 
+impl From<backend::theme::Theme> for Theme {
+    fn from(value: backend::theme::Theme) -> Self {
+        Theme {
+            main: value.main.into(),
+            titlebar: value.titlebar.into(),
+            left_sidebar: value.left_sidebar.into(),
+            right_sidebar: value.right_sidebar.into(),
+            control_bar: value.control_bar.into(),
+        }
+    }
+}
+
 impl Into<backend::theme::Theme> for Theme {
-    fn into(self) -> backend::theme::Theme {}
+    fn into(self) -> backend::theme::Theme {
+        backend::theme::Theme {
+            main: self.main.into(),
+            titlebar: self.titlebar.into(),
+            left_sidebar: self.left_sidebar.into(),
+            right_sidebar: self.right_sidebar.into(),
+            control_bar: self.control_bar.into(),
+        }
+    }
 }
 
 impl Global for Theme {}

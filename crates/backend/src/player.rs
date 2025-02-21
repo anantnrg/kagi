@@ -2,6 +2,8 @@ use std::{
     num::NonZeroUsize,
     path::PathBuf,
     sync::{Arc, Mutex},
+    thread,
+    time::Duration,
 };
 
 use gstreamer::State;
@@ -157,6 +159,9 @@ impl Player {
 
     pub async fn run(&mut self) {
         let theme_file = Theme::get_file().expect("Could not get theme file path.");
+        if !theme_file.exists() {
+            Theme::write(&Theme::default()).expect("Could not write file");
+        }
 
         let (watch_tx, watch_rx) = mpsc::channel();
         let mut watcher = notify::recommended_watcher(move |res: Result<Event, _>| {
@@ -446,6 +451,8 @@ impl Player {
                     .expect("Could not send message.");
                 self.position = curr_pos;
             }
+
+            thread::sleep(Duration::from_millis(1));
         }
     }
 }

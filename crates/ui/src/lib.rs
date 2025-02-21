@@ -89,7 +89,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let playlists = saved_playlists.clone();
 
                     cx.on_app_quit(|_, cx| {
-                        let theme: u32 = cx.global::<Theme>().accent.into();
+                        let theme: u32 = cx.global::<Theme>().main.accent.into();
 
                         async move {
                             println!("{}", theme);

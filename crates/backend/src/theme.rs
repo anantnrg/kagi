@@ -9,16 +9,11 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Theme {
-    pub accent: String,
-    pub text: String,
-    pub icon: String,
-    pub background: String,
-    pub secondary: String,
-    pub border: String,
-    pub sidebar_bg: String,
-    pub main_bg: String,
-    pub titlebar_bg: String,
-    pub highlight: String,
+    pub main: SubTheme,
+    pub titlebar: SubTheme,
+    pub left_sidebar: SubTheme,
+    pub right_sidebar: SubTheme,
+    pub control_bar: SubTheme,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -32,19 +27,28 @@ pub struct SubTheme {
     pub highlight: String,
 }
 
-impl Theme {
+impl SubTheme {
     pub fn default() -> Self {
-        Theme {
+        SubTheme {
             accent: String::from("#cba6f7"),
             text: String::from("#cdd6f4"),
             icon: String::from("#cdd6f4"),
             background: String::from("#11111B"),
             secondary: String::from("#1e1e2d"),
             border: String::from("#11111B"),
-            sidebar_bg: String::from("#11111B"),
-            main_bg: String::from("#11111B"),
-            titlebar_bg: String::from("#11111B"),
             highlight: String::from("#52cba6f7"),
+        }
+    }
+}
+
+impl Theme {
+    pub fn default() -> Self {
+        Theme {
+            main: SubTheme::default(),
+            titlebar: SubTheme::default(),
+            left_sidebar: SubTheme::default(),
+            right_sidebar: SubTheme::default(),
+            control_bar: SubTheme::default(),
         }
     }
     pub fn get_file() -> Option<PathBuf> {
@@ -79,6 +83,7 @@ impl Theme {
                     }
                 }
             } else {
+                Self::write(&Theme::default()).expect("Could not write file");
                 Theme::default()
             }
         } else {
