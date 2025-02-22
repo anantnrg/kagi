@@ -1,5 +1,6 @@
-use crate::theme::Theme;
 use gpui::*;
+
+use crate::theme::Theme;
 
 #[derive(Clone, Render)]
 pub struct Thumb(EntityId);
@@ -14,20 +15,18 @@ pub struct Slider {
     step: f32,
     value: f32,
     bounds: Bounds<Pixels>,
-    theme: Theme,
 }
 
 impl EventEmitter<SliderEvent> for Slider {}
 
 impl Slider {
-    pub fn new(theme: Theme) -> Self {
+    pub fn new() -> Self {
         Self {
             min: 0.0,
             max: 100.0,
             step: 1.0,
             value: 0.0,
             bounds: Bounds::default(),
-            theme,
         }
     }
 
@@ -93,6 +92,7 @@ impl Slider {
 
     fn render_thumb(&self, cx: &mut Context<Self>) -> impl gpui::IntoElement {
         let entity_id = cx.entity_id();
+        let theme = cx.global::<Theme>();
 
         div()
             .id("thumb")
@@ -118,13 +118,14 @@ impl Slider {
             .size_4()
             .rounded_full()
             .border(px(1.5))
-            .border_color(self.theme.secondary)
-            .bg(self.theme.accent)
+            .border_color(theme.control_bar.secondary)
+            .bg(theme.control_bar.accent)
     }
 }
 
 impl Render for Slider {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let theme = cx.global::<Theme>();
         div()
             .id("slider")
             .on_mouse_down(MouseButton::Left, cx.listener(Self::on_mouse_down))
@@ -136,8 +137,8 @@ impl Render for Slider {
                     .relative()
                     .w_full()
                     .h_1p5()
-                    .bg(self.theme.secondary)
-                    .active(|this| this.bg(self.theme.accent))
+                    .bg(theme.control_bar.secondary)
+                    .active(|this| this.bg(theme.control_bar.accent))
                     .rounded(px(3.))
                     .child(
                         div()
@@ -146,7 +147,7 @@ impl Render for Slider {
                             .left_0()
                             .h_full()
                             .w(relative(self.relative_value()))
-                            .bg(self.theme.accent)
+                            .bg(theme.control_bar.accent)
                             .rounded_l(px(3.)),
                     )
                     .child(self.render_thumb(cx))

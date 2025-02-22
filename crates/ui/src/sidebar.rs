@@ -24,7 +24,7 @@ impl Render for LeftSidebar {
             deferred(
                 div()
                     .track_focus(&cx.focus_handle())
-                    .bg(theme.background)
+                    .bg(theme.left_sidebar.background)
                     .h_full()
                     .w(px(layout.left_sidebar.read(cx).clone().width))
                     .min_w(px(200.0))
@@ -34,7 +34,7 @@ impl Render for LeftSidebar {
                     )
                     .occlude()
                     .border_r_1()
-                    .border_color(theme.secondary)
+                    .border_color(theme.left_sidebar.border)
                     .px_3()
                     .py_3()
                     .flex()
@@ -46,14 +46,14 @@ impl Render for LeftSidebar {
                         let current_index = curr_index.read(cx).playlist_name.clone();
 
                         div()
-                            .bg(theme.background)
+                            .bg(theme.left_sidebar.background)
                             .border_1()
-                            .border_color(theme.secondary)
-                            .hover(|this| this.border_color(theme.accent))
+                            .border_color(theme.left_sidebar.border)
+                            .hover(|this| this.border_color(theme.left_sidebar.accent))
                             .when(playlist.name == current_index.clone(), |this| {
-                                this.bg(theme.secondary)
+                                this.bg(theme.left_sidebar.secondary)
                             })
-                            .text_color(theme.text)
+                            .text_color(theme.left_sidebar.text)
                             .font_weight(FontWeight::MEDIUM)
                             .w_full()
                             .rounded_lg()
@@ -83,10 +83,13 @@ impl Render for LeftSidebar {
                             .items_center()
                             .justify_center()
                             .rounded_lg()
-                            .text_color(theme.text)
+                            .text_color(theme.left_sidebar.text)
                             .border_1()
-                            .border_color(theme.secondary)
-                            .hover(|this| this.bg(theme.secondary).border_color(theme.accent))
+                            .border_color(theme.left_sidebar.border)
+                            .hover(|this| {
+                                this.bg(theme.left_sidebar.secondary)
+                                    .border_color(theme.left_sidebar.accent)
+                            })
                             .on_mouse_down(MouseButton::Left, move |_, _, _| {
                                 controller.open_folder();
                                 controller.get_queue();

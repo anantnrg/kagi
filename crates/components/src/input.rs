@@ -432,9 +432,12 @@ impl Element for TextElement {
         let theme = cx.global::<Theme>();
 
         let (display_text, text_color) = if content.is_empty() {
-            (input.placeholder.clone(), Hsla::from(theme.secondary))
+            (
+                input.placeholder.clone(),
+                Hsla::from(theme.right_sidebar.secondary),
+            )
         } else {
-            (content.clone(), Hsla::from(theme.text))
+            (content.clone(), Hsla::from(theme.right_sidebar.text))
         };
 
         let run = TextRun {
@@ -487,7 +490,7 @@ impl Element for TextElement {
                         point(bounds.left() + cursor_pos, bounds.top()),
                         size(px(2.0), bounds.bottom() - bounds.top()),
                     ),
-                    theme.accent,
+                    theme.right_sidebar.accent,
                 )),
             )
         } else {
@@ -503,7 +506,7 @@ impl Element for TextElement {
                             bounds.bottom(),
                         ),
                     ),
-                    theme.highlight,
+                    theme.right_sidebar.highlight,
                 )),
                 None,
             )

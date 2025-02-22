@@ -37,7 +37,7 @@ impl Render for QueueList {
             deferred(
                 div()
                     .track_focus(&cx.focus_handle())
-                    .bg(theme.background)
+                    .bg(theme.right_sidebar.background)
                     .h_full()
                     .w(px(layout.right_sidebar.read(cx).clone().width))
                     .flex()
@@ -48,7 +48,7 @@ impl Render for QueueList {
                         |this| this.absolute().border_0(),
                     )
                     .border_l_1()
-                    .border_color(theme.secondary)
+                    .border_color(theme.right_sidebar.border)
                     .occlude()
                     .child(
                         div()
@@ -57,7 +57,7 @@ impl Render for QueueList {
                             .py_1()
                             .px_1()
                             .border_b_1()
-                            .border_color(theme.secondary)
+                            .border_color(theme.right_sidebar.border)
                             .child(self.text_input.clone()),
                     )
                     .child(
@@ -78,13 +78,13 @@ impl Render for QueueList {
                                             .flex()
                                             .mt_2()
                                             .gap_2()
-                                            .text_color(theme.text)
+                                            .text_color(theme.right_sidebar.text)
                                             .items_center()
                                             .justify_between()
                                             .px_2()
                                             .rounded_lg()
                                             .overflow_hidden()
-                                            .hover(|this| this.bg(theme.secondary))
+                                            .hover(|this| this.bg(theme.right_sidebar.secondary))
                                             .on_mouse_down(MouseButton::Left, move |_, _, cx| {
                                                 let controller = cx.global::<Controller>().clone();
                                                 controller.play_id(id);

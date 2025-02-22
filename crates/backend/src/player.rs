@@ -2,18 +2,23 @@ use std::{
     num::NonZeroUsize,
     path::PathBuf,
     sync::{Arc, Mutex},
+    thread,
+    time::Duration,
 };
 
 use gstreamer::State;
 use image::{Frame, RgbaImage, imageops::thumbnail};
+use notify::{Event, EventKind, RecursiveMode, Watcher};
 use rand::seq::SliceRandom;
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
+use std::sync::mpsc;
 
 use crate::{
     Backend,
     playback::{Playlist, SavedPlaylist, SavedPlaylists, Track},
+    theme::Theme,
 };
 
 pub enum Command {
@@ -32,6 +37,8 @@ pub enum Command {
     WriteSavedPlaylists,
     RetrieveSavedPlaylists,
     Shuffle,
+    LoadTheme,
+    WriteTheme(Theme),
 }
 
 #[derive(Clone)]
@@ -49,6 +56,7 @@ pub enum Response {
     SavedPlaylists(SavedPlaylists),
     PlaylistName(String),
     Shuffle(bool),
+    Theme(Theme),
 }
 
 #[derive(Clone)]
@@ -150,6 +158,26 @@ impl Player {
     }
 
     pub async fn run(&mut self) {
+        let theme_file = Theme::get_file().expect("Could not get theme file path.");
+        if !theme_file.exists() {
+            Theme::write(&Theme::default()).expect("Could not write file");
+        }
+
+        let (watch_tx, watch_rx) = mpsc::channel();
+        let mut watcher = notify::recommended_watcher(move |res: Result<Event, _>| {
+            if let Ok(event) = res {
+                if let EventKind::Modify(_) = event.kind {
+                    watch_tx
+                        .send(())
+                        .expect("Failed to send theme update event.");
+                }
+            }
+        })
+        .expect("Failed to create watcher.");
+
+        watcher
+            .watch(&theme_file, RecursiveMode::NonRecursive)
+            .expect("Failed to watch theme file.");
         loop {
             while let Ok(command) = self.rx.try_recv() {
                 match command {
@@ -393,12 +421,29 @@ impl Player {
                             .send(Response::Shuffle(self.shuffle.clone()))
                             .expect("Could not send message");
                     }
+                    Command::LoadTheme => {
+                        let theme = Theme::load();
+                        self.tx
+                            .send(Response::Theme(theme))
+                            .expect("Could not send message");
+                    }
+                    Command::WriteTheme(theme) => {
+                        Theme::write(&theme).expect("Could not write theme");
+                    }
                 }
             }
 
             if let Some(res) = self.backend.monitor().await {
                 self.tx.send(res).unwrap();
             }
+
+            if watch_rx.try_recv().is_ok() {
+                let theme = Theme::load();
+                self.tx
+                    .send(Response::Theme(theme))
+                    .expect("Could not send theme update.");
+            }
+
             let curr_pos = self.backend.get_position().await;
             if self.position != curr_pos {
                 self.tx
@@ -406,6 +451,8 @@ impl Player {
                     .expect("Could not send message.");
                 self.position = curr_pos;
             }
+
+            thread::sleep(Duration::from_millis(1));
         }
     }
 }
@@ -494,6 +541,18 @@ impl Controller {
     pub fn shuffle(&self) {
         self.tx
             .send(Command::Shuffle)
+            .expect("Could not send command");
+    }
+
+    pub fn load_theme(&self) {
+        self.tx
+            .send(Command::LoadTheme)
+            .expect("Could not send command");
+    }
+
+    pub fn write_theme(&self, theme: Theme) {
+        self.tx
+            .send(Command::WriteTheme(theme))
             .expect("Could not send command");
     }
 }

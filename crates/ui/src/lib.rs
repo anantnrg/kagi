@@ -62,7 +62,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
         cx.open_window(
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
-                app_id: Some(String::from("reyvr")),
+                app_id: Some(String::from("kagi")),
                 focus: true,
                 titlebar: Some(TitlebarOptions {
                     title: None,
@@ -73,34 +73,33 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             },
             |_, cx| {
                 cx.new(|cx| {
-                    let theme = Theme::default();
                     let player_context = PlayerContext::new(cx);
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
                     let (mut player, controller) =
                         Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
-                    let vol_slider = cx.new(|_| {
-                        Slider::new(theme)
-                            .min(0.0)
-                            .max(1.0)
-                            .step(0.005)
-                            .default(0.2)
-                    });
-                    let playbar = cx.new(|_| {
-                        Slider::new(theme)
-                            .min(0.0)
-                            .max(1.0)
-                            .step(0.005)
-                            .default(0.0)
-                    });
+                    controller.load_theme();
+                    let vol_slider =
+                        cx.new(|_| Slider::new().min(0.0).max(1.0).step(0.005).default(0.2));
+                    let playbar =
+                        cx.new(|_| Slider::new().min(0.0).max(1.0).step(0.005).default(0.0));
                     let layout = Layout::new(cx);
                     let recv_controller = controller.clone();
                     let saved_playlists = cx.new(|_| SavedPlaylists::default());
                     let playlists = saved_playlists.clone();
 
+                    cx.on_app_quit(|_, cx| {
+                        let theme: u32 = cx.global::<Theme>().main.accent.into();
+
+                        async move {
+                            println!("{}", theme);
+                        }
+                    })
+                    .detach();
+
                     keybinds::register(cx);
                     cx.set_global(controller);
-                    cx.set_global(theme);
+                    cx.set_global(Theme::default());
                     cx.set_global(player_context.clone());
                     cx.set_global(layout);
                     cx.background_executor()
@@ -286,6 +285,10 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     cx.notify();
                                 });
                             }
+                            Response::Theme(theme) => {
+                                cx.set_global::<Theme>(theme.clone().into());
+                                cx.refresh_windows();
+                            }
                             _ => {}
                         },
                     )
@@ -299,7 +302,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let queue_list = cx.new(|cx| QueueList::new(cx));
                     let left_sidebar = cx.new(move |_| LeftSidebar::new(playlists.clone()));
                     cx.global::<Controller>().load_saved_playlists();
-
+                    cx.global::<Controller>().load_theme();
                     Kagi {
                         titlebar,
                         res_handler,
