@@ -62,7 +62,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
         cx.open_window(
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
-                app_id: Some(String::from("reyvr")),
+                app_id: Some(String::from("kagi")),
                 focus: true,
                 titlebar: Some(TitlebarOptions {
                     title: None,
