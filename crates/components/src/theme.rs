@@ -165,6 +165,126 @@ impl Into<backend::theme::Theme> for Theme {
     }
 }
 
+impl From<backend::theme::LeftSidebarTheme> for LeftSidebarTheme {
+    fn from(theme: backend::theme::LeftSidebarTheme) -> Self {
+        Self {
+            bg: hex_to_rgba(&theme.bg),
+            title: hex_to_rgba(&theme.title),
+            item_text: hex_to_rgba(&theme.item_text),
+            item_border: hex_to_rgba(&theme.item_border),
+            item_bg: hex_to_rgba(&theme.item_bg),
+            item_hover: hex_to_rgba(&theme.item_hover),
+        }
+    }
+}
+
+impl Into<backend::theme::LeftSidebarTheme> for LeftSidebarTheme {
+    fn into(self) -> backend::theme::LeftSidebarTheme {
+        backend::theme::LeftSidebarTheme {
+            bg: rgba_to_hex(self.bg),
+            title: rgba_to_hex(self.title),
+            item_text: rgba_to_hex(self.item_text),
+            item_border: rgba_to_hex(self.item_border),
+            item_bg: rgba_to_hex(self.item_bg),
+            item_hover: rgba_to_hex(self.item_hover),
+        }
+    }
+}
+
+impl From<backend::theme::MainTheme> for MainTheme {
+    fn from(theme: backend::theme::MainTheme) -> Self {
+        Self {
+            bg: hex_to_rgba(&theme.bg),
+            title: hex_to_rgba(&theme.title),
+            album: hex_to_rgba(&theme.album),
+            artists: hex_to_rgba(&theme.artists),
+            separator: hex_to_rgba(&theme.separator),
+        }
+    }
+}
+
+impl Into<backend::theme::MainTheme> for MainTheme {
+    fn into(self) -> backend::theme::MainTheme {
+        backend::theme::MainTheme {
+            bg: rgba_to_hex(self.bg),
+            title: rgba_to_hex(self.title),
+            album: rgba_to_hex(self.album),
+            artists: rgba_to_hex(self.artists),
+            separator: rgba_to_hex(self.separator),
+        }
+    }
+}
+
+impl From<backend::theme::RightSidebarTheme> for RightSidebarTheme {
+    fn from(theme: backend::theme::RightSidebarTheme) -> Self {
+        Self {
+            bg: hex_to_rgba(&theme.bg),
+            title: hex_to_rgba(&theme.title),
+            item_title: hex_to_rgba(&theme.item_title),
+            item_artists: hex_to_rgba(&theme.item_artists),
+            item_border: hex_to_rgba(&theme.item_border),
+            item_bg: hex_to_rgba(&theme.item_bg),
+            item_hover: hex_to_rgba(&theme.item_hover),
+            search_bg: hex_to_rgba(&theme.search_bg),
+            search_text: hex_to_rgba(&theme.search_text),
+            search_placeholder: hex_to_rgba(&theme.search_placeholder),
+            search_cursor: hex_to_rgba(&theme.search_cursor),
+            search_highlight: hex_to_rgba(&theme.search_highlight),
+        }
+    }
+}
+
+impl Into<backend::theme::RightSidebarTheme> for RightSidebarTheme {
+    fn into(self) -> backend::theme::RightSidebarTheme {
+        backend::theme::RightSidebarTheme {
+            bg: rgba_to_hex(self.bg),
+            title: rgba_to_hex(self.title),
+            item_title: rgba_to_hex(self.item_title),
+            item_artists: rgba_to_hex(self.item_artists),
+            item_border: rgba_to_hex(self.item_border),
+            item_bg: rgba_to_hex(self.item_bg),
+            item_hover: rgba_to_hex(self.item_hover),
+            search_bg: rgba_to_hex(self.search_bg),
+            search_text: rgba_to_hex(self.search_text),
+            search_placeholder: rgba_to_hex(self.search_placeholder),
+            search_cursor: rgba_to_hex(self.search_cursor),
+            search_highlight: rgba_to_hex(self.search_highlight),
+        }
+    }
+}
+
+impl From<backend::theme::ControlBarTheme> for ControlBarTheme {
+    fn from(theme: backend::theme::ControlBarTheme) -> Self {
+        Self {
+            bg: hex_to_rgba(&theme.bg),
+            playbar_bg: hex_to_rgba(&theme.playbar_bg),
+            playbar_fill: hex_to_rgba(&theme.playbar_fill),
+            playbar_thumb: hex_to_rgba(&theme.playbar_thumb),
+            text: hex_to_rgba(&theme.text),
+            icons: hex_to_rgba(&theme.icons),
+            volume_bg: hex_to_rgba(&theme.volume_bg),
+            volume_fill: hex_to_rgba(&theme.volume_fill),
+            volume_thumb: hex_to_rgba(&theme.volume_thumb),
+        }
+    }
+}
+
+impl Into<backend::theme::ControlBarTheme> for ControlBarTheme {
+    fn into(self) -> backend::theme::ControlBarTheme {
+        backend::theme::ControlBarTheme {
+            bg: rgba_to_hex(self.bg),
+            playbar_bg: rgba_to_hex(self.playbar_bg),
+            playbar_fill: rgba_to_hex(self.playbar_fill),
+            playbar_thumb: rgba_to_hex(self.playbar_thumb),
+            text: rgba_to_hex(self.text),
+            icons: rgba_to_hex(self.icons),
+            volume_bg: rgba_to_hex(self.volume_bg),
+            volume_fill: rgba_to_hex(self.volume_fill),
+            volume_thumb: rgba_to_hex(self.volume_thumb),
+        }
+    }
+}
+
 impl Global for Theme {}
 
 pub fn rgba_to_hex(color: Rgba) -> String {
