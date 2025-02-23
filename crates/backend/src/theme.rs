@@ -27,6 +27,54 @@ pub struct SubTheme {
     pub highlight: String,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct LeftSidebarTheme {
+    pub bg: String,
+    pub title: String,
+    pub item_text: String,
+    pub item_border: String,
+    pub item_bg: String,
+    pub item_hover: String,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct MainTheme {
+    pub bg: String,
+    pub title: String,
+    pub album: String,
+    pub artists: String,
+    pub separator: String,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct RightSidebarTheme {
+    pub bg: String,
+    pub title: String,
+    pub item_title: String,
+    pub item_artists: String,
+    pub item_border: String,
+    pub item_bg: String,
+    pub item_hover: String,
+    pub search_bg: String,
+    pub search_text: String,
+    pub search_placeholder: String,
+    pub search_cursor: String,
+    pub search_highlight: String,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct ControlBarTheme {
+    pub bg: String,
+    pub playbar_bg: String,
+    pub playbar_fill: String,
+    pub playbar_thumb: String,
+    pub text: String,
+    pub icons: String,
+    pub volume_bg: String,
+    pub volume_fill: String,
+    pub volume_thumb: String,
+}
+
 impl SubTheme {
     pub fn default() -> Self {
         SubTheme {
