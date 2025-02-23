@@ -14,10 +14,45 @@ pub struct SubTheme {
     pub accent: Rgba,
     pub text: Rgba,
     pub icon: Rgba,
-    pub background: Rgba,
+    pub bg: Rgba,
     pub secondary: Rgba,
     pub border: Rgba,
     pub highlight: Rgba,
+}
+
+#[derive(Clone, Copy)]
+pub struct LeftSidebarTheme {
+    pub bg: Rgba,
+    pub title: Rgba,
+    pub item_text: Rgba,
+    pub item_border: Rgba,
+    pub item_bg: Rgba,
+    pub item_hover: Rgba,
+}
+
+#[derive(Clone, Copy)]
+pub struct MainTheme {
+    pub bg: Rgba,
+    pub title: Rgba,
+    pub album: Rgba,
+    pub artists: Rgba,
+    pub separator: Rgba,
+}
+
+#[derive(Clone, Copy)]
+pub struct RightSidebarTheme {
+    pub bg: Rgba,
+    pub title: Rgba,
+    pub item_title: Rgba,
+    pub item_artists: Rgba,
+    pub item_border: Rgba,
+    pub item_bg: Rgba,
+    pub item_hover: Rgba,
+    pub search_bg: Rgba,
+    pub search_text: Rgba,
+    pub search_placeholder: Rgba,
+    pub search_cursor: Rgba,
+    pub search_highlight: Rgba,
 }
 
 impl SubTheme {
@@ -26,7 +61,7 @@ impl SubTheme {
             accent: rgb(0xcba6f7),
             text: rgb(0xcdd6f4),
             icon: rgb(0xcdd6f4),
-            background: rgb(0x11111B),
+            bg: rgb(0x11111B),
             secondary: rgb(0x1e1e2d),
             border: rgb(0x11111B),
             highlight: rgb(0x52cba6f7),
@@ -36,7 +71,7 @@ impl SubTheme {
         accent: Rgba,
         text: Rgba,
         icon: Rgba,
-        background: Rgba,
+        bg: Rgba,
         secondary: Rgba,
         border: Rgba,
         highlight: Rgba,
@@ -45,7 +80,7 @@ impl SubTheme {
             accent,
             text,
             icon,
-            background,
+            bg,
             secondary,
             highlight,
             border,
@@ -71,7 +106,7 @@ impl From<backend::theme::SubTheme> for SubTheme {
             accent: hex_to_rgba(&theme.accent),
             text: hex_to_rgba(&theme.text),
             icon: hex_to_rgba(&theme.icon),
-            background: hex_to_rgba(&theme.background),
+            bg: hex_to_rgba(&theme.bg),
             secondary: hex_to_rgba(&theme.secondary),
             border: hex_to_rgba(&theme.border),
             highlight: hex_to_rgba(&theme.highlight),
@@ -85,7 +120,7 @@ impl Into<backend::theme::SubTheme> for SubTheme {
             accent: rgba_to_hex(self.accent),
             text: rgba_to_hex(self.text),
             icon: rgba_to_hex(self.icon),
-            background: rgba_to_hex(self.background),
+            bg: rgba_to_hex(self.bg),
             secondary: rgba_to_hex(self.secondary),
             border: rgba_to_hex(self.border),
             highlight: rgba_to_hex(self.highlight),

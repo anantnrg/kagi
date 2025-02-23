@@ -16,9 +16,9 @@ pub struct Kagi {
 impl Render for Kagi {
     fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let titlebar = self.clone().titlebar;
-        let sidebar = self.clone().left_sidebar;
         let control_bar = self.clone().control_bar;
         let main_view = self.clone().main_view;
+        let left_sidebar = self.clone().left_sidebar;
         let right_sidebar = self.clone().right_sidebar;
         let old_layout = cx.global::<Layout>().clone();
 
@@ -41,7 +41,7 @@ impl Render for Kagi {
                     ))
                     .flex()
                     .overflow_hidden()
-                    .child(sidebar)
+                    .child(left_sidebar)
                     .child(main_view)
                     .child(right_sidebar),
             )
