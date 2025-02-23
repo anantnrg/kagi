@@ -67,6 +67,17 @@ pub struct ControlBarTheme {
     pub volume_thumb: Rgba,
 }
 
+impl Default for TitlebarTheme {
+    fn default() -> Self {
+        Self {
+            bg: rgb(0x11111B),
+            title: rgb(0xcba6f7),
+            icon: rgb(0xcdd6f4),
+            hover: rgb(0x52cba6f7),
+        }
+    }
+}
+
 impl Default for LeftSidebarTheme {
     fn default() -> Self {
         Self {
@@ -130,11 +141,11 @@ impl Default for ControlBarTheme {
 impl Theme {
     pub fn default() -> Self {
         Theme {
-            main: SubTheme::default(),
-            titlebar: SubTheme::default(),
-            left_sidebar: SubTheme::default(),
-            right_sidebar: SubTheme::default(),
-            control_bar: SubTheme::default(),
+            main: MainTheme::default(),
+            titlebar: TitlebarTheme::default(),
+            left_sidebar: LeftSidebarTheme::default(),
+            right_sidebar: RightSidebarTheme::default(),
+            control_bar: ControlBarTheme::default(),
         }
     }
 }
@@ -159,6 +170,28 @@ impl Into<backend::theme::Theme> for Theme {
             left_sidebar: self.left_sidebar.into(),
             right_sidebar: self.right_sidebar.into(),
             control_bar: self.control_bar.into(),
+        }
+    }
+}
+
+impl From<backend::theme::TitlebarTheme> for TitlebarTheme {
+    fn from(theme: backend::theme::TitlebarTheme) -> Self {
+        Self {
+            bg: hex_to_rgba(&theme.bg),
+            title: hex_to_rgba(&theme.title),
+            icon: hex_to_rgba(&theme.icon),
+            hover: hex_to_rgba(&theme.hover),
+        }
+    }
+}
+
+impl Into<backend::theme::TitlebarTheme> for TitlebarTheme {
+    fn into(self) -> backend::theme::TitlebarTheme {
+        backend::theme::TitlebarTheme {
+            bg: rgba_to_hex(self.bg),
+            title: rgba_to_hex(self.title),
+            icon: rgba_to_hex(self.icon),
+            hover: rgba_to_hex(self.hover),
         }
     }
 }

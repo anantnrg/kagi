@@ -18,10 +18,10 @@ pub struct Theme {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct TitlebarTheme {
-    pub bg: Rgba,
-    pub title: Rgba,
-    pub icon: Rgba,
-    pub hover: Rgba,
+    pub bg: String,
+    pub title: String,
+    pub icon: String,
+    pub hover: String,
 }
 #[derive(Clone, Serialize, Deserialize)]
 pub struct LeftSidebarTheme {
@@ -71,16 +71,73 @@ pub struct ControlBarTheme {
     pub volume_thumb: String,
 }
 
-impl SubTheme {
-    pub fn default() -> Self {
-        SubTheme {
-            accent: String::from("#cba6f7"),
-            text: String::from("#cdd6f4"),
-            icon: String::from("#cdd6f4"),
-            background: String::from("#11111B"),
-            secondary: String::from("#1e1e2d"),
-            border: String::from("#11111B"),
-            highlight: String::from("#52cba6f7"),
+impl Default for TitlebarTheme {
+    fn default() -> Self {
+        Self {
+            bg: "#11111B".to_string(),
+            title: "#cba6f7".to_string(),
+            icon: "#cdd6f4".to_string(),
+            hover: "#52cba6f7".to_string(),
+        }
+    }
+}
+
+impl Default for LeftSidebarTheme {
+    fn default() -> Self {
+        Self {
+            bg: "#11111B".to_string(),
+            title: "#cba6f7".to_string(),
+            item_text: "#cdd6f4".to_string(),
+            item_border: "#11111B".to_string(),
+            item_bg: "#1e1e2d".to_string(),
+            item_hover: "#52cba6f7".to_string(),
+        }
+    }
+}
+
+impl Default for MainTheme {
+    fn default() -> Self {
+        Self {
+            bg: "#11111B".to_string(),
+            title: "#cba6f7".to_string(),
+            album: "#cdd6f4".to_string(),
+            artists: "#a6adc8".to_string(),
+            separator: "#45475a".to_string(),
+        }
+    }
+}
+
+impl Default for RightSidebarTheme {
+    fn default() -> Self {
+        Self {
+            bg: "#11111B".to_string(),
+            title: "#cba6f7".to_string(),
+            item_title: "#cdd6f4".to_string(),
+            item_artists: "#a6adc8".to_string(),
+            item_border: "#11111B".to_string(),
+            item_bg: "#1e1e2d".to_string(),
+            item_hover: "#52cba6f7".to_string(),
+            search_bg: "#181825".to_string(),
+            search_text: "#cdd6f4".to_string(),
+            search_placeholder: "#a6adc8".to_string(),
+            search_cursor: "#cba6f7".to_string(),
+            search_highlight: "#52cba6f7".to_string(),
+        }
+    }
+}
+
+impl Default for ControlBarTheme {
+    fn default() -> Self {
+        Self {
+            bg: "#11111B".to_string(),
+            playbar_bg: "#181825".to_string(),
+            playbar_fill: "#cba6f7".to_string(),
+            playbar_thumb: "#cdd6f4".to_string(),
+            text: "#cdd6f4".to_string(),
+            icons: "#cba6f7".to_string(),
+            volume_bg: "#181825".to_string(),
+            volume_fill: "#cba6f7".to_string(),
+            volume_thumb: "#cdd6f4".to_string(),
         }
     }
 }
@@ -88,11 +145,11 @@ impl SubTheme {
 impl Theme {
     pub fn default() -> Self {
         Theme {
-            main: SubTheme::default(),
-            titlebar: SubTheme::default(),
-            left_sidebar: SubTheme::default(),
-            right_sidebar: SubTheme::default(),
-            control_bar: SubTheme::default(),
+            main: MainTheme::default(),
+            titlebar: TitlebarTheme::default(),
+            left_sidebar: LeftSidebarTheme::default(),
+            right_sidebar: RightSidebarTheme::default(),
+            control_bar: ControlBarTheme::default(),
         }
     }
     pub fn get_file() -> Option<PathBuf> {
