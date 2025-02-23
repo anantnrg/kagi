@@ -379,6 +379,11 @@ impl EntityInputHandler for TextInput {
 
 struct TextElement {
     input: Entity<TextInput>,
+    bg: Rgba,
+    text: Rgba,
+    placeholder: Rgba,
+    cursor: Rgba,
+    highlight: Rgba,
 }
 
 struct PrepaintState {
@@ -432,12 +437,9 @@ impl Element for TextElement {
         let theme = cx.global::<Theme>();
 
         let (display_text, text_color) = if content.is_empty() {
-            (
-                input.placeholder.clone(),
-                Hsla::from(theme.right_sidebar.secondary),
-            )
+            (input.placeholder.clone(), Hsla::from(self.placeholder))
         } else {
-            (content.clone(), Hsla::from(theme.right_sidebar.text))
+            (content.clone(), Hsla::from(self.text))
         };
 
         let run = TextRun {
@@ -490,7 +492,7 @@ impl Element for TextElement {
                         point(bounds.left() + cursor_pos, bounds.top()),
                         size(px(2.0), bounds.bottom() - bounds.top()),
                     ),
-                    theme.right_sidebar.accent,
+                    self.cursor,
                 )),
             )
         } else {
@@ -506,7 +508,7 @@ impl Element for TextElement {
                             bounds.bottom(),
                         ),
                     ),
-                    theme.right_sidebar.highlight,
+                    self.highlight,
                 )),
                 None,
             )
@@ -599,6 +601,11 @@ impl Render for TextInput {
             .on_mouse_move(cx.listener(Self::on_mouse_move))
             .child(div().flex().flex_grow().w_full().child(TextElement {
                 input: cx.entity().clone(),
+                bg: rgb(0x1e1e2d),
+                text: rgb(0xcdd6f4),
+                placeholder: rgb(0x45475a),
+                cursor: rgb(0xcba6f7),
+                highlight: rgb(0x52cba6f7),
             }))
     }
 }

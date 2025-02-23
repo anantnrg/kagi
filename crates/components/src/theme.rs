@@ -133,7 +133,7 @@ impl Default for ControlBarTheme {
             icons: rgb(0xcdd6f4),
             volume_bg: rgb(0x1e1e2d),
             volume_fill: rgb(0xcba6f7),
-            volume_thumb: rgb(0x52cba6f7),
+            volume_thumb: rgb(0xcba6f7),
         }
     }
 }
