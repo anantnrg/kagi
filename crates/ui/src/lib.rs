@@ -5,7 +5,6 @@ mod keybinds;
 pub mod layout;
 pub mod main_view;
 pub mod player_context;
-pub mod queue_list;
 pub mod res_handler;
 pub mod sidebar;
 pub mod titlebar;
