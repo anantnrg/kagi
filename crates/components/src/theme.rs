@@ -9,6 +9,8 @@ pub struct Theme {
     pub control_bar: SubTheme,
 }
 
+impl Global for Theme {}
+
 #[derive(Clone, Copy)]
 pub struct SubTheme {
     pub accent: Rgba,
@@ -68,35 +70,62 @@ pub struct ControlBarTheme {
     pub volume_thumb: Rgba,
 }
 
-impl SubTheme {
-    pub fn default() -> Self {
-        SubTheme {
-            accent: rgb(0xcba6f7),
-            text: rgb(0xcdd6f4),
-            icon: rgb(0xcdd6f4),
+impl Default for LeftSidebarTheme {
+    fn default() -> Self {
+        Self {
             bg: rgb(0x11111B),
-            secondary: rgb(0x1e1e2d),
-            border: rgb(0x11111B),
-            highlight: rgb(0x52cba6f7),
+            title: rgb(0xcba6f7),
+            item_text: rgb(0xcdd6f4),
+            item_border: rgb(0x1e1e2d),
+            item_bg: rgb(0x1e1e2d),
+            item_hover: rgb(0x52cba6f7),
         }
     }
-    pub fn new(
-        accent: Rgba,
-        text: Rgba,
-        icon: Rgba,
-        bg: Rgba,
-        secondary: Rgba,
-        border: Rgba,
-        highlight: Rgba,
-    ) -> Self {
+}
+
+impl Default for MainTheme {
+    fn default() -> Self {
         Self {
-            accent,
-            text,
-            icon,
-            bg,
-            secondary,
-            highlight,
-            border,
+            bg: rgb(0x11111B),
+            title: rgb(0xcba6f7),
+            album: rgb(0xcdd6f4),
+            artists: rgb(0xb4befe),
+            separator: rgb(0x45475a),
+        }
+    }
+}
+
+impl Default for RightSidebarTheme {
+    fn default() -> Self {
+        Self {
+            bg: rgb(0x11111B),
+            title: rgb(0xcba6f7),
+            item_title: rgb(0xcdd6f4),
+            item_artists: rgb(0xb4befe),
+            item_border: rgb(0x1e1e2d),
+            item_bg: rgb(0x1e1e2d),
+            item_hover: rgb(0x52cba6f7),
+            search_bg: rgb(0x1e1e2d),
+            search_text: rgb(0xcdd6f4),
+            search_placeholder: rgb(0x45475a),
+            search_cursor: rgb(0xcba6f7),
+            search_highlight: rgb(0x52cba6f7),
+        }
+    }
+}
+
+impl Default for ControlBarTheme {
+    fn default() -> Self {
+        Self {
+            bg: rgb(0x11111B),
+            playbar_bg: rgb(0x1e1e2d),
+            playbar_fill: rgb(0xcba6f7),
+            playbar_thumb: rgb(0x52cba6f7),
+            text: rgb(0xcdd6f4),
+            icons: rgb(0xcdd6f4),
+            volume_bg: rgb(0x1e1e2d),
+            volume_fill: rgb(0xcba6f7),
+            volume_thumb: rgb(0x52cba6f7),
         }
     }
 }
@@ -109,34 +138,6 @@ impl Theme {
             left_sidebar: SubTheme::default(),
             right_sidebar: SubTheme::default(),
             control_bar: SubTheme::default(),
-        }
-    }
-}
-
-impl From<backend::theme::SubTheme> for SubTheme {
-    fn from(theme: backend::theme::SubTheme) -> Self {
-        Self {
-            accent: hex_to_rgba(&theme.accent),
-            text: hex_to_rgba(&theme.text),
-            icon: hex_to_rgba(&theme.icon),
-            bg: hex_to_rgba(&theme.bg),
-            secondary: hex_to_rgba(&theme.secondary),
-            border: hex_to_rgba(&theme.border),
-            highlight: hex_to_rgba(&theme.highlight),
-        }
-    }
-}
-
-impl Into<backend::theme::SubTheme> for SubTheme {
-    fn into(self) -> backend::theme::SubTheme {
-        backend::theme::SubTheme {
-            accent: rgba_to_hex(self.accent),
-            text: rgba_to_hex(self.text),
-            icon: rgba_to_hex(self.icon),
-            bg: rgba_to_hex(self.bg),
-            secondary: rgba_to_hex(self.secondary),
-            border: rgba_to_hex(self.border),
-            highlight: rgba_to_hex(self.highlight),
         }
     }
 }
@@ -284,8 +285,6 @@ impl Into<backend::theme::ControlBarTheme> for ControlBarTheme {
         }
     }
 }
-
-impl Global for Theme {}
 
 pub fn rgba_to_hex(color: Rgba) -> String {
     let a = (color.a * 255.0) as u32;
