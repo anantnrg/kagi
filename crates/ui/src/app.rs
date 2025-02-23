@@ -1,7 +1,12 @@
 use super::{res_handler::*, titlebar::Titlebar};
-use crate::{control_bar::ControlBar, layout::Layout, main_view::MainView, sidebar::*};
+use crate::{
+    control_bar::ControlBar,
+    layout::{Layout, LayoutMode},
+    main_view::MainView,
+    sidebar::*,
+};
 use components::theme::Theme;
-use gpui::*;
+use gpui::{prelude::FluentBuilder, *};
 
 #[derive(Clone)]
 pub struct Kagi {
@@ -26,6 +31,7 @@ impl Render for Kagi {
         *cx.global_mut::<Layout>() = old_layout.layout(win.bounds().size.width.0, cx);
 
         let theme = cx.global::<Theme>();
+        let layout = cx.global::<Layout>();
 
         div()
             .bg(theme.bg)
@@ -40,6 +46,9 @@ impl Render for Kagi {
                         win.window_bounds().get_bounds().size.height.0 - (32.0 + 96.0)
                     ))
                     .flex()
+                    .when(layout.mode.read(cx) == &LayoutMode::Inline, |this| {
+                        this.px_3().gap_3()
+                    })
                     .overflow_hidden()
                     .child(left_sidebar)
                     .child(main_view)
