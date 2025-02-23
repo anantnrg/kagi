@@ -2,6 +2,7 @@ use gpui::{Global, Rgba, rgb};
 
 #[derive(Clone, Copy)]
 pub struct Theme {
+    pub bg: Rgba,
     pub main: MainTheme,
     pub titlebar: TitlebarTheme,
     pub left_sidebar: LeftSidebarTheme,
@@ -65,6 +66,7 @@ pub struct ControlBarTheme {
     pub volume_bg: Rgba,
     pub volume_fill: Rgba,
     pub volume_thumb: Rgba,
+    pub hover: Rgba,
 }
 
 impl Default for TitlebarTheme {
@@ -134,6 +136,7 @@ impl Default for ControlBarTheme {
             volume_bg: rgb(0x1e1e2d),
             volume_fill: rgb(0xcba6f7),
             volume_thumb: rgb(0xcba6f7),
+            hover: rgb(0xcba6f7),
         }
     }
 }
@@ -141,6 +144,7 @@ impl Default for ControlBarTheme {
 impl Theme {
     pub fn default() -> Self {
         Theme {
+            bg: rgb(0x11111b),
             main: MainTheme::default(),
             titlebar: TitlebarTheme::default(),
             left_sidebar: LeftSidebarTheme::default(),
@@ -153,6 +157,7 @@ impl Theme {
 impl From<backend::theme::Theme> for Theme {
     fn from(value: backend::theme::Theme) -> Self {
         Theme {
+            bg: hex_to_rgba(value.bg.as_str()),
             main: value.main.into(),
             titlebar: value.titlebar.into(),
             left_sidebar: value.left_sidebar.into(),
@@ -165,6 +170,7 @@ impl From<backend::theme::Theme> for Theme {
 impl Into<backend::theme::Theme> for Theme {
     fn into(self) -> backend::theme::Theme {
         backend::theme::Theme {
+            bg: rgba_to_hex(self.bg),
             main: self.main.into(),
             titlebar: self.titlebar.into(),
             left_sidebar: self.left_sidebar.into(),
@@ -296,6 +302,7 @@ impl From<backend::theme::ControlBarTheme> for ControlBarTheme {
             volume_bg: hex_to_rgba(&theme.volume_bg),
             volume_fill: hex_to_rgba(&theme.volume_fill),
             volume_thumb: hex_to_rgba(&theme.volume_thumb),
+            hover: hex_to_rgba(&theme.hover),
         }
     }
 }
@@ -312,6 +319,7 @@ impl Into<backend::theme::ControlBarTheme> for ControlBarTheme {
             volume_bg: rgba_to_hex(self.volume_bg),
             volume_fill: rgba_to_hex(self.volume_fill),
             volume_thumb: rgba_to_hex(self.volume_thumb),
+            hover: rgba_to_hex(self.hover),
         }
     }
 }

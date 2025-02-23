@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Theme {
+    pub bg: String,
     pub main: MainTheme,
     pub titlebar: TitlebarTheme,
     pub left_sidebar: LeftSidebarTheme,
@@ -69,6 +70,7 @@ pub struct ControlBarTheme {
     pub volume_bg: String,
     pub volume_fill: String,
     pub volume_thumb: String,
+    pub hover: String,
 }
 
 impl Default for TitlebarTheme {
@@ -138,6 +140,7 @@ impl Default for ControlBarTheme {
             volume_bg: "#181825".to_string(),
             volume_fill: "#cba6f7".to_string(),
             volume_thumb: "#cdd6f4".to_string(),
+            hover: "#cba6f7".to_string(),
         }
     }
 }
@@ -145,6 +148,7 @@ impl Default for ControlBarTheme {
 impl Theme {
     pub fn default() -> Self {
         Theme {
+            bg: "#11111b".to_string(),
             main: MainTheme::default(),
             titlebar: TitlebarTheme::default(),
             left_sidebar: LeftSidebarTheme::default(),

@@ -28,8 +28,7 @@ impl Render for ControlBar {
             .w_full()
             .h_24()
             .border_t_1()
-            .bg(theme.control_bar.background)
-            .border_color(theme.control_bar.border)
+            .bg(theme.control_bar.bg)
             .flex()
             .flex_col()
             .justify_center()
@@ -105,9 +104,9 @@ impl Render for ControlBar {
                                         Icon::new(Icons::Shuffle)
                                             .size(24.0)
                                             .color(theme.control_bar.text)
-                                            .hover(theme.control_bar.accent)
+                                            .hover(theme.control_bar.hover)
                                             .when(state.shuffle, |this| {
-                                                this.color(theme.control_bar.accent)
+                                                this.color(theme.control_bar.hover)
                                             }),
                                     )
                                     .on_mouse_down(MouseButton::Left, {
@@ -129,9 +128,9 @@ impl Render for ControlBar {
                                         Icon::new(Icons::Previous)
                                             .size(24.0)
                                             .color(theme.control_bar.text)
-                                            .hover(theme.control_bar.accent),
+                                            .hover(theme.control_bar.hover),
                                     )
-                                    .hover(|this| this.text_color(theme.control_bar.accent))
+                                    .hover(|this| this.text_color(theme.control_bar.hover))
                                     .on_mouse_down(MouseButton::Left, {
                                         {
                                             move |_, _, cx| {
@@ -152,7 +151,7 @@ impl Render for ControlBar {
                                             Icon::new(Icons::Stopped)
                                                 .size(24.0)
                                                 .color(theme.control_bar.text)
-                                                .hover(theme.control_bar.accent),
+                                                .hover(theme.control_bar.hover),
                                         )
                                     })
                                     .when(state.state == State::Playing, |this| {
@@ -160,7 +159,7 @@ impl Render for ControlBar {
                                             Icon::new(Icons::Pause)
                                                 .size(24.0)
                                                 .color(theme.control_bar.text)
-                                                .hover(theme.control_bar.accent),
+                                                .hover(theme.control_bar.hover),
                                         )
                                     })
                                     .when(state.state == State::Paused, |this| {
@@ -168,10 +167,10 @@ impl Render for ControlBar {
                                             Icon::new(Icons::Play)
                                                 .size(24.0)
                                                 .color(theme.control_bar.text)
-                                                .hover(theme.control_bar.accent),
+                                                .hover(theme.control_bar.hover),
                                         )
                                     })
-                                    .hover(|this| this.text_color(theme.control_bar.accent))
+                                    .hover(|this| this.text_color(theme.control_bar.hover))
                                     .on_mouse_down(MouseButton::Left, {
                                         {
                                             let np = state.clone();
@@ -198,7 +197,7 @@ impl Render for ControlBar {
                                         Icon::new(Icons::Next)
                                             .size(24.0)
                                             .color(theme.control_bar.text)
-                                            .hover(theme.control_bar.accent),
+                                            .hover(theme.control_bar.hover),
                                     )
                                     .on_mouse_down(MouseButton::Left, {
                                         {
@@ -219,9 +218,9 @@ impl Render for ControlBar {
                                         Icon::new(Icons::Repeat)
                                             .size(24.0)
                                             .color(theme.control_bar.text)
-                                            .hover(theme.control_bar.accent)
+                                            .hover(theme.control_bar.hover)
                                             .when(state.repeat, |this| {
-                                                this.color(theme.control_bar.accent)
+                                                this.color(theme.control_bar.hover)
                                             }),
                                     )
                                     .on_mouse_down(MouseButton::Left, {

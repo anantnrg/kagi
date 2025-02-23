@@ -28,7 +28,7 @@ impl Render for Kagi {
         let theme = cx.global::<Theme>();
 
         div()
-            .bg(theme.left_sidebar.background)
+            .bg(theme.bg)
             .w_full()
             .h_full()
             .flex_col()
