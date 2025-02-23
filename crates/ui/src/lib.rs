@@ -26,9 +26,8 @@ use gpui::*;
 use layout::Layout;
 use main_view::MainView;
 use player_context::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
-use queue_list::QueueList;
 use res_handler::ResHandler;
-use sidebar::LeftSidebar;
+use sidebar::{LeftSidebar, RightSidebar};
 use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -299,7 +298,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let control_bar =
                         cx.new(|_| ControlBar::new(vol_slider.clone(), playbar.clone()));
                     let main_view = cx.new(|_| MainView::new());
-                    let queue_list = cx.new(|cx| QueueList::new(cx));
+                    let right_sidebar = cx.new(|cx| RightSidebar::new(cx));
                     let left_sidebar = cx.new(move |_| LeftSidebar::new(playlists.clone()));
                     cx.global::<Controller>().load_saved_playlists();
                     cx.global::<Controller>().load_theme();
@@ -309,7 +308,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         left_sidebar,
                         control_bar,
                         main_view,
-                        queue_list,
+                        right_sidebar,
                     }
                 })
             },
