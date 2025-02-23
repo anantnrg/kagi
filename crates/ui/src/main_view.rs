@@ -15,7 +15,7 @@ impl Render for MainView {
         if !meta.read(cx).title.is_empty() {
             div()
                 .track_focus(&cx.focus_handle())
-                .bg(theme.main.background)
+                .bg(theme.main.bg)
                 .w(px(layout.central_width.read(cx).clone()))
                 .h_full()
                 .flex()
@@ -58,7 +58,7 @@ impl Render for MainView {
                             let meta = meta.read(cx);
                             if !meta.title.is_empty() {
                                 div()
-                                    .text_color(theme.main.accent)
+                                    .text_color(theme.main.title)
                                     .child(meta.title.clone())
                                     .text_3xl()
                                     .font_weight(FontWeight::EXTRA_BOLD)
@@ -73,7 +73,7 @@ impl Render for MainView {
                             let meta = meta.read(cx);
                             if !meta.title.is_empty() {
                                 div()
-                                    .text_color(theme.main.text)
+                                    .text_color(theme.main.artists)
                                     .text_xl()
                                     .font_weight(FontWeight::MEDIUM)
                                     .whitespace_normal()
@@ -89,7 +89,7 @@ impl Render for MainView {
         } else {
             div()
                 .track_focus(&cx.focus_handle())
-                .bg(theme.main.background)
+                .bg(theme.main.bg)
                 .w(px(layout.central_width.read(cx).clone()))
                 .h_full()
                 .flex()
@@ -107,17 +107,16 @@ impl Render for MainView {
                         .flex()
                         .items_end()
                         .justify_end()
-                        .flex_grow()
-                        .child(
-                            img("logo/logo scaled.png")
-                                .size_full()
-                                .object_fit(ObjectFit::Contain),
-                        ),
+                        .flex_grow(), // .child(
+                                      //     img("logo/logo scaled.png")
+                                      //         .size_full()
+                                      //         .object_fit(ObjectFit::Contain),
+                                      // ),
                 )
                 .child(
                     div()
                         .text_lg()
-                        .text_color(theme.main.secondary)
+                        .text_color(theme.main.title)
                         .font_weight(FontWeight::BOLD)
                         .text_center()
                         .child("No playlist loaded..."),

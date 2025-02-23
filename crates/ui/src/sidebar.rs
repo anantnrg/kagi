@@ -44,7 +44,7 @@ impl Render for LeftSidebar {
             deferred(
                 div()
                     .track_focus(&cx.focus_handle())
-                    .bg(theme.left_sidebar.background)
+                    .bg(theme.left_sidebar.bg)
                     .h_full()
                     .w(px(layout.left_sidebar.read(cx).clone().width))
                     .min_w(px(200.0))
@@ -54,7 +54,6 @@ impl Render for LeftSidebar {
                     )
                     .occlude()
                     .border_r_1()
-                    .border_color(theme.left_sidebar.border)
                     .px_3()
                     .py_3()
                     .flex()
@@ -66,14 +65,14 @@ impl Render for LeftSidebar {
                         let current_index = curr_index.read(cx).playlist_name.clone();
 
                         div()
-                            .bg(theme.left_sidebar.background)
+                            .bg(theme.left_sidebar.bg)
                             .border_1()
-                            .border_color(theme.left_sidebar.border)
-                            .hover(|this| this.border_color(theme.left_sidebar.accent))
+                            .border_color(theme.left_sidebar.item_border)
+                            .hover(|this| this.border_color(theme.left_sidebar.item_hover))
                             .when(playlist.name == current_index.clone(), |this| {
-                                this.bg(theme.left_sidebar.secondary)
+                                this.bg(theme.left_sidebar.item_bg)
                             })
-                            .text_color(theme.left_sidebar.text)
+                            .text_color(theme.left_sidebar.item_text)
                             .font_weight(FontWeight::MEDIUM)
                             .w_full()
                             .rounded_lg()
@@ -103,13 +102,10 @@ impl Render for LeftSidebar {
                             .items_center()
                             .justify_center()
                             .rounded_lg()
-                            .text_color(theme.left_sidebar.text)
+                            .text_color(theme.left_sidebar.item_text)
                             .border_1()
-                            .border_color(theme.left_sidebar.border)
-                            .hover(|this| {
-                                this.bg(theme.left_sidebar.secondary)
-                                    .border_color(theme.left_sidebar.accent)
-                            })
+                            .border_color(theme.left_sidebar.item_border)
+                            .hover(|this| this.bg(theme.left_sidebar.item_bg))
                             .on_mouse_down(MouseButton::Left, move |_, _, _| {
                                 controller.open_folder();
                                 controller.get_queue();
@@ -137,7 +133,7 @@ impl Render for RightSidebar {
             deferred(
                 div()
                     .track_focus(&cx.focus_handle())
-                    .bg(theme.right_sidebar.background)
+                    .bg(theme.right_sidebar.bg)
                     .h_full()
                     .w(px(layout.right_sidebar.read(cx).clone().width))
                     .flex()
@@ -148,7 +144,6 @@ impl Render for RightSidebar {
                         |this| this.absolute().border_0(),
                     )
                     .border_l_1()
-                    .border_color(theme.right_sidebar.border)
                     .occlude()
                     .child(
                         div()
@@ -157,7 +152,6 @@ impl Render for RightSidebar {
                             .py_1()
                             .px_1()
                             .border_b_1()
-                            .border_color(theme.right_sidebar.border)
                             .child(self.text_input.clone()),
                     )
                     .child(
@@ -178,13 +172,13 @@ impl Render for RightSidebar {
                                             .flex()
                                             .mt_2()
                                             .gap_2()
-                                            .text_color(theme.right_sidebar.text)
+                                            .text_color(theme.right_sidebar.item_title)
                                             .items_center()
                                             .justify_between()
                                             .px_2()
                                             .rounded_lg()
                                             .overflow_hidden()
-                                            .hover(|this| this.bg(theme.right_sidebar.secondary))
+                                            .hover(|this| this.bg(theme.right_sidebar.item_hover))
                                             .on_mouse_down(MouseButton::Left, move |_, _, cx| {
                                                 let controller = cx.global::<Controller>().clone();
                                                 controller.play_id(id);

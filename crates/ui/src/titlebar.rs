@@ -15,9 +15,8 @@ impl Render for Titlebar {
         div()
             .w_full()
             .h_8()
-            .bg(theme.titlebar.background)
+            .bg(theme.titlebar.bg)
             .border_b_1()
-            .border_color(theme.titlebar.border)
             .flex()
             .items_center()
             .justify_between()
@@ -75,7 +74,7 @@ impl Render for Titlebar {
                         };
 
                         div()
-                            .text_color(theme.titlebar.accent)
+                            .text_color(theme.titlebar.title)
                             .text_sm()
                             .overflow_hidden()
                             .when(window_width < 200.0, |this| this.child("Kagi"))
@@ -163,7 +162,7 @@ impl Render for Titlebar {
                             .flex()
                             .items_center()
                             .justify_center()
-                            .hover(|this| this.bg(theme.titlebar.secondary))
+                            .hover(|this| this.bg(theme.titlebar.hover))
                             .child(Icon::new(Icons::Minimize).size(20.0).color(rgb(0xffffff))),
                     )
                     .child(
@@ -173,7 +172,7 @@ impl Render for Titlebar {
                             .flex()
                             .items_center()
                             .justify_center()
-                            .hover(|this| this.bg(theme.titlebar.secondary))
+                            .hover(|this| this.bg(theme.titlebar.hover))
                             .child({
                                 if win.is_maximized() {
                                     Icon::new(Icons::Restore).size(20.0).color(rgb(0xffffff))
