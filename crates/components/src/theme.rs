@@ -55,6 +55,19 @@ pub struct RightSidebarTheme {
     pub search_highlight: Rgba,
 }
 
+#[derive(Clone, Copy)]
+pub struct ControlBarTheme {
+    pub bg: Rgba,
+    pub playbar_bg: Rgba,
+    pub playbar_fill: Rgba,
+    pub playbar_thumb: Rgba,
+    pub text: Rgba,
+    pub icons: Rgba,
+    pub volume_bg: Rgba,
+    pub volume_fill: Rgba,
+    pub volume_thumb: Rgba,
+}
+
 impl SubTheme {
     pub fn default() -> Self {
         SubTheme {
