@@ -9,24 +9,20 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Theme {
-    pub main: SubTheme,
-    pub titlebar: SubTheme,
-    pub left_sidebar: SubTheme,
-    pub right_sidebar: SubTheme,
-    pub control_bar: SubTheme,
+    pub main: MainTheme,
+    pub titlebar: TitlebarTheme,
+    pub left_sidebar: LeftSidebarTheme,
+    pub right_sidebar: RightSidebarTheme,
+    pub control_bar: ControlBarTheme,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct SubTheme {
-    pub accent: String,
-    pub text: String,
-    pub icon: String,
-    pub background: String,
-    pub secondary: String,
-    pub border: String,
-    pub highlight: String,
+pub struct TitlebarTheme {
+    pub bg: Rgba,
+    pub title: Rgba,
+    pub icon: Rgba,
+    pub hover: Rgba,
 }
-
 #[derive(Clone, Serialize, Deserialize)]
 pub struct LeftSidebarTheme {
     pub bg: String,

@@ -2,24 +2,21 @@ use gpui::{Global, Rgba, rgb};
 
 #[derive(Clone, Copy)]
 pub struct Theme {
-    pub main: SubTheme,
-    pub titlebar: SubTheme,
-    pub left_sidebar: SubTheme,
-    pub right_sidebar: SubTheme,
-    pub control_bar: SubTheme,
+    pub main: MainTheme,
+    pub titlebar: TitlebarTheme,
+    pub left_sidebar: LeftSidebarTheme,
+    pub right_sidebar: RightSidebarTheme,
+    pub control_bar: ControlBarTheme,
 }
 
 impl Global for Theme {}
 
 #[derive(Clone, Copy)]
-pub struct SubTheme {
-    pub accent: Rgba,
-    pub text: Rgba,
-    pub icon: Rgba,
+pub struct TitlebarTheme {
     pub bg: Rgba,
-    pub secondary: Rgba,
-    pub border: Rgba,
-    pub highlight: Rgba,
+    pub title: Rgba,
+    pub icon: Rgba,
+    pub hover: Rgba,
 }
 
 #[derive(Clone, Copy)]
