@@ -28,3 +28,20 @@ impl AssetSource for Assets {
             .map_err(|err| err.into())
     }
 }
+
+pub fn load_fonts(cx: &mut App) -> gpui::Result<()> {
+    let paths = cx.asset_source().list("fonts")?;
+    let mut fonts = vec![];
+    for path in paths {
+        println!("{path}");
+
+        if path.ends_with(".ttf") || path.ends_with(".otf") {
+            if let Some(v) = cx.asset_source().load(&path)? {
+                fonts.push(v);
+            }
+        }
+    }
+
+    let results = cx.text_system().add_fonts(fonts);
+    results
+}

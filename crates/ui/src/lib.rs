@@ -56,6 +56,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
 
     app.run(move |cx: &mut App| {
         let bounds = Bounds::centered(None, size(px(1280.0), px(720.0)), cx);
+        load_fonts(cx).expect("could not load fonts");
+
         components::input::bind_actions(cx);
         cx.open_window(
             WindowOptions {
