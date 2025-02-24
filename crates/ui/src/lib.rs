@@ -71,8 +71,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             },
             |_, cx| {
                 cx.new(|cx| {
-                    let fonts = cx.asset_source().list("fonts").unwrap();
-                    println!("{:#?}", fonts);
                     let player_context = PlayerContext::new(cx);
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());

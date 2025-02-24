@@ -37,6 +37,7 @@ impl Render for Kagi {
             .bg(theme.bg)
             .w_full()
             .h_full()
+            .font_family("Inter")
             .flex_col()
             .child(titlebar.clone())
             .child(
