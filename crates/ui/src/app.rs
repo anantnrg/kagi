@@ -50,9 +50,13 @@ impl Render for Kagi {
                         this.px_3().gap_3()
                     })
                     .overflow_hidden()
-                    .child(left_sidebar)
+                    .when(layout.left_sidebar.read(cx).clone().show, |this| {
+                        this.child(left_sidebar)
+                    })
                     .child(main_view)
-                    .child(right_sidebar),
+                    .when(layout.right_sidebar.read(cx).clone().show, |this| {
+                        this.child(right_sidebar)
+                    }),
             )
             .child(control_bar)
     }
