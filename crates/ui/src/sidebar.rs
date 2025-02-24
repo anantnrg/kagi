@@ -157,10 +157,11 @@ impl Render for RightSidebar {
                 .flex()
                 .flex_col()
                 .min_w(px(280.0))
+                .max_w(px(420.0))
                 .rounded_xl()
                 .when(
                     layout.mode.read(cx).clone() == LayoutMode::Overlay,
-                    |this| this.absolute().border_0(),
+                    |this| this.absolute().border_0().max_w_full(),
                 )
                 .border_l_1()
                 .occlude()
@@ -222,61 +223,78 @@ impl Render for RightSidebar {
 
                                     div()
                                         .w_full()
-                                        .h_16()
+                                        .h(px(64.0))
                                         .flex()
-                                        .mt_2()
-                                        .gap_2()
-                                        .text_color(theme.right_sidebar.item_title)
                                         .items_center()
-                                        .justify_between()
-                                        .px_2()
-                                        .rounded_lg()
-                                        .overflow_hidden()
-                                        .hover(|this| this.bg(theme.right_sidebar.item_hover))
-                                        .on_mouse_down(MouseButton::Left, move |_, _, cx| {
-                                            let controller = cx.global::<Controller>().clone();
-                                            controller.play_id(id);
-                                        })
-                                        .child({
-                                            if let Some(thumbnail) = &track.thumbnail {
-                                                img(thumbnail.img.clone())
-                                                    .min_h(px(56.0))
-                                                    .min_w(px(56.0))
-                                                    .rounded_md()
-                                            } else {
-                                                img("")
-                                            }
-                                        })
+                                        .justify_center()
                                         .child(
                                             div()
                                                 .w_full()
                                                 .h(px(56.0))
                                                 .flex()
-                                                .flex_col()
-                                                .gap(px(1.0))
-                                                .child(
-                                                    div()
-                                                        .child(track.title.clone())
-                                                        .truncate()
-                                                        .text_ellipsis()
-                                                        .text_base()
-                                                        .font_weight(FontWeight::MEDIUM),
+                                                .mt_2()
+                                                .gap_2()
+                                                .text_color(theme.right_sidebar.item_title)
+                                                .items_center()
+                                                .justify_between()
+                                                .px(px(6.0))
+                                                .rounded_lg()
+                                                .overflow_hidden()
+                                                .border_1()
+                                                .border_color(theme.right_sidebar.item_border)
+                                                .hover(|this| {
+                                                    this.bg(theme.right_sidebar.item_hover)
+                                                })
+                                                .on_mouse_down(
+                                                    MouseButton::Left,
+                                                    move |_, _, cx| {
+                                                        let controller =
+                                                            cx.global::<Controller>().clone();
+                                                        controller.play_id(id);
+                                                    },
                                                 )
+                                                .child({
+                                                    if let Some(thumbnail) = &track.thumbnail {
+                                                        img(thumbnail.img.clone())
+                                                            .min_h(px(46.0))
+                                                            .min_w(px(46.0))
+                                                            .h(px(46.0))
+                                                            .w(px(46.0))
+                                                            .rounded_md()
+                                                    } else {
+                                                        img("")
+                                                    }
+                                                })
                                                 .child(
                                                     div()
-                                                        .child(track.artists.join(", "))
-                                                        .truncate()
-                                                        .text_ellipsis()
-                                                        .text_sm()
-                                                        .font_weight(FontWeight::NORMAL),
+                                                        .w_full()
+                                                        .flex()
+                                                        .flex_col()
+                                                        .gap(px(1.0))
+                                                        .child(
+                                                            div()
+                                                                .child(track.title.clone())
+                                                                .truncate()
+                                                                .text_ellipsis()
+                                                                .text_base()
+                                                                .text_sm()
+                                                                .font_weight(FontWeight::NORMAL),
+                                                        )
+                                                        .child(
+                                                            div()
+                                                                .child(track.artists.join(", "))
+                                                                .truncate()
+                                                                .text_ellipsis()
+                                                                .text_xs()
+                                                                .font_weight(FontWeight::NORMAL),
+                                                        ),
                                                 ),
                                         )
                                 })
                                 .collect()
                         },
                     )
-                    .h_full()
-                    .px_1(),
+                    .h_full(),
                 ),
         )
         .with_priority(2)
