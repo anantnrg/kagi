@@ -50,7 +50,7 @@ impl Render for LeftSidebar {
                     .min_w(px(200.0))
                     .when(
                         layout.mode.read(cx).clone() == LayoutMode::Overlay,
-                        |this| this.absolute().border_0(),
+                        |this| this.absolute().bg(theme.bg).rounded_none(),
                     )
                     .occlude()
                     .border_r_1()

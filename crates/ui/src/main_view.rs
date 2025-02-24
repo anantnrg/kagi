@@ -1,7 +1,10 @@
 use components::theme::Theme;
-use gpui::*;
+use gpui::{prelude::FluentBuilder, *};
 
-use crate::{layout::Layout, player_context::PlayerContext};
+use crate::{
+    layout::{Layout, LayoutMode},
+    player_context::PlayerContext,
+};
 
 #[derive(Clone)]
 pub struct MainView;
@@ -20,6 +23,9 @@ impl Render for MainView {
                 .h_full()
                 .flex()
                 .rounded_lg()
+                .when(layout.mode.read(cx) == &LayoutMode::Overlay, |this| {
+                    this.bg(theme.bg).rounded_none()
+                })
                 .flex_grow()
                 .items_center()
                 .justify_center()
