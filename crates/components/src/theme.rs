@@ -84,7 +84,7 @@ impl Default for LeftSidebarTheme {
     fn default() -> Self {
         Self {
             bg: rgb(0x11111B),
-            title: rgb(0xcba6f7),
+            title: rgb(0xB8C5EE),
             item_text: rgb(0xcdd6f4),
             item_border: rgb(0x1e1e2d),
             item_bg: rgb(0x1e1e2d),

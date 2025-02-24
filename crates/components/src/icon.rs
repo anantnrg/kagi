@@ -15,6 +15,8 @@ pub enum Icons {
     Shuffle,
     Repeat,
     Search,
+    Playlist,
+    Library,
 }
 
 impl Icons {
@@ -34,6 +36,8 @@ impl Icons {
             Self::Shuffle => "icons/shuffle.svg",
             Self::Repeat => "icons/repeat.svg",
             Self::Search => "icons/search.svg",
+            Self::Library => "icons/library.svg",
+            Self::Playlist => "icons/playlist.svg",
         }
         .into()
     }

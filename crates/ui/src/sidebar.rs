@@ -1,5 +1,5 @@
 use backend::{playback::SavedPlaylists, player::Controller};
-use components::{input::TextInput, theme::Theme};
+use components::{icon::Icon, input::TextInput, theme::Theme};
 use gpui::{prelude::FluentBuilder, *};
 use nucleo::{
     Config, Nucleo,
@@ -59,6 +59,26 @@ impl Render for LeftSidebar {
                 .flex()
                 .flex_col()
                 .gap_2()
+                .child(
+                    div()
+                        .font_weight(FontWeight::BOLD)
+                        .text_color(theme.left_sidebar.title)
+                        .w_full()
+                        .h_auto()
+                        .flex()
+                        .items_center()
+                        .gap_x_2()
+                        .text_center()
+                        .text_lg()
+                        .mb_2()
+                        .child(
+                            Icon::new(components::icon::Icons::Library)
+                                .size(20.0)
+                                .color(theme.left_sidebar.title)
+                                .hover(theme.left_sidebar.title),
+                        )
+                        .child("Library"),
+                )
                 .children(playlists.into_iter().map(|playlist| {
                     let controller = controller.clone();
                     let curr_index = current_index.clone();
@@ -145,6 +165,28 @@ impl Render for RightSidebar {
                 )
                 .border_l_1()
                 .occlude()
+                .px_3()
+                .py_3()
+                .child(
+                    div()
+                        .font_weight(FontWeight::BOLD)
+                        .text_color(theme.left_sidebar.title)
+                        .w_full()
+                        .h_auto()
+                        .flex()
+                        .items_center()
+                        .gap_x_2()
+                        .text_center()
+                        .text_lg()
+                        .mb_2()
+                        .child(
+                            Icon::new(components::icon::Icons::Playlist)
+                                .size(20.0)
+                                .color(theme.left_sidebar.title)
+                                .hover(theme.left_sidebar.title),
+                        )
+                        .child("Playlist"),
+                )
                 .child(
                     div()
                         .w_full()
