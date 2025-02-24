@@ -55,7 +55,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
     });
 
     app.run(move |cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(500.0), px(500.0)), cx);
+        let bounds = Bounds::centered(None, size(px(1280.0), px(720.0)), cx);
         components::input::bind_actions(cx);
         cx.open_window(
             WindowOptions {

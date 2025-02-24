@@ -48,6 +48,7 @@ impl Render for LeftSidebar {
                     .h_full()
                     .w(px(layout.left_sidebar.read(cx).clone().width))
                     .min_w(px(200.0))
+                    .rounded_xl()
                     .when(
                         layout.mode.read(cx).clone() == LayoutMode::Overlay,
                         |this| this.absolute().bg(theme.bg).rounded_none(),
@@ -139,6 +140,7 @@ impl Render for RightSidebar {
                     .flex()
                     .flex_col()
                     .min_w(px(280.0))
+                    .rounded_xl()
                     .when(
                         layout.mode.read(cx).clone() == LayoutMode::Overlay,
                         |this| this.absolute().border_0(),

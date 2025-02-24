@@ -22,7 +22,7 @@ impl Render for MainView {
                 .w(px(layout.central_width.read(cx).clone()))
                 .h_full()
                 .flex()
-                .rounded_lg()
+                .rounded_xl()
                 .when(layout.mode.read(cx) == &LayoutMode::Overlay, |this| {
                     this.bg(theme.bg).rounded_none()
                 })
