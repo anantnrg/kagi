@@ -69,7 +69,6 @@ impl Render for LeftSidebar {
                         .items_center()
                         .gap_x_2()
                         .text_center()
-                        .text_lg()
                         .mb_2()
                         .child(
                             Icon::new(components::icon::Icons::Library)
@@ -167,6 +166,7 @@ impl Render for RightSidebar {
                 .occlude()
                 .px_3()
                 .py_3()
+                .gap_2()
                 .child(
                     div()
                         .font_weight(FontWeight::BOLD)
@@ -177,7 +177,6 @@ impl Render for RightSidebar {
                         .items_center()
                         .gap_x_2()
                         .text_center()
-                        .text_lg()
                         .mb_2()
                         .child(
                             Icon::new(components::icon::Icons::Playlist)
@@ -198,8 +197,15 @@ impl Render for RightSidebar {
                         .rounded_xl()
                         .text_sm()
                         .flex()
+                        .gap_x_2()
                         .items_center()
                         .overflow_hidden()
+                        .child(
+                            Icon::new(components::icon::Icons::Search)
+                                .size(20.0)
+                                .color(theme.right_sidebar.search_text)
+                                .hover(theme.right_sidebar.search_text),
+                        )
                         .child(div().w_full().max_w_full().child(self.text_input.clone())),
                 )
                 .child(
