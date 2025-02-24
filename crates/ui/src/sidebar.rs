@@ -190,10 +190,15 @@ impl Render for RightSidebar {
                 .child(
                     div()
                         .w_full()
-                        .h_10()
-                        .py_1()
-                        .px_1()
-                        .border_b_1()
+                        .h_12()
+                        .p_1()
+                        .border_1()
+                        .border_color(theme.right_sidebar.item_border)
+                        .bg(theme.right_sidebar.search_bg)
+                        .rounded_xl()
+                        .text_sm()
+                        .flex()
+                        .items_center()
                         .child(self.text_input.clone()),
                 )
                 .child(
