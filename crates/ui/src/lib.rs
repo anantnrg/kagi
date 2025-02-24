@@ -50,13 +50,11 @@ actions!(text_input, [
 ]);
 
 pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
-    let app = Application::new().with_assets(Assets {
-        base: PathBuf::from("assets"),
-    });
+    let app = Application::new().with_assets(Assets {});
 
     app.run(move |cx: &mut App| {
         let bounds = Bounds::centered(None, size(px(1280.0), px(720.0)), cx);
-        load_fonts(cx).expect("could not load fonts");
+        // load_fonts(cx).expect("could not load fonts");
 
         components::input::bind_actions(cx);
         cx.open_window(
@@ -73,6 +71,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
             },
             |_, cx| {
                 cx.new(|cx| {
+                    let fonts = cx.asset_source().list("fonts").unwrap();
+                    println!("{:#?}", fonts);
                     let player_context = PlayerContext::new(cx);
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
