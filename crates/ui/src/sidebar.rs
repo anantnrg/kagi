@@ -191,7 +191,7 @@ impl Render for RightSidebar {
                     div()
                         .w_full()
                         .h_12()
-                        .p_1()
+                        .px_3()
                         .border_1()
                         .border_color(theme.right_sidebar.item_border)
                         .bg(theme.right_sidebar.search_bg)
@@ -199,7 +199,8 @@ impl Render for RightSidebar {
                         .text_sm()
                         .flex()
                         .items_center()
-                        .child(self.text_input.clone()),
+                        .overflow_hidden()
+                        .child(div().w_full().max_w_full().child(self.text_input.clone())),
                 )
                 .child(
                     uniform_list(
