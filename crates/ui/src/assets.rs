@@ -4,7 +4,7 @@ use rust_embed::RustEmbed;
 use std::fs;
 use std::path::PathBuf;
 
-#[derive(RustEmbed)]
+#[derive(RustEmbed, Clone)]
 #[folder = "../../assets"]
 #[include = "fonts/**/*"]
 #[include = "icons/**/*"]
