@@ -379,7 +379,6 @@ impl EntityInputHandler for TextInput {
 
 struct TextElement {
     input: Entity<TextInput>,
-    bg: Rgba,
     text: Rgba,
     placeholder: Rgba,
     cursor: Rgba,
@@ -601,7 +600,6 @@ impl Render for TextInput {
             .on_mouse_move(cx.listener(Self::on_mouse_move))
             .child(div().flex().flex_grow().w_full().child(TextElement {
                 input: cx.entity().clone(),
-                bg: rgb(0x1e1e2d),
                 text: rgb(0xcdd6f4),
                 placeholder: rgb(0x45475a),
                 cursor: rgb(0xcba6f7),
