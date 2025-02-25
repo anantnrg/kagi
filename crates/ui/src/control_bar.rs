@@ -48,6 +48,7 @@ impl Render for ControlBar {
                     .px_3()
                     .mt_3()
                     .pb_1()
+                    .text_sm()
                     .text_color(theme.control_bar.text)
                     .font_weight(FontWeight::MEDIUM)
                     .child(format!(
@@ -246,6 +247,7 @@ impl Render for ControlBar {
                             .child(
                                 div()
                                     .child(format!("{:.0}%", state.volume * 100.0))
+                                    .text_sm()
                                     .text_color(theme.control_bar.text)
                                     .ml_4()
                                     .w_10()
