@@ -28,7 +28,6 @@ use player_context::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
 use res_handler::ResHandler;
 use sidebar::{LeftSidebar, RightSidebar};
 use std::{
-    path::PathBuf,
     sync::{Arc, Mutex},
     time::Duration,
 };

@@ -3,8 +3,6 @@ use std::ops::Range;
 use gpui::*;
 use unicode_segmentation::*;
 
-use crate::theme::Theme;
-
 actions!(text_input, [
     Backspace,
     Delete,
