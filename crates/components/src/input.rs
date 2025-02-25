@@ -433,7 +433,6 @@ impl Element for TextElement {
         let selected_range = input.selected_range.clone();
         let cursor = input.cursor_offset();
         let style = window.text_style();
-        let theme = cx.global::<Theme>();
 
         let (display_text, text_color) = if content.is_empty() {
             (input.placeholder.clone(), Hsla::from(self.placeholder))

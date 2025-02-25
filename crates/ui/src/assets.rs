@@ -1,8 +1,6 @@
 use anyhow::anyhow;
 use gpui::*;
 use rust_embed::RustEmbed;
-use std::fs;
-use std::path::PathBuf;
 
 #[derive(RustEmbed, Clone)]
 #[folder = "../../assets"]
