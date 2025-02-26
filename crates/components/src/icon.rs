@@ -49,7 +49,6 @@ pub struct Icon {
     pub size: f32,
     pub color: Rgba,
     pub hover: Rgba,
-    hovered: bool,
 }
 
 impl Icon {
@@ -59,7 +58,6 @@ impl Icon {
             size: 24.0,
             color: rgb(0xcdd6f4),
             hover: rgb(0xcdd6f4),
-            hovered: false,
         }
     }
 
