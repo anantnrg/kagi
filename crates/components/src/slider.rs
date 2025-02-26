@@ -16,7 +16,6 @@ pub struct Slider {
     bg: Rgba,
     fill: Rgba,
     thumb_bg: Rgba,
-    thumb_border: Rgba,
 }
 
 impl EventEmitter<SliderEvent> for Slider {}
@@ -32,7 +31,6 @@ impl Slider {
             bg: rgb(0x1e1e2d),
             fill: rgb(0xcba6f7),
             thumb_bg: rgb(0xcba6f7),
-            thumb_border: rgb(0x1e1e2d),
         }
     }
 
@@ -117,13 +115,12 @@ impl Slider {
                 },
             ))
             .absolute()
-            .top(px(-5.))
+            .top(px(-4.))
             .left(relative(self.relative_value()))
             .ml(-px(8.))
-            .size_4()
+            .size(px(14.0))
             .rounded_full()
             .border(px(1.5))
-            .border_color(self.thumb_border)
             .bg(self.thumb_bg)
     }
 }
@@ -140,7 +137,7 @@ impl Render for Slider {
                     .id("bar")
                     .relative()
                     .w_full()
-                    .h_1p5()
+                    .h(px(4.0))
                     .bg(self.bg)
                     .active(|this| this.bg(self.fill))
                     .rounded(px(3.))
