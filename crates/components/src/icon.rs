@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use gpui::*;
 
 pub enum Icons {
@@ -87,5 +89,10 @@ impl RenderOnce for Icon {
             .text_color(self.color)
             .path(self.icon.path())
             .hover(|this| this.text_color(self.hover))
+            .with_animation(
+                "svg_icon",
+                Animation::new(Duration::from_millis(250)).with_easing(quadratic),
+                |this, delta| this.opacity(delta),
+            )
     }
 }

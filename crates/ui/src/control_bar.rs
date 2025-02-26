@@ -103,7 +103,7 @@ impl Render for ControlBar {
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Shuffle)
-                                            .size(24.0)
+                                            .size(22.0)
                                             .color(theme.control_bar.text)
                                             .hover(theme.control_bar.hover)
                                             .when(state.shuffle, |this| {
@@ -127,7 +127,7 @@ impl Render for ControlBar {
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Previous)
-                                            .size(24.0)
+                                            .size(22.0)
                                             .color(theme.control_bar.text)
                                             .hover(theme.control_bar.hover),
                                     )
@@ -150,7 +150,7 @@ impl Render for ControlBar {
                                     .when(state.state == State::Null, |this| {
                                         this.child(
                                             Icon::new(Icons::Stopped)
-                                                .size(24.0)
+                                                .size(22.0)
                                                 .color(theme.control_bar.text)
                                                 .hover(theme.control_bar.hover),
                                         )
@@ -158,7 +158,7 @@ impl Render for ControlBar {
                                     .when(state.state == State::Playing, |this| {
                                         this.child(
                                             Icon::new(Icons::Pause)
-                                                .size(24.0)
+                                                .size(22.0)
                                                 .color(theme.control_bar.text)
                                                 .hover(theme.control_bar.hover),
                                         )
@@ -166,7 +166,7 @@ impl Render for ControlBar {
                                     .when(state.state == State::Paused, |this| {
                                         this.child(
                                             Icon::new(Icons::Play)
-                                                .size(24.0)
+                                                .size(22.0)
                                                 .color(theme.control_bar.text)
                                                 .hover(theme.control_bar.hover),
                                         )
@@ -196,7 +196,7 @@ impl Render for ControlBar {
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Next)
-                                            .size(24.0)
+                                            .size(22.0)
                                             .color(theme.control_bar.text)
                                             .hover(theme.control_bar.hover),
                                     )
@@ -217,7 +217,7 @@ impl Render for ControlBar {
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Repeat)
-                                            .size(24.0)
+                                            .size(22.0)
                                             .color(theme.control_bar.text)
                                             .hover(theme.control_bar.hover)
                                             .when(state.repeat, |this| {
