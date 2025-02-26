@@ -1,6 +1,6 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
-use gpui::{App, MouseButton, MouseDownEvent, SharedString, Window, div, prelude::*, px, rgb};
+use gpui::{prelude::*, *};
 
 pub struct Button {
     text: SharedString,
@@ -82,6 +82,7 @@ impl Render for Button {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let on_click = self.on_click.clone();
         div()
+            .id("button")
             .flex()
             .h(px(self.h))
             .when(self.w != 0.0, |this| this.w(px(self.w)))
@@ -95,7 +96,6 @@ impl Render for Button {
             .content_center()
             .items_center()
             .child(self.text.clone())
-            .id("button")
             .on_hover(cx.listener(|this, hovered, _, cx| {
                 this.hovered = *hovered;
                 cx.notify();
@@ -103,6 +103,14 @@ impl Render for Button {
             .on_mouse_down(MouseButton::Left, move |event, win, cx| {
                 (on_click)(event.clone(), win, cx);
             })
+            .with_transition(
+                self.hovered,
+                "hover-transition",
+                TransitionAnimation::new(Duration::from_millis(1000))
+                    .backward(Some(Duration::from_millis(500)))
+                    .with_easing(ease_in_out),
+                |this, _forward, delta| this.w(px(32.0 + delta * 32.0)),
+            )
             .into_element()
     }
 }
