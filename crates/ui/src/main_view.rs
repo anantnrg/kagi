@@ -31,6 +31,7 @@ impl Render for MainView {
                 .justify_center()
                 .flex_col()
                 .overflow_hidden()
+                .p_4()
                 .child({
                     if let Some(thumbnail) = meta.read(cx).thumbnail.clone() {
                         div()
@@ -41,6 +42,7 @@ impl Render for MainView {
                             .items_end()
                             .justify_end()
                             .flex_grow()
+                            .rounded_xl()
                             .child(
                                 img(thumbnail.img)
                                     .size_full()
@@ -67,7 +69,7 @@ impl Render for MainView {
                                     .text_color(theme.main.title)
                                     .child(meta.title.clone())
                                     .text_3xl()
-                                    .font_weight(FontWeight::EXTRA_BOLD)
+                                    .font_weight(FontWeight::BOLD)
                                     .w_full()
                                     .max_w_full()
                                     .text_align(TextAlign::Center)
@@ -81,7 +83,7 @@ impl Render for MainView {
                                 div()
                                     .text_color(theme.main.artists)
                                     .text_xl()
-                                    .font_weight(FontWeight::MEDIUM)
+                                    .font_weight(FontWeight::NORMAL)
                                     .whitespace_normal()
                                     .child(format!("{} • {}", meta.artists.join(", "), meta.album))
                                     .w_full()

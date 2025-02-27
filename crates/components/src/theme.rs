@@ -97,10 +97,10 @@ impl Default for MainTheme {
     fn default() -> Self {
         Self {
             bg: rgb(0x11111B),
-            title: rgb(0xcba6f7),
+            title: rgb(0xcdd6f4),
             album: rgb(0xcdd6f4),
-            artists: rgb(0xb4befe),
-            separator: rgb(0x45475a),
+            artists: rgb(0xcdd6f4),
+            separator: rgb(0xcba6f7),
         }
     }
 }
