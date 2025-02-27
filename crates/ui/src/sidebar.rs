@@ -123,7 +123,12 @@ impl Render for LeftSidebarItem {
         let playlist = self.playlist.clone();
         let controller = cx.global::<Controller>().clone();
         let index_write = cx.global::<PlayerContext>().metadata.clone();
-        let index = cx.global::<PlayerContext>().metadata.read(cx).title.clone();
+        let index = cx
+            .global::<PlayerContext>()
+            .metadata
+            .read(cx)
+            .playlist_name
+            .clone();
         let theme = cx.global::<Theme>();
         div()
             .bg(theme.left_sidebar.bg)
