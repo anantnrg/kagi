@@ -2,7 +2,7 @@ use backend::{
     playback::{SavedPlaylist, SavedPlaylists},
     player::Controller,
 };
-use components::{button::Button, icon::Icon, input::TextInput, theme::Theme};
+use components::{icon::Icon, input::TextInput, theme::Theme};
 use gpui::{prelude::FluentBuilder, *};
 use nucleo::{
     Config, Nucleo,
@@ -13,7 +13,6 @@ use std::{collections::HashSet, time::Duration};
 
 use crate::{
     layout::{Layout, LayoutMode},
-    lerp,
     player_context::{PlayerContext, Track},
 };
 
@@ -60,7 +59,7 @@ impl Render for LeftSidebar {
                     layout.mode.read(cx).clone() == LayoutMode::Overlay,
                     |this| this.absolute().bg(theme.bg).rounded_none(),
                 )
-                // .occlude()
+                .occlude()
                 .border_r_1()
                 .px_3()
                 .py_3()
@@ -91,7 +90,6 @@ impl Render for LeftSidebar {
                         .into_iter()
                         .map(|playlist| cx.new(|_| LeftSidebarItem::new(playlist))),
                 )
-                .child(cx.new(|_| Button::new()))
                 .child(
                     div()
                         .w_full()
@@ -130,25 +128,12 @@ impl Render for LeftSidebarItem {
             .read(cx)
             .playlist_name
             .clone();
-        let theme = cx.global::<Theme>().clone();
+        let theme = cx.global::<Theme>();
         div()
-            .id("sidebar_item")
             .bg(theme.left_sidebar.bg)
             .border_1()
             .border_color(theme.left_sidebar.item_border)
-            .on_mouse_move(|_, _, _| {})
-            .on_hover({
-                println!("hover");
-                cx.listener(|this, hovered: &bool, _, cx| {
-                    this.hovered = hovered.clone();
-                    println!(
-                        "this.hovered: {}; hovered: {}",
-                        this.hovered.clone(),
-                        hovered
-                    );
-                    cx.notify();
-                })
-            })
+            .hover(|this| this.bg(theme.left_sidebar.item_hover))
             .when(playlist.name == index.clone(), |this| {
                 this.bg(theme.left_sidebar.item_bg)
             })
@@ -175,18 +160,11 @@ impl Render for LeftSidebarItem {
             })
             .with_transition(
                 self.hovered,
-                "sidebar_item",
+                "hover-transition",
                 TransitionAnimation::new(Duration::from_millis(1000))
                     .backward(Some(Duration::from_millis(500)))
                     .with_easing(ease_in_out),
-                move |this, _forward, delta| {
-                    println!("delta:{delta}");
-                    this.bg(lerp(
-                        theme.left_sidebar.item_bg.clone(),
-                        theme.left_sidebar.item_hover.clone(),
-                        delta,
-                    ))
-                },
+                |this, _forward, delta| this.w(px(32.0 + delta * 32.0)),
             )
     }
 }
