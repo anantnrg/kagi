@@ -1,12 +1,15 @@
-use backend::{playback::SavedPlaylists, player::Controller};
+use backend::{
+    playback::{SavedPlaylist, SavedPlaylists},
+    player::Controller,
+};
 use components::{icon::Icon, input::TextInput, theme::Theme};
 use gpui::{prelude::FluentBuilder, *};
 use nucleo::{
     Config, Nucleo,
     pattern::{CaseMatching, Normalization},
 };
-use std::collections::HashSet;
 use std::sync::Arc;
+use std::{collections::HashSet, time::Duration};
 
 use crate::{
     layout::{Layout, LayoutMode},
@@ -16,6 +19,11 @@ use crate::{
 #[derive(Clone)]
 pub struct LeftSidebar {
     pub playlists: Entity<SavedPlaylists>,
+}
+
+pub struct LeftSidebarItem {
+    playlist: SavedPlaylist,
+    hovered: bool,
 }
 
 pub struct RightSidebar {
@@ -82,36 +90,6 @@ impl Render for LeftSidebar {
                     let controller = controller.clone();
                     let curr_index = current_index.clone();
                     let current_index = curr_index.read(cx).playlist_name.clone();
-
-                    div()
-                        .bg(theme.left_sidebar.bg)
-                        .border_1()
-                        .border_color(theme.left_sidebar.item_border)
-                        .hover(|this| this.bg(theme.left_sidebar.item_hover))
-                        .when(playlist.name == current_index.clone(), |this| {
-                            this.bg(theme.left_sidebar.item_bg)
-                        })
-                        .text_color(theme.left_sidebar.item_text)
-                        .text_sm()
-                        .font_weight(FontWeight::MEDIUM)
-                        .w_full()
-                        .rounded_lg()
-                        .h_12()
-                        .flex()
-                        .items_center()
-                        .justify_start()
-                        .px_3()
-                        .child(playlist.name.clone())
-                        .truncate()
-                        .on_mouse_down(MouseButton::Left, {
-                            move |_, _, cx| {
-                                curr_index.update(cx, |this, _| {
-                                    this.playlist_name = playlist.name.clone().into();
-                                });
-                                controller.load(playlist.clone());
-                                controller.get_queue();
-                            }
-                        })
                 }))
                 .child(
                     div()
@@ -137,6 +115,62 @@ impl Render for LeftSidebar {
                 ),
         )
         .with_priority(1)
+    }
+}
+
+impl Render for LeftSidebarItem {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<'_, Self>) -> impl IntoElement {
+        let playlist = self.playlist.clone();
+        let controller = cx.global::<Controller>().clone();
+        let index_write = cx.global::<PlayerContext>().metadata.clone();
+        let index = cx.global::<PlayerContext>().metadata.read(cx).title.clone();
+        let theme = cx.global::<Theme>();
+        div()
+            .bg(theme.left_sidebar.bg)
+            .border_1()
+            .border_color(theme.left_sidebar.item_border)
+            .hover(|this| this.bg(theme.left_sidebar.item_hover))
+            .when(playlist.name == index.clone(), |this| {
+                this.bg(theme.left_sidebar.item_bg)
+            })
+            .text_color(theme.left_sidebar.item_text)
+            .text_sm()
+            .font_weight(FontWeight::MEDIUM)
+            .w_full()
+            .rounded_lg()
+            .h_12()
+            .flex()
+            .items_center()
+            .justify_start()
+            .px_3()
+            .child(playlist.name.clone())
+            .truncate()
+            .on_mouse_down(MouseButton::Left, {
+                move |_, _, cx| {
+                    index_write.update(cx, |this, _| {
+                        this.playlist_name = playlist.name.clone().into();
+                    });
+                    controller.load(playlist.clone());
+                    controller.get_queue();
+                }
+            })
+            .with_transition(
+                self.hovered,
+                "hover-transition",
+                TransitionAnimation::new(Duration::from_millis(1000))
+                    .backward(Some(Duration::from_millis(500)))
+                    .with_easing(ease_in_out),
+                |this, _forward, delta| this.w(px(32.0 + delta * 32.0)),
+            )
+    }
+}
+
+impl LeftSidebarItem {
+    pub fn new(playlist: SavedPlaylist) -> Self {
+        LeftSidebarItem {
+            playlist,
+            hovered: false,
+        }
     }
 }
 
