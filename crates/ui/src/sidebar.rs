@@ -42,7 +42,7 @@ impl Focusable for RightSidebar {
 
 impl Render for LeftSidebar {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let theme = cx.global::<Theme>();
+        let theme = cx.global::<Theme>().clone();
         let controller = cx.global::<Controller>().clone();
         let playlists = self.playlists.read(cx).clone().playlists;
         let current_index = cx.global::<PlayerContext>().metadata.clone();
@@ -86,11 +86,11 @@ impl Render for LeftSidebar {
                         )
                         .child("Library"),
                 )
-                .children(playlists.into_iter().map(|playlist| {
-                    let controller = controller.clone();
-                    let curr_index = current_index.clone();
-                    let current_index = curr_index.read(cx).playlist_name.clone();
-                }))
+                .children(
+                    playlists
+                        .into_iter()
+                        .map(|playlist| cx.new(|_| LeftSidebarItem::new(playlist))),
+                )
                 .child(
                     div()
                         .w_full()
