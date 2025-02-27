@@ -45,7 +45,6 @@ impl Render for LeftSidebar {
         let theme = cx.global::<Theme>().clone();
         let controller = cx.global::<Controller>().clone();
         let playlists = self.playlists.read(cx).clone().playlists;
-        let current_index = cx.global::<PlayerContext>().metadata.clone();
         let layout = cx.global::<Layout>().clone();
 
         deferred(

@@ -306,3 +306,12 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
     });
     Ok(())
 }
+
+pub fn lerp(start: Rgba, end: Rgba, t: f32) -> Rgba {
+    Rgba {
+        r: start.r + (end.r - start.r) * t,
+        g: start.g + (end.g - start.g) * t,
+        b: start.b + (end.b - start.b) * t,
+        a: start.a + (end.a - start.a) * t,
+    }
+}
