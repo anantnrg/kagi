@@ -275,6 +275,11 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             }
                             Response::Theme(theme) => {
                                 cx.set_global::<Theme>(theme.clone().into());
+                                println!(
+                                    "{:#?}",
+                                    <Theme as From<backend::theme::Theme>>::from(theme.clone())
+                                        .clone()
+                                );
                                 cx.refresh_windows();
                             }
                             _ => {}

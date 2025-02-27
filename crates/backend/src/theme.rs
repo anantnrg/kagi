@@ -76,10 +76,10 @@ pub struct ControlBarTheme {
 impl Default for TitlebarTheme {
     fn default() -> Self {
         Self {
-            bg: "#11111B".to_string(),
-            title: "#cba6f7".to_string(),
+            bg: "#161622".to_string(),
+            title: "#cdd6f4".to_string(),
             icon: "#cdd6f4".to_string(),
-            hover: "#52cba6f7".to_string(),
+            hover: "#cdd6f4".to_string(),
         }
     }
 }
@@ -87,12 +87,12 @@ impl Default for TitlebarTheme {
 impl Default for LeftSidebarTheme {
     fn default() -> Self {
         Self {
-            bg: "#11111B".to_string(),
-            title: "#cba6f7".to_string(),
+            bg: "#11111b".to_string(),
+            title: "#cdd6f4".to_string(),
             item_text: "#cdd6f4".to_string(),
-            item_border: "#11111B".to_string(),
-            item_bg: "#1e1e2d".to_string(),
-            item_hover: "#52cba6f7".to_string(),
+            item_border: "#272747".to_string(),
+            item_bg: "#11111b".to_string(),
+            item_hover: "#272747".to_string(),
         }
     }
 }
@@ -100,11 +100,11 @@ impl Default for LeftSidebarTheme {
 impl Default for MainTheme {
     fn default() -> Self {
         Self {
-            bg: "#11111B".to_string(),
-            title: "#cba6f7".to_string(),
+            bg: "#11111b".to_string(),
+            title: "#cdd6f4".to_string(),
             album: "#cdd6f4".to_string(),
-            artists: "#a6adc8".to_string(),
-            separator: "#45475a".to_string(),
+            artists: "#cdd6f4".to_string(),
+            separator: "#cba6f7".to_string(),
         }
     }
 }
@@ -112,18 +112,18 @@ impl Default for MainTheme {
 impl Default for RightSidebarTheme {
     fn default() -> Self {
         Self {
-            bg: "#11111B".to_string(),
+            bg: "#11111b".to_string(),
             title: "#cba6f7".to_string(),
             item_title: "#cdd6f4".to_string(),
-            item_artists: "#a6adc8".to_string(),
-            item_border: "#11111B".to_string(),
+            item_artists: "#cdd6f4".to_string(),
+            item_border: "#272747".to_string(),
             item_bg: "#1e1e2d".to_string(),
-            item_hover: "#52cba6f7".to_string(),
-            search_bg: "#181825".to_string(),
+            item_hover: "#272747".to_string(),
+            search_bg: "#161622".to_string(),
             search_text: "#cdd6f4".to_string(),
-            search_placeholder: "#a6adc8".to_string(),
+            search_placeholder: "#272747".to_string(),
             search_cursor: "#cba6f7".to_string(),
-            search_highlight: "#52cba6f7".to_string(),
+            search_highlight: "#cba6f7".to_string(),
         }
     }
 }
@@ -131,15 +131,15 @@ impl Default for RightSidebarTheme {
 impl Default for ControlBarTheme {
     fn default() -> Self {
         Self {
-            bg: "#11111B".to_string(),
-            playbar_bg: "#181825".to_string(),
+            bg: "#161622".to_string(),
+            playbar_bg: "#272747".to_string(),
             playbar_fill: "#cba6f7".to_string(),
-            playbar_thumb: "#cdd6f4".to_string(),
+            playbar_thumb: "#cba6f7".to_string(),
             text: "#cdd6f4".to_string(),
-            icons: "#cba6f7".to_string(),
-            volume_bg: "#181825".to_string(),
+            icons: "#cdd6f4".to_string(),
+            volume_bg: "#272747".to_string(),
             volume_fill: "#cba6f7".to_string(),
-            volume_thumb: "#cdd6f4".to_string(),
+            volume_thumb: "#cba6f7".to_string(),
             hover: "#cba6f7".to_string(),
         }
     }
@@ -148,7 +148,7 @@ impl Default for ControlBarTheme {
 impl Theme {
     pub fn default() -> Self {
         Theme {
-            bg: "#11111b".to_string(),
+            bg: "#161622".to_string(),
             main: MainTheme::default(),
             titlebar: TitlebarTheme::default(),
             left_sidebar: LeftSidebarTheme::default(),
@@ -156,6 +156,7 @@ impl Theme {
             control_bar: ControlBarTheme::default(),
         }
     }
+
     pub fn get_file() -> Option<PathBuf> {
         if let Some(user_dirs) = UserDirs::new() {
             let proj_dir = user_dirs

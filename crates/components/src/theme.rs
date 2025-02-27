@@ -1,6 +1,6 @@
-use gpui::{Global, Rgba, rgb};
+use gpui::{Global, Rgba, rgb, rgba};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Theme {
     pub bg: Rgba,
     pub main: MainTheme,
@@ -12,7 +12,7 @@ pub struct Theme {
 
 impl Global for Theme {}
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct TitlebarTheme {
     pub bg: Rgba,
     pub title: Rgba,
@@ -20,7 +20,7 @@ pub struct TitlebarTheme {
     pub hover: Rgba,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct LeftSidebarTheme {
     pub bg: Rgba,
     pub title: Rgba,
@@ -30,7 +30,7 @@ pub struct LeftSidebarTheme {
     pub item_hover: Rgba,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct MainTheme {
     pub bg: Rgba,
     pub title: Rgba,
@@ -39,7 +39,7 @@ pub struct MainTheme {
     pub separator: Rgba,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct RightSidebarTheme {
     pub bg: Rgba,
     pub title: Rgba,
@@ -55,7 +55,7 @@ pub struct RightSidebarTheme {
     pub search_highlight: Rgba,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct ControlBarTheme {
     pub bg: Rgba,
     pub playbar_bg: Rgba,
@@ -72,10 +72,10 @@ pub struct ControlBarTheme {
 impl Default for TitlebarTheme {
     fn default() -> Self {
         Self {
-            bg: rgb(0x11111B),
-            title: rgb(0xcba6f7),
-            icon: rgb(0xcdd6f4),
-            hover: rgb(0x52cba6f7),
+            bg: rgba(0x161622ff),
+            title: rgba(0xcdd6f4ff),
+            icon: rgba(0xcdd6f4ff),
+            hover: rgba(0xcdd6f4ff),
         }
     }
 }
@@ -83,12 +83,12 @@ impl Default for TitlebarTheme {
 impl Default for LeftSidebarTheme {
     fn default() -> Self {
         Self {
-            bg: rgb(0x11111B),
-            title: rgb(0xB8C5EE),
-            item_text: rgb(0xcdd6f4),
-            item_border: rgb(0x1e1e2d),
-            item_bg: rgb(0x1e1e2d),
-            item_hover: rgb(0x52cba6f7),
+            bg: rgba(0x11111bff),
+            title: rgba(0xcdd6f4ff),
+            item_text: rgba(0xcdd6f4ff),
+            item_border: rgba(0x272747ff),
+            item_bg: rgba(0x11111bff),
+            item_hover: rgba(0x272747ff),
         }
     }
 }
@@ -96,11 +96,11 @@ impl Default for LeftSidebarTheme {
 impl Default for MainTheme {
     fn default() -> Self {
         Self {
-            bg: rgb(0x11111B),
-            title: rgb(0xcdd6f4),
-            album: rgb(0xcdd6f4),
-            artists: rgb(0xcdd6f4),
-            separator: rgb(0xcba6f7),
+            bg: rgba(0x11111bff),
+            title: rgba(0xcdd6f4ff),
+            album: rgba(0xcdd6f4ff),
+            artists: rgba(0xcdd6f4ff),
+            separator: rgba(0xcba6f7ff),
         }
     }
 }
@@ -108,18 +108,18 @@ impl Default for MainTheme {
 impl Default for RightSidebarTheme {
     fn default() -> Self {
         Self {
-            bg: rgb(0x11111B),
-            title: rgb(0xcba6f7),
-            item_title: rgb(0xcdd6f4),
-            item_artists: rgb(0xb4befe),
-            item_border: rgb(0x1e1e2d),
-            item_bg: rgb(0x1e1e2d),
-            item_hover: rgb(0x52cba6f7),
-            search_bg: rgb(0x1e1e2d),
-            search_text: rgb(0xcdd6f4),
-            search_placeholder: rgb(0x45475a),
-            search_cursor: rgb(0xcba6f7),
-            search_highlight: rgb(0x52cba6f7),
+            bg: rgba(0x11111bff),
+            title: rgba(0xcba6f7ff),
+            item_title: rgba(0xcdd6f4ff),
+            item_artists: rgba(0xcdd6f4ff),
+            item_border: rgba(0x272747ff),
+            item_bg: rgba(0x1e1e2dff),
+            item_hover: rgba(0x272747ff),
+            search_bg: rgba(0x161622ff),
+            search_text: rgba(0xcdd6f4ff),
+            search_placeholder: rgba(0x272747ff),
+            search_cursor: rgba(0xcba6f7ff),
+            search_highlight: rgba(0xcba6f7ff),
         }
     }
 }
@@ -127,24 +127,24 @@ impl Default for RightSidebarTheme {
 impl Default for ControlBarTheme {
     fn default() -> Self {
         Self {
-            bg: rgb(0x11111B),
-            playbar_bg: rgb(0x1e1e2d),
-            playbar_fill: rgb(0xcba6f7),
-            playbar_thumb: rgb(0x52cba6f7),
-            text: rgb(0xcdd6f4),
-            icons: rgb(0xcdd6f4),
-            volume_bg: rgb(0x1e1e2d),
-            volume_fill: rgb(0xcba6f7),
-            volume_thumb: rgb(0xcba6f7),
-            hover: rgb(0xcba6f7),
+            bg: rgba(0x161622ff),
+            playbar_bg: rgba(0x272747ff),
+            playbar_fill: rgba(0xcba6f7ff),
+            playbar_thumb: rgba(0xcba6f7ff),
+            text: rgba(0xcdd6f4ff),
+            icons: rgba(0xcdd6f4ff),
+            volume_bg: rgba(0x272747ff),
+            volume_fill: rgba(0xcba6f7ff),
+            volume_thumb: rgba(0xcba6f7ff),
+            hover: rgba(0xcba6f7ff),
         }
     }
 }
 
-impl Theme {
-    pub fn default() -> Self {
-        Theme {
-            bg: rgb(0x11111b),
+impl Default for Theme {
+    fn default() -> Self {
+        Self {
+            bg: rgba(0x161622ff),
             main: MainTheme::default(),
             titlebar: TitlebarTheme::default(),
             left_sidebar: LeftSidebarTheme::default(),
