@@ -309,6 +309,15 @@ impl Render for ControlBar {
                             .h_auto()
                             .w_full()
                             .px_2()
+                            .child({
+                                let vol = cx.global::<PlayerContext>().state.read(cx).volume as f32;
+                                // if vol == 0.0 {
+                                Icon::new(Icons::Next)
+                                    .size(22.0)
+                                    .color(theme.control_bar.text)
+                                    .hover(theme.control_bar.hover)
+                                // }
+                            })
                             .child(div().w_20().child(self.vol_slider.clone()))
                             .child(
                                 div()
