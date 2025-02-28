@@ -46,6 +46,7 @@ impl Render for MainView {
                             .child(
                                 img(thumbnail.img)
                                     .size_full()
+                                    .rounded_xl()
                                     .object_fit(ObjectFit::Contain),
                             )
                     } else {
@@ -61,7 +62,7 @@ impl Render for MainView {
                         .items_center()
                         .w_full()
                         .flex_shrink_0()
-                        .gap_2()
+                        .gap_1()
                         .child({
                             let meta = meta.read(cx);
                             if !meta.title.is_empty() {
@@ -69,6 +70,12 @@ impl Render for MainView {
                                     .text_color(theme.main.title)
                                     .child(meta.title.clone())
                                     .text_3xl()
+                                    .when(layout.central_width.read(cx) < &600.0, |this| {
+                                        this.text_xl()
+                                    })
+                                    .when(layout.central_width.read(cx) < &400.0, |this| {
+                                        this.text_lg()
+                                    })
                                     .font_weight(FontWeight::BOLD)
                                     .w_full()
                                     .max_w_full()
@@ -83,6 +90,12 @@ impl Render for MainView {
                                 div()
                                     .text_color(theme.main.artists)
                                     .text_xl()
+                                    .when(layout.central_width.read(cx) < &600.0, |this| {
+                                        this.text_lg()
+                                    })
+                                    .when(layout.central_width.read(cx) < &400.0, |this| {
+                                        this.text_base()
+                                    })
                                     .font_weight(FontWeight::NORMAL)
                                     .whitespace_normal()
                                     .child(format!("{} • {}", meta.artists.join(", "), meta.album))
