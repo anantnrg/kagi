@@ -147,6 +147,36 @@ impl Render for ControlBar {
                                     .flex_col()
                                     .items_center()
                                     .justify_center()
+                                    .child(
+                                        Icon::new(Icons::Rewind)
+                                            .size(22.0)
+                                            .color(theme.control_bar.text)
+                                            .hover(theme.control_bar.hover)
+                                            .when(state.shuffle, |this| {
+                                                this.color(theme.control_bar.hover)
+                                            }),
+                                    )
+                                    .on_mouse_down(MouseButton::Left, {
+                                        {
+                                            move |_, _, cx| {
+                                                let current_pos = cx
+                                                    .global::<PlayerContext>()
+                                                    .state
+                                                    .read(cx)
+                                                    .position;
+                                                cx.global::<Controller>()
+                                                    .seek(current_pos.saturating_sub(5));
+                                            }
+                                        }
+                                    }),
+                            )
+                            .child(
+                                div()
+                                    .size_6()
+                                    .flex()
+                                    .flex_col()
+                                    .items_center()
+                                    .justify_center()
                                     .when(state.state == State::Null, |this| {
                                         this.child(
                                             Icon::new(Icons::Stopped)
@@ -183,6 +213,42 @@ impl Render for ControlBar {
                                                 {
                                                     cx.global::<Controller>().play();
                                                 }
+                                            }
+                                        }
+                                    }),
+                            )
+                            .child(
+                                div()
+                                    .size_6()
+                                    .flex()
+                                    .flex_col()
+                                    .items_center()
+                                    .justify_center()
+                                    .child(
+                                        Icon::new(Icons::FastForward)
+                                            .size(22.0)
+                                            .color(theme.control_bar.text)
+                                            .hover(theme.control_bar.hover)
+                                            .when(state.shuffle, |this| {
+                                                this.color(theme.control_bar.hover)
+                                            }),
+                                    )
+                                    .on_mouse_down(MouseButton::Left, {
+                                        {
+                                            move |_, _, cx| {
+                                                let current_pos = cx
+                                                    .global::<PlayerContext>()
+                                                    .state
+                                                    .read(cx)
+                                                    .position;
+                                                let total_duration = cx
+                                                    .global::<PlayerContext>()
+                                                    .metadata
+                                                    .read(cx)
+                                                    .duration;
+                                                cx.global::<Controller>().seek(
+                                                    (current_pos + 5).clamp(0, total_duration),
+                                                );
                                             }
                                         }
                                     }),

@@ -17,6 +17,8 @@ pub enum Icons {
     Search,
     Playlist,
     Library,
+    FastForward,
+    Rewind,
 }
 
 impl Icons {
@@ -38,6 +40,8 @@ impl Icons {
             Self::Search => "icons/search.svg",
             Self::Library => "icons/library.svg",
             Self::Playlist => "icons/playlist.svg",
+            Self::FastForward => "icons/fast-forward.svg",
+            Self::Rewind => "icons/rewind.svg",
         }
         .into()
     }
