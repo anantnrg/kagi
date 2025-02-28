@@ -309,6 +309,7 @@ impl Render for ControlBar {
                             .h_auto()
                             .w_full()
                             .px_2()
+                            .gap_x_2()
                             .child({
                                 let vol = cx.global::<PlayerContext>().state.read(cx).volume as f32;
                                 if vol == 0.0 {
@@ -336,7 +337,7 @@ impl Render for ControlBar {
                             .child(div().w_20().child(self.vol_slider.clone()))
                             .child(
                                 div()
-                                    .child(format!("{:.0}%", state.volume * 100.0))
+                                    .child(format!("{:00.0}%", state.volume * 100.0))
                                     .text_sm()
                                     .text_color(theme.control_bar.text)
                                     .ml_4()
