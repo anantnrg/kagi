@@ -71,10 +71,10 @@ impl Render for MainView {
                                     .child(meta.title.clone())
                                     .text_3xl()
                                     .when(layout.central_width.read(cx) < &600.0, |this| {
-                                        this.text_xl()
+                                        this.text_2xl()
                                     })
                                     .when(layout.central_width.read(cx) < &400.0, |this| {
-                                        this.text_lg()
+                                        this.text_xl()
                                     })
                                     .font_weight(FontWeight::BOLD)
                                     .w_full()

@@ -81,7 +81,7 @@ impl Render for ControlBar {
                         div()
                             .w_full()
                             .h_full()
-                            .when(win.bounds().size.width.0 < 400.0, |this| {
+                            .when(win.bounds().size.width.0 < 600.0, |this| {
                                 this.w_auto().flex_grow()
                             }),
                     )
