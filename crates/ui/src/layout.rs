@@ -4,6 +4,7 @@ const MIN_CENTRAL_WIDTH: f32 = 200.0;
 const LEFT_PCT: f32 = 0.20;
 const RIGHT_PCT: f32 = 0.33;
 const OVERLAY_THRESHOLD: f32 = 640.0;
+const PADDING: f32 = 12.0;
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum LayoutMode {
@@ -74,23 +75,15 @@ impl Layout {
         if window_width < OVERLAY_THRESHOLD {
             // Enter overlay mode
             layout_mode = LayoutMode::Overlay;
-            // Main content always takes the full width in overlay mode.
-            central_width = window_width;
+            central_width = window_width - (2.0 * PADDING);
 
-            // Set each sidebar's width to the full window width if they are toggled on.
             if self.left_sidebar.read(cx).should_show {
                 left_sidebar.show = true;
-                left_sidebar.width = window_width;
-            } else {
-                left_sidebar.show = false;
-                left_sidebar.width = 0.0;
+                left_sidebar.width = window_width - (2.0 * PADDING);
             }
             if self.right_sidebar.read(cx).should_show {
                 right_sidebar.show = true;
-                right_sidebar.width = window_width;
-            } else {
-                right_sidebar.show = false;
-                right_sidebar.width = 0.0;
+                right_sidebar.width = window_width - (2.0 * PADDING);
             }
         } else {
             // Enter inline mode
@@ -98,64 +91,43 @@ impl Layout {
             let potential_left_width = window_width * LEFT_PCT;
             let potential_right_width = window_width * RIGHT_PCT;
 
+            let mut used_width = 2.0 * PADDING;
+
             // Priority: main view > right sidebar > left sidebar
             if self.left_sidebar.read(cx).should_show && self.right_sidebar.read(cx).should_show {
                 if window_width
-                    >= (potential_left_width + potential_right_width + MIN_CENTRAL_WIDTH)
+                    >= (potential_left_width
+                        + potential_right_width
+                        + MIN_CENTRAL_WIDTH
+                        + 4.0 * PADDING)
                 {
                     left_sidebar.show = true;
                     left_sidebar.width = potential_left_width;
                     right_sidebar.show = true;
                     right_sidebar.width = potential_right_width;
-                } else if window_width >= (potential_right_width + MIN_CENTRAL_WIDTH) {
-                    left_sidebar.show = false;
-                    left_sidebar.width = 0.0;
+                    used_width += left_sidebar.width + right_sidebar.width + 2.0 * PADDING;
+                } else if window_width
+                    >= (potential_right_width + MIN_CENTRAL_WIDTH + 3.0 * PADDING)
+                {
                     right_sidebar.show = true;
                     right_sidebar.width = potential_right_width;
-                } else {
-                    left_sidebar.show = false;
-                    left_sidebar.width = 0.0;
-                    right_sidebar.show = false;
-                    right_sidebar.width = 0.0;
+                    used_width += right_sidebar.width + PADDING;
                 }
             } else if self.right_sidebar.read(cx).should_show {
-                if window_width >= (potential_right_width + MIN_CENTRAL_WIDTH) {
+                if window_width >= (potential_right_width + MIN_CENTRAL_WIDTH + 3.0 * PADDING) {
                     right_sidebar.show = true;
                     right_sidebar.width = potential_right_width;
-                } else {
-                    right_sidebar.show = false;
-                    right_sidebar.width = 0.0;
+                    used_width += right_sidebar.width + PADDING;
                 }
-                left_sidebar.show = false;
-                left_sidebar.width = 0.0;
             } else if self.left_sidebar.read(cx).should_show {
-                if window_width >= (potential_left_width + MIN_CENTRAL_WIDTH) {
+                if window_width >= (potential_left_width + MIN_CENTRAL_WIDTH + 3.0 * PADDING) {
                     left_sidebar.show = true;
                     left_sidebar.width = potential_left_width;
-                } else {
-                    left_sidebar.show = false;
-                    left_sidebar.width = 0.0;
+                    used_width += left_sidebar.width + PADDING;
                 }
-                right_sidebar.show = false;
-                right_sidebar.width = 0.0;
-            } else {
-                left_sidebar.show = false;
-                left_sidebar.width = 0.0;
-                right_sidebar.show = false;
-                right_sidebar.width = 0.0;
             }
 
-            let used_width = if left_sidebar.show {
-                left_sidebar.width
-            } else {
-                0.0
-            } + if right_sidebar.show {
-                right_sidebar.width
-            } else {
-                0.0
-            };
-            let computed_central = window_width - used_width;
-            central_width = computed_central.max(MIN_CENTRAL_WIDTH);
+            central_width = (window_width - used_width).max(MIN_CENTRAL_WIDTH);
         }
 
         self.central_width.update(cx, |v, _| *v = central_width);
