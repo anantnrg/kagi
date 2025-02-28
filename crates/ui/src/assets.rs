@@ -1,30 +1,48 @@
+use anyhow::anyhow;
 use gpui::*;
-use std::fs;
-use std::path::PathBuf;
+use rust_embed::RustEmbed;
 
-pub struct Assets {
-    pub base: PathBuf,
-}
+#[derive(RustEmbed, Clone)]
+#[folder = "../../assets"]
+#[include = "fonts/**/*"]
+#[include = "icons/**/*"]
+#[exclude = "*.DS_Store"]
+pub struct Assets;
 
 impl AssetSource for Assets {
     fn load(&self, path: &str) -> Result<Option<std::borrow::Cow<'static, [u8]>>> {
-        fs::read(self.base.join(path))
-            .map(|data| Some(std::borrow::Cow::Owned(data)))
-            .map_err(|err| err.into())
+        Self::get(path)
+            .map(|f| Some(f.data))
+            .ok_or_else(|| anyhow!("could not find asset at path \"{}\"", path))
     }
 
     fn list(&self, path: &str) -> Result<Vec<SharedString>> {
-        fs::read_dir(self.base.join(path))
-            .map(|entries| {
-                entries
-                    .filter_map(|entry| {
-                        entry
-                            .ok()
-                            .and_then(|entry| entry.file_name().into_string().ok())
-                            .map(SharedString::from)
-                    })
-                    .collect()
+        Ok(Self::iter()
+            .filter_map(|p| {
+                if p.starts_with(path) {
+                    Some(p.into())
+                } else {
+                    None
+                }
             })
-            .map_err(|err| err.into())
+            .collect())
+    }
+}
+
+impl Assets {
+    pub fn load_fonts(&self, cx: &App) -> gpui::Result<()> {
+        let font_paths = self.list("fonts")?;
+        let mut embedded_fonts = Vec::new();
+        for font_path in font_paths {
+            if font_path.ends_with(".ttf") {
+                let font_bytes = cx
+                    .asset_source()
+                    .load(&font_path)?
+                    .expect("Assets should never return None");
+                embedded_fonts.push(font_bytes);
+            }
+        }
+
+        cx.text_system().add_fonts(embedded_fonts)
     }
 }

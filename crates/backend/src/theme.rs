@@ -9,34 +9,138 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Theme {
-    pub main: SubTheme,
-    pub titlebar: SubTheme,
-    pub left_sidebar: SubTheme,
-    pub right_sidebar: SubTheme,
-    pub control_bar: SubTheme,
+    pub bg: String,
+    pub main: MainTheme,
+    pub titlebar: TitlebarTheme,
+    pub left_sidebar: LeftSidebarTheme,
+    pub right_sidebar: RightSidebarTheme,
+    pub control_bar: ControlBarTheme,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct SubTheme {
-    pub accent: String,
-    pub text: String,
+pub struct TitlebarTheme {
+    pub bg: String,
+    pub title: String,
     pub icon: String,
-    pub background: String,
-    pub secondary: String,
-    pub border: String,
-    pub highlight: String,
+    pub hover: String,
+}
+#[derive(Clone, Serialize, Deserialize)]
+pub struct LeftSidebarTheme {
+    pub bg: String,
+    pub title: String,
+    pub item_text: String,
+    pub item_border: String,
+    pub item_bg: String,
+    pub item_hover: String,
 }
 
-impl SubTheme {
-    pub fn default() -> Self {
-        SubTheme {
-            accent: String::from("#cba6f7"),
-            text: String::from("#cdd6f4"),
-            icon: String::from("#cdd6f4"),
-            background: String::from("#11111B"),
-            secondary: String::from("#1e1e2d"),
-            border: String::from("#11111B"),
-            highlight: String::from("#52cba6f7"),
+#[derive(Clone, Serialize, Deserialize)]
+pub struct MainTheme {
+    pub bg: String,
+    pub title: String,
+    pub album: String,
+    pub artists: String,
+    pub separator: String,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct RightSidebarTheme {
+    pub bg: String,
+    pub title: String,
+    pub item_title: String,
+    pub item_artists: String,
+    pub item_border: String,
+    pub item_bg: String,
+    pub item_hover: String,
+    pub search_bg: String,
+    pub search_text: String,
+    pub search_placeholder: String,
+    pub search_cursor: String,
+    pub search_highlight: String,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct ControlBarTheme {
+    pub bg: String,
+    pub playbar_bg: String,
+    pub playbar_fill: String,
+    pub playbar_thumb: String,
+    pub text: String,
+    pub icons: String,
+    pub volume_bg: String,
+    pub volume_fill: String,
+    pub volume_thumb: String,
+    pub hover: String,
+}
+
+impl Default for TitlebarTheme {
+    fn default() -> Self {
+        Self {
+            bg: "#161622".to_string(),
+            title: "#cdd6f4".to_string(),
+            icon: "#cdd6f4".to_string(),
+            hover: "#cdd6f4".to_string(),
+        }
+    }
+}
+
+impl Default for LeftSidebarTheme {
+    fn default() -> Self {
+        Self {
+            bg: "#11111b".to_string(),
+            title: "#cdd6f4".to_string(),
+            item_text: "#cdd6f4".to_string(),
+            item_border: "#272747".to_string(),
+            item_bg: "#11111b".to_string(),
+            item_hover: "#272747".to_string(),
+        }
+    }
+}
+
+impl Default for MainTheme {
+    fn default() -> Self {
+        Self {
+            bg: "#11111b".to_string(),
+            title: "#cdd6f4".to_string(),
+            album: "#cdd6f4".to_string(),
+            artists: "#cdd6f4".to_string(),
+            separator: "#cba6f7".to_string(),
+        }
+    }
+}
+
+impl Default for RightSidebarTheme {
+    fn default() -> Self {
+        Self {
+            bg: "#11111b".to_string(),
+            title: "#cba6f7".to_string(),
+            item_title: "#cdd6f4".to_string(),
+            item_artists: "#cdd6f4".to_string(),
+            item_border: "#272747".to_string(),
+            item_bg: "#1e1e2d".to_string(),
+            item_hover: "#272747".to_string(),
+            search_bg: "#161622".to_string(),
+            search_text: "#cdd6f4".to_string(),
+            search_placeholder: "#272747".to_string(),
+            search_cursor: "#cba6f7".to_string(),
+            search_highlight: "#cba6f7".to_string(),
+        }
+    }
+}
+
+impl Default for ControlBarTheme {
+    fn default() -> Self {
+        Self {
+            bg: "#161622".to_string(),
+            playbar_bg: "#272747".to_string(),
+            playbar_fill: "#cba6f7".to_string(),
+            playbar_thumb: "#cba6f7".to_string(),
+            text: "#cdd6f4".to_string(),
+            icons: "#cdd6f4".to_string(),
+            volume_bg: "#272747".to_string(),
+            volume_fill: "#cba6f7".to_string(),
+            volume_thumb: "#cba6f7".to_string(),
+            hover: "#cba6f7".to_string(),
         }
     }
 }
@@ -44,13 +148,15 @@ impl SubTheme {
 impl Theme {
     pub fn default() -> Self {
         Theme {
-            main: SubTheme::default(),
-            titlebar: SubTheme::default(),
-            left_sidebar: SubTheme::default(),
-            right_sidebar: SubTheme::default(),
-            control_bar: SubTheme::default(),
+            bg: "#161622".to_string(),
+            main: MainTheme::default(),
+            titlebar: TitlebarTheme::default(),
+            left_sidebar: LeftSidebarTheme::default(),
+            right_sidebar: RightSidebarTheme::default(),
+            control_bar: ControlBarTheme::default(),
         }
     }
+
     pub fn get_file() -> Option<PathBuf> {
         if let Some(user_dirs) = UserDirs::new() {
             let proj_dir = user_dirs

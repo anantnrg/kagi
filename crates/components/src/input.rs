@@ -3,8 +3,6 @@ use std::ops::Range;
 use gpui::*;
 use unicode_segmentation::*;
 
-use crate::theme::Theme;
-
 actions!(text_input, [
     Backspace,
     Delete,
@@ -375,10 +373,27 @@ impl EntityInputHandler for TextInput {
             ),
         ))
     }
+
+    fn character_index_for_point(
+        &mut self,
+        point: gpui::Point<Pixels>,
+        _window: &mut Window,
+        _cx: &mut Context<Self>,
+    ) -> Option<usize> {
+        let line_point = self.last_bounds?.localize(&point)?;
+        let last_layout = self.last_layout.as_ref()?;
+
+        let utf8_index = last_layout.index_for_x(point.x - line_point.x)?;
+        Some(self.offset_to_utf16(utf8_index))
+    }
 }
 
 struct TextElement {
     input: Entity<TextInput>,
+    text: Rgba,
+    placeholder: Rgba,
+    cursor: Rgba,
+    highlight: Rgba,
 }
 
 struct PrepaintState {
@@ -429,15 +444,11 @@ impl Element for TextElement {
         let selected_range = input.selected_range.clone();
         let cursor = input.cursor_offset();
         let style = window.text_style();
-        let theme = cx.global::<Theme>();
 
         let (display_text, text_color) = if content.is_empty() {
-            (
-                input.placeholder.clone(),
-                Hsla::from(theme.right_sidebar.secondary),
-            )
+            (input.placeholder.clone(), Hsla::from(self.placeholder))
         } else {
-            (content.clone(), Hsla::from(theme.right_sidebar.text))
+            (content.clone(), Hsla::from(self.text))
         };
 
         let run = TextRun {
@@ -490,7 +501,7 @@ impl Element for TextElement {
                         point(bounds.left() + cursor_pos, bounds.top()),
                         size(px(2.0), bounds.bottom() - bounds.top()),
                     ),
-                    theme.right_sidebar.accent,
+                    self.cursor,
                 )),
             )
         } else {
@@ -506,7 +517,7 @@ impl Element for TextElement {
                             bounds.bottom(),
                         ),
                     ),
-                    theme.right_sidebar.highlight,
+                    self.highlight,
                 )),
                 None,
             )
@@ -599,6 +610,10 @@ impl Render for TextInput {
             .on_mouse_move(cx.listener(Self::on_mouse_move))
             .child(div().flex().flex_grow().w_full().child(TextElement {
                 input: cx.entity().clone(),
+                text: rgb(0xcdd6f4),
+                placeholder: rgb(0x45475a),
+                cursor: rgb(0xcba6f7),
+                highlight: rgb(0x52cba6f7),
             }))
     }
 }

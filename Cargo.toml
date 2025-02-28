@@ -5,7 +5,7 @@ default-members = ["crates/kagi"]
 
 [workspace.dependencies]
 anyhow = "1.0.95"
-gpui = { git = "https://github.com/zed-industries/zed" }
+gpui = { git = "https://github.com/someone13574/zed/", branch = "animate-when" }
 gstreamer = "0.23.4"
 async-trait = "0.1.85"
 smol = "2.0.2"
@@ -22,3 +22,4 @@ bincode = { git = "https://github.com/bincode-org/bincode", branch = "trunk", fe
 rand = "0.9.0"
 nucleo = "0.5.0"
 notify = "8.0.0"
+rust-embed = "8.5.0"

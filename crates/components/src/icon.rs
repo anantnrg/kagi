@@ -15,6 +15,14 @@ pub enum Icons {
     Shuffle,
     Repeat,
     Search,
+    Playlist,
+    Library,
+    FastForward,
+    Rewind,
+    VolZero,
+    VolLow,
+    VolMid,
+    VolHigh,
 }
 
 impl Icons {
@@ -34,6 +42,14 @@ impl Icons {
             Self::Shuffle => "icons/shuffle.svg",
             Self::Repeat => "icons/repeat.svg",
             Self::Search => "icons/search.svg",
+            Self::Library => "icons/library.svg",
+            Self::Playlist => "icons/playlist.svg",
+            Self::FastForward => "icons/fast-forward.svg",
+            Self::Rewind => "icons/rewind.svg",
+            Self::VolZero => "icons/vol_zero.svg",
+            Self::VolLow => "icons/vol_low.svg",
+            Self::VolMid => "icons/vol_mid.svg",
+            Self::VolHigh => "icons/vol_high.svg",
         }
         .into()
     }
@@ -74,7 +90,7 @@ impl Icon {
 }
 
 impl RenderOnce for Icon {
-    fn render(self, _win: &mut Window, _cx: &mut App) -> impl IntoElement {
+    fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement {
         svg()
             .flex()
             .items_center()
@@ -82,6 +98,5 @@ impl RenderOnce for Icon {
             .size(px(self.size))
             .text_color(self.color)
             .path(self.icon.path())
-            .hover(|this| this.text_color(self.hover))
     }
 }

@@ -1,7 +1,5 @@
 use gpui::*;
 
-use crate::theme::Theme;
-
 #[derive(Clone, Render)]
 pub struct Thumb(EntityId);
 
@@ -15,6 +13,9 @@ pub struct Slider {
     step: f32,
     value: f32,
     bounds: Bounds<Pixels>,
+    bg: Rgba,
+    fill: Rgba,
+    thumb_bg: Rgba,
 }
 
 impl EventEmitter<SliderEvent> for Slider {}
@@ -27,6 +28,9 @@ impl Slider {
             step: 1.0,
             value: 0.0,
             bounds: Bounds::default(),
+            bg: rgb(0x1e1e2d),
+            fill: rgb(0xcba6f7),
+            thumb_bg: rgb(0xcba6f7),
         }
     }
 
@@ -92,7 +96,6 @@ impl Slider {
 
     fn render_thumb(&self, cx: &mut Context<Self>) -> impl gpui::IntoElement {
         let entity_id = cx.entity_id();
-        let theme = cx.global::<Theme>();
 
         div()
             .id("thumb")
@@ -112,20 +115,18 @@ impl Slider {
                 },
             ))
             .absolute()
-            .top(px(-5.))
+            .top(px(-4.))
             .left(relative(self.relative_value()))
             .ml(-px(8.))
-            .size_4()
+            .size(px(14.0))
             .rounded_full()
             .border(px(1.5))
-            .border_color(theme.control_bar.secondary)
-            .bg(theme.control_bar.accent)
+            .bg(self.thumb_bg)
     }
 }
 
 impl Render for Slider {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let theme = cx.global::<Theme>();
         div()
             .id("slider")
             .on_mouse_down(MouseButton::Left, cx.listener(Self::on_mouse_down))
@@ -136,9 +137,9 @@ impl Render for Slider {
                     .id("bar")
                     .relative()
                     .w_full()
-                    .h_1p5()
-                    .bg(theme.control_bar.secondary)
-                    .active(|this| this.bg(theme.control_bar.accent))
+                    .h(px(4.0))
+                    .bg(self.bg)
+                    .active(|this| this.bg(self.fill))
                     .rounded(px(3.))
                     .child(
                         div()
@@ -147,7 +148,7 @@ impl Render for Slider {
                             .left_0()
                             .h_full()
                             .w(relative(self.relative_value()))
-                            .bg(theme.control_bar.accent)
+                            .bg(self.fill)
                             .rounded_l(px(3.)),
                     )
                     .child(self.render_thumb(cx))

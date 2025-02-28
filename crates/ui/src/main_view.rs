@@ -1,7 +1,10 @@
 use components::theme::Theme;
-use gpui::*;
+use gpui::{prelude::FluentBuilder, *};
 
-use crate::{layout::Layout, player_context::PlayerContext};
+use crate::{
+    layout::{Layout, LayoutMode},
+    player_context::PlayerContext,
+};
 
 #[derive(Clone)]
 pub struct MainView;
@@ -15,16 +18,20 @@ impl Render for MainView {
         if !meta.read(cx).title.is_empty() {
             div()
                 .track_focus(&cx.focus_handle())
-                .bg(theme.main.background)
+                .bg(theme.main.bg)
                 .w(px(layout.central_width.read(cx).clone()))
                 .h_full()
                 .flex()
-                .rounded_lg()
+                .rounded_xl()
+                .when(layout.mode.read(cx) == &LayoutMode::Overlay, |this| {
+                    this.bg(theme.bg).rounded_none()
+                })
                 .flex_grow()
                 .items_center()
                 .justify_center()
                 .flex_col()
                 .overflow_hidden()
+                .p_4()
                 .child({
                     if let Some(thumbnail) = meta.read(cx).thumbnail.clone() {
                         div()
@@ -35,9 +42,11 @@ impl Render for MainView {
                             .items_end()
                             .justify_end()
                             .flex_grow()
+                            .rounded_xl()
                             .child(
                                 img(thumbnail.img)
                                     .size_full()
+                                    .rounded_xl()
                                     .object_fit(ObjectFit::Contain),
                             )
                     } else {
@@ -53,15 +62,21 @@ impl Render for MainView {
                         .items_center()
                         .w_full()
                         .flex_shrink_0()
-                        .gap_2()
+                        .gap_1()
                         .child({
                             let meta = meta.read(cx);
                             if !meta.title.is_empty() {
                                 div()
-                                    .text_color(theme.main.accent)
+                                    .text_color(theme.main.title)
                                     .child(meta.title.clone())
                                     .text_3xl()
-                                    .font_weight(FontWeight::EXTRA_BOLD)
+                                    .when(layout.central_width.read(cx) < &600.0, |this| {
+                                        this.text_2xl()
+                                    })
+                                    .when(layout.central_width.read(cx) < &400.0, |this| {
+                                        this.text_xl()
+                                    })
+                                    .font_weight(FontWeight::BOLD)
                                     .w_full()
                                     .max_w_full()
                                     .text_align(TextAlign::Center)
@@ -73,9 +88,15 @@ impl Render for MainView {
                             let meta = meta.read(cx);
                             if !meta.title.is_empty() {
                                 div()
-                                    .text_color(theme.main.text)
+                                    .text_color(theme.main.artists)
                                     .text_xl()
-                                    .font_weight(FontWeight::MEDIUM)
+                                    .when(layout.central_width.read(cx) < &600.0, |this| {
+                                        this.text_lg()
+                                    })
+                                    .when(layout.central_width.read(cx) < &400.0, |this| {
+                                        this.text_base()
+                                    })
+                                    .font_weight(FontWeight::NORMAL)
                                     .whitespace_normal()
                                     .child(format!("{} • {}", meta.artists.join(", "), meta.album))
                                     .w_full()
@@ -89,7 +110,7 @@ impl Render for MainView {
         } else {
             div()
                 .track_focus(&cx.focus_handle())
-                .bg(theme.main.background)
+                .bg(theme.main.bg)
                 .w(px(layout.central_width.read(cx).clone()))
                 .h_full()
                 .flex()
@@ -107,17 +128,16 @@ impl Render for MainView {
                         .flex()
                         .items_end()
                         .justify_end()
-                        .flex_grow()
-                        .child(
-                            img("logo/logo scaled.png")
-                                .size_full()
-                                .object_fit(ObjectFit::Contain),
-                        ),
+                        .flex_grow(), // .child(
+                                      //     img("logo/logo scaled.png")
+                                      //         .size_full()
+                                      //         .object_fit(ObjectFit::Contain),
+                                      // ),
                 )
                 .child(
                     div()
                         .text_lg()
-                        .text_color(theme.main.secondary)
+                        .text_color(theme.main.title)
                         .font_weight(FontWeight::BOLD)
                         .text_center()
                         .child("No playlist loaded..."),

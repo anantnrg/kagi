@@ -28,8 +28,7 @@ impl Render for ControlBar {
             .w_full()
             .h_24()
             .border_t_1()
-            .bg(theme.control_bar.background)
-            .border_color(theme.control_bar.border)
+            .bg(theme.control_bar.bg)
             .flex()
             .flex_col()
             .justify_center()
@@ -49,6 +48,7 @@ impl Render for ControlBar {
                     .px_3()
                     .mt_3()
                     .pb_1()
+                    .text_sm()
                     .text_color(theme.control_bar.text)
                     .font_weight(FontWeight::MEDIUM)
                     .child(format!(
@@ -81,7 +81,7 @@ impl Render for ControlBar {
                         div()
                             .w_full()
                             .h_full()
-                            .when(win.bounds().size.width.0 < 400.0, |this| {
+                            .when(win.bounds().size.width.0 < 600.0, |this| {
                                 this.w_auto().flex_grow()
                             }),
                     )
@@ -103,11 +103,11 @@ impl Render for ControlBar {
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Shuffle)
-                                            .size(24.0)
+                                            .size(22.0)
                                             .color(theme.control_bar.text)
-                                            .hover(theme.control_bar.accent)
+                                            .hover(theme.control_bar.hover)
                                             .when(state.shuffle, |this| {
-                                                this.color(theme.control_bar.accent)
+                                                this.color(theme.control_bar.hover)
                                             }),
                                     )
                                     .on_mouse_down(MouseButton::Left, {
@@ -127,11 +127,11 @@ impl Render for ControlBar {
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Previous)
-                                            .size(24.0)
+                                            .size(22.0)
                                             .color(theme.control_bar.text)
-                                            .hover(theme.control_bar.accent),
+                                            .hover(theme.control_bar.hover),
                                     )
-                                    .hover(|this| this.text_color(theme.control_bar.accent))
+                                    .hover(|this| this.text_color(theme.control_bar.hover))
                                     .on_mouse_down(MouseButton::Left, {
                                         {
                                             move |_, _, cx| {
@@ -147,31 +147,61 @@ impl Render for ControlBar {
                                     .flex_col()
                                     .items_center()
                                     .justify_center()
+                                    .child(
+                                        Icon::new(Icons::Rewind)
+                                            .size(22.0)
+                                            .color(theme.control_bar.text)
+                                            .hover(theme.control_bar.hover)
+                                            .when(state.shuffle, |this| {
+                                                this.color(theme.control_bar.hover)
+                                            }),
+                                    )
+                                    .on_mouse_down(MouseButton::Left, {
+                                        {
+                                            move |_, _, cx| {
+                                                let current_pos = cx
+                                                    .global::<PlayerContext>()
+                                                    .state
+                                                    .read(cx)
+                                                    .position;
+                                                cx.global::<Controller>()
+                                                    .seek(current_pos.saturating_sub(5));
+                                            }
+                                        }
+                                    }),
+                            )
+                            .child(
+                                div()
+                                    .size_6()
+                                    .flex()
+                                    .flex_col()
+                                    .items_center()
+                                    .justify_center()
                                     .when(state.state == State::Null, |this| {
                                         this.child(
                                             Icon::new(Icons::Stopped)
-                                                .size(24.0)
+                                                .size(22.0)
                                                 .color(theme.control_bar.text)
-                                                .hover(theme.control_bar.accent),
+                                                .hover(theme.control_bar.hover),
                                         )
                                     })
                                     .when(state.state == State::Playing, |this| {
                                         this.child(
                                             Icon::new(Icons::Pause)
-                                                .size(24.0)
+                                                .size(22.0)
                                                 .color(theme.control_bar.text)
-                                                .hover(theme.control_bar.accent),
+                                                .hover(theme.control_bar.hover),
                                         )
                                     })
                                     .when(state.state == State::Paused, |this| {
                                         this.child(
                                             Icon::new(Icons::Play)
-                                                .size(24.0)
+                                                .size(22.0)
                                                 .color(theme.control_bar.text)
-                                                .hover(theme.control_bar.accent),
+                                                .hover(theme.control_bar.hover),
                                         )
                                     })
-                                    .hover(|this| this.text_color(theme.control_bar.accent))
+                                    .hover(|this| this.text_color(theme.control_bar.hover))
                                     .on_mouse_down(MouseButton::Left, {
                                         {
                                             let np = state.clone();
@@ -195,10 +225,46 @@ impl Render for ControlBar {
                                     .items_center()
                                     .justify_center()
                                     .child(
-                                        Icon::new(Icons::Next)
-                                            .size(24.0)
+                                        Icon::new(Icons::FastForward)
+                                            .size(22.0)
                                             .color(theme.control_bar.text)
-                                            .hover(theme.control_bar.accent),
+                                            .hover(theme.control_bar.hover)
+                                            .when(state.shuffle, |this| {
+                                                this.color(theme.control_bar.hover)
+                                            }),
+                                    )
+                                    .on_mouse_down(MouseButton::Left, {
+                                        {
+                                            move |_, _, cx| {
+                                                let current_pos = cx
+                                                    .global::<PlayerContext>()
+                                                    .state
+                                                    .read(cx)
+                                                    .position;
+                                                let total_duration = cx
+                                                    .global::<PlayerContext>()
+                                                    .metadata
+                                                    .read(cx)
+                                                    .duration;
+                                                cx.global::<Controller>().seek(
+                                                    (current_pos + 5).clamp(0, total_duration),
+                                                );
+                                            }
+                                        }
+                                    }),
+                            )
+                            .child(
+                                div()
+                                    .size_6()
+                                    .flex()
+                                    .flex_col()
+                                    .items_center()
+                                    .justify_center()
+                                    .child(
+                                        Icon::new(Icons::Next)
+                                            .size(22.0)
+                                            .color(theme.control_bar.text)
+                                            .hover(theme.control_bar.hover),
                                     )
                                     .on_mouse_down(MouseButton::Left, {
                                         {
@@ -217,11 +283,11 @@ impl Render for ControlBar {
                                     .justify_center()
                                     .child(
                                         Icon::new(Icons::Repeat)
-                                            .size(24.0)
+                                            .size(22.0)
                                             .color(theme.control_bar.text)
-                                            .hover(theme.control_bar.accent)
+                                            .hover(theme.control_bar.hover)
                                             .when(state.repeat, |this| {
-                                                this.color(theme.control_bar.accent)
+                                                this.color(theme.control_bar.hover)
                                             }),
                                     )
                                     .on_mouse_down(MouseButton::Left, {
@@ -243,10 +309,36 @@ impl Render for ControlBar {
                             .h_auto()
                             .w_full()
                             .px_2()
+                            .gap_x_2()
+                            .child({
+                                let vol = cx.global::<PlayerContext>().state.read(cx).volume as f32;
+                                if vol == 0.0 {
+                                    Icon::new(Icons::VolZero)
+                                        .size(22.0)
+                                        .color(theme.control_bar.text)
+                                        .hover(theme.control_bar.hover)
+                                } else if vol <= 0.3 {
+                                    Icon::new(Icons::VolLow)
+                                        .size(22.0)
+                                        .color(theme.control_bar.text)
+                                        .hover(theme.control_bar.hover)
+                                } else if vol <= 0.7 {
+                                    Icon::new(Icons::VolMid)
+                                        .size(22.0)
+                                        .color(theme.control_bar.text)
+                                        .hover(theme.control_bar.hover)
+                                } else {
+                                    Icon::new(Icons::VolHigh)
+                                        .size(22.0)
+                                        .color(theme.control_bar.text)
+                                        .hover(theme.control_bar.hover)
+                                }
+                            })
                             .child(div().w_20().child(self.vol_slider.clone()))
                             .child(
                                 div()
-                                    .child(format!("{:.0}%", state.volume * 100.0))
+                                    .child(format!("{:00.0}%", state.volume * 100.0))
+                                    .text_sm()
                                     .text_color(theme.control_bar.text)
                                     .ml_4()
                                     .w_10()

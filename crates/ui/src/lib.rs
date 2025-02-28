@@ -5,7 +5,6 @@ mod keybinds;
 pub mod layout;
 pub mod main_view;
 pub mod player_context;
-pub mod queue_list;
 pub mod res_handler;
 pub mod sidebar;
 pub mod titlebar;
@@ -26,11 +25,9 @@ use gpui::*;
 use layout::Layout;
 use main_view::MainView;
 use player_context::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
-use queue_list::QueueList;
 use res_handler::ResHandler;
-use sidebar::LeftSidebar;
+use sidebar::{LeftSidebar, RightSidebar};
 use std::{
-    path::PathBuf,
     sync::{Arc, Mutex},
     time::Duration,
 };
@@ -52,12 +49,12 @@ actions!(text_input, [
 ]);
 
 pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
-    let app = Application::new().with_assets(Assets {
-        base: PathBuf::from("assets"),
-    });
+    let assets = Assets {};
+    let app = Application::new().with_assets(assets.clone());
 
     app.run(move |cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(500.0), px(500.0)), cx);
+        let bounds = Bounds::centered(None, size(px(1280.0), px(720.0)), cx);
+        assets.load_fonts(cx).expect("Could not load fonts");
         components::input::bind_actions(cx);
         cx.open_window(
             WindowOptions {
@@ -87,15 +84,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let recv_controller = controller.clone();
                     let saved_playlists = cx.new(|_| SavedPlaylists::default());
                     let playlists = saved_playlists.clone();
-
-                    cx.on_app_quit(|_, cx| {
-                        let theme: u32 = cx.global::<Theme>().main.accent.into();
-
-                        async move {
-                            println!("{}", theme);
-                        }
-                    })
-                    .detach();
 
                     keybinds::register(cx);
                     cx.set_global(controller);
@@ -287,6 +275,11 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             }
                             Response::Theme(theme) => {
                                 cx.set_global::<Theme>(theme.clone().into());
+                                println!(
+                                    "{:#?}",
+                                    <Theme as From<backend::theme::Theme>>::from(theme.clone())
+                                        .clone()
+                                );
                                 cx.refresh_windows();
                             }
                             _ => {}
@@ -299,7 +292,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let control_bar =
                         cx.new(|_| ControlBar::new(vol_slider.clone(), playbar.clone()));
                     let main_view = cx.new(|_| MainView::new());
-                    let queue_list = cx.new(|cx| QueueList::new(cx));
+                    let right_sidebar = cx.new(|cx| RightSidebar::new(cx));
                     let left_sidebar = cx.new(move |_| LeftSidebar::new(playlists.clone()));
                     cx.global::<Controller>().load_saved_playlists();
                     cx.global::<Controller>().load_theme();
@@ -309,7 +302,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         left_sidebar,
                         control_bar,
                         main_view,
-                        queue_list,
+                        right_sidebar,
                     }
                 })
             },
@@ -317,4 +310,13 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
         .unwrap();
     });
     Ok(())
+}
+
+pub fn lerp(start: Rgba, end: Rgba, t: f32) -> Rgba {
+    Rgba {
+        r: start.r + (end.r - start.r) * t,
+        g: start.g + (end.g - start.g) * t,
+        b: start.b + (end.b - start.b) * t,
+        a: start.a + (end.a - start.a) * t,
+    }
 }

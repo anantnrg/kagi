@@ -1,6 +1,7 @@
-use gpui::{App, MouseButton, MouseDownEvent, SharedString, Window, div, prelude::*, px, rgb};
+use std::{sync::Arc, time::Duration};
 
-#[derive(IntoElement)]
+use gpui::{prelude::*, *};
+
 pub struct Button {
     text: SharedString,
     w: f32,
@@ -9,11 +10,9 @@ pub struct Button {
     bg_color: u32,
     text_color: u32,
     border_color: u32,
-    hover_bg_color: u32,
-    hover_text_color: u32,
-    hover_border_color: u32,
     rounded: f32,
-    on_click: Box<dyn Fn(MouseDownEvent, &mut Window, &mut App) + 'static>,
+    hovered: bool,
+    on_click: Arc<dyn Fn(MouseDownEvent, &mut Window, &mut App) + 'static>,
 }
 
 #[allow(dead_code)]
@@ -27,11 +26,9 @@ impl Button {
             bg_color: 0x45475a,
             text_color: 0xcdd6f4,
             border_color: 0xcba6f7,
-            hover_bg_color: 0xcba6f7,
-            hover_text_color: 0x1e1e2d,
-            hover_border_color: 0xcba6f7,
             rounded: 8.0,
-            on_click: Box::new(|_, _, _| println!("Clicked!")),
+            on_click: Arc::new(|_, _, _| println!("Clicked!")),
+            hovered: false,
         }
     }
 
@@ -70,15 +67,16 @@ impl Button {
     where
         F: Fn(MouseDownEvent, &mut Window, &mut App) + 'static,
     {
-        self.on_click = Box::new(callback);
+        self.on_click = Arc::new(callback);
         self
     }
 }
 
-impl RenderOnce for Button {
-    fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement {
-        let on_click = self.on_click;
+impl Render for Button {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let on_click = self.on_click.clone();
         div()
+            .id("button")
             .flex()
             .h(px(self.h))
             .when(self.w != 0.0, |this| this.w(px(self.w)))
@@ -91,15 +89,22 @@ impl RenderOnce for Button {
             .justify_center()
             .content_center()
             .items_center()
-            .child(self.text)
-            .hover(move |this| {
-                this.bg(rgb(self.hover_bg_color))
-                    .text_color(rgb(self.hover_text_color))
-                    .border_color(rgb(self.hover_border_color))
-            })
+            .child(self.text.clone())
+            .on_hover(cx.listener(|this, hovered, _, cx| {
+                this.hovered = *hovered;
+                cx.notify();
+            }))
             .on_mouse_down(MouseButton::Left, move |event, win, cx| {
                 (on_click)(event.clone(), win, cx);
             })
+            .with_transition(
+                self.hovered,
+                "hover-transition",
+                TransitionAnimation::new(Duration::from_millis(1000))
+                    .backward(Some(Duration::from_millis(500)))
+                    .with_easing(ease_in_out),
+                |this, _forward, delta| this.w(px(32.0 + delta * 32.0)),
+            )
             .into_element()
     }
 }
