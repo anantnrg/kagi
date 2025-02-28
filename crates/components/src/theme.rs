@@ -1,4 +1,4 @@
-use gpui::{Global, Rgba, rgb, rgba};
+use gpui::{Global, Rgba, rgba};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Theme {

@@ -90,7 +90,7 @@ impl Icon {
 }
 
 impl RenderOnce for Icon {
-    fn render(self, _win: &mut Window, cx: &mut App) -> impl IntoElement {
+    fn render(self, _: &mut Window, _: &mut App) -> impl IntoElement {
         svg()
             .flex()
             .items_center()
