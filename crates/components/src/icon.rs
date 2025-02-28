@@ -19,6 +19,10 @@ pub enum Icons {
     Library,
     FastForward,
     Rewind,
+    VolZero,
+    VolLow,
+    VolMid,
+    VolHigh,
 }
 
 impl Icons {
@@ -42,6 +46,10 @@ impl Icons {
             Self::Playlist => "icons/playlist.svg",
             Self::FastForward => "icons/fast-forward.svg",
             Self::Rewind => "icons/rewind.svg",
+            Self::VolZero => "icons/vol_zero.svg",
+            Self::VolLow => "icons/vol_low.svg",
+            Self::VolMid => "icons/vol_mid.svg",
+            Self::VolHigh => "icons/vol_high.svg",
         }
         .into()
     }
