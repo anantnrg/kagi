@@ -35,12 +35,12 @@ impl Render for Titlebar {
                             .flex()
                             .items_center()
                             .justify_center()
-                            .hover(|this| this.bg(rgb(0x45475a)))
                             .rounded_md()
                             .child(
                                 Icon::new(Icons::LeftSidebar)
                                     .size(18.0)
-                                    .color(theme.titlebar.icon.into()),
+                                    .color(theme.titlebar.icon.into())
+                                    .hover(theme.titlebar.hover.into()),
                             )
                             .on_mouse_down(MouseButton::Left, {
                                 move |_, _, cx| {
@@ -138,12 +138,12 @@ impl Render for Titlebar {
                             .flex()
                             .items_center()
                             .justify_center()
-                            .hover(|this| this.bg(rgb(0x45475a)))
                             .rounded_md()
                             .child(
                                 Icon::new(Icons::RightSidebar)
                                     .size(18.0)
-                                    .color(theme.titlebar.icon.into()),
+                                    .color(theme.titlebar.icon.into())
+                                    .hover(theme.titlebar.hover.into()),
                             )
                             .on_mouse_down(MouseButton::Left, {
                                 move |_, _, cx| {
