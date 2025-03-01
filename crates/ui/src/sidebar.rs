@@ -143,12 +143,17 @@ impl Render for LeftSidebarItem {
             .font_weight(FontWeight::MEDIUM)
             .w_full()
             .rounded_lg()
-            .h(px(56.0))
+            .h_16()
             .flex()
             .items_center()
             .justify_start()
             .px_2()
-            .child(img(thumbnail_path).size_12().rounded_md())
+            .child(
+                img(thumbnail_path)
+                    .min_w(px(56.0))
+                    .max_w(px(56.0))
+                    .rounded_md(),
+            )
             .child(playlist.name.clone())
             .truncate()
             .on_mouse_down(MouseButton::Left, {
