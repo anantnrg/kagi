@@ -129,7 +129,7 @@ impl Render for LeftSidebarItem {
             .playlist_name
             .clone();
         let theme = cx.global::<Theme>();
-        let thumbnail_path = PathBuf::from(playlist.actual_path.clone()).join("thumbnail.jpg");
+        let thumbnail_path = PathBuf::from(playlist.actual_path.clone()).join("thumbnail.png");
         div()
             .bg(theme.left_sidebar.bg)
             .border_1()
@@ -160,14 +160,6 @@ impl Render for LeftSidebarItem {
                     controller.get_queue();
                 }
             })
-            .with_transition(
-                self.hovered,
-                "hover-transition",
-                TransitionAnimation::new(Duration::from_millis(1000))
-                    .backward(Some(Duration::from_millis(500)))
-                    .with_easing(ease_in_out),
-                |this, _forward, delta| this.w(px(32.0 + delta * 32.0)),
-            )
     }
 }
 
