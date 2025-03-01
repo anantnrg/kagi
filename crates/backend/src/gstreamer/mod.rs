@@ -233,6 +233,7 @@ fn retrieve_small_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<Thumbnail> {
         height: 64,
     })
 }
+
 pub fn create_playlist_thumbnail(
     thumbnails: &[Thumbnail],
     output_path: &str,
