@@ -7,7 +7,8 @@ use gstreamer::{ClockTime, MessageView, SeekFlags, State, prelude::*};
 use gstreamer_pbutils as gst_pbutils;
 use image::{EncodableLayout, ImageReader, Rgba, RgbaImage};
 use std::{
-    io::Cursor,
+    fs::File,
+    io::{BufWriter, Cursor},
     sync::{Arc, Mutex},
 };
 
@@ -231,4 +232,39 @@ fn retrieve_small_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<Thumbnail> {
         width: 64,
         height: 64,
     })
+}
+fn create_tiled_image(thumbnails: &[Thumbnail], output_path: &str) -> anyhow::Result<()> {
+    let count = thumbnails.len();
+    if count == 0 {
+        return Err(anyhow::anyhow!("No thumbnails provided"));
+    }
+
+    let (cols, rows) = if count >= 4 {
+        (2, 2)
+    } else if count == 2 {
+        (2, 1)
+    } else {
+        (1, 1)
+    };
+
+    let thumb_w = thumbnails[0].width;
+    let thumb_h = thumbnails[0].height;
+
+    let mut final_img = RgbaImage::new(thumb_w * cols, thumb_h * rows);
+
+    for (i, thumb) in thumbnails.iter().enumerate() {
+        let x_offset = (i as u32 % cols) * thumb_w;
+        let y_offset = (i as u32 / cols) * thumb_h;
+
+        let thumb_img = RgbaImage::from_raw(thumb.width, thumb.height, thumb.img.clone())
+            .ok_or_else(|| anyhow::anyhow!("Failed to create image from raw data"))?;
+
+        image::imageops::overlay(&mut final_img, &thumb_img, x_offset as i64, y_offset as i64);
+    }
+
+    let fout = File::create(output_path)?;
+    let mut writer = BufWriter::new(fout);
+    final_img.write_to(&mut writer, image::ImageFormat::Png)?;
+
+    Ok(())
 }
