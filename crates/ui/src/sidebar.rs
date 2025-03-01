@@ -147,7 +147,8 @@ impl Render for LeftSidebarItem {
             .flex()
             .items_center()
             .justify_start()
-            .px_2()
+            .gap_2()
+            .px_1()
             .child(
                 img(thumbnail_path)
                     .min_w(px(56.0))

@@ -266,9 +266,15 @@ pub fn create_playlist_thumbnail(
         image::imageops::overlay(&mut final_img, &thumb_img, x_offset as i64, y_offset as i64);
     }
 
+    let mut bgra_image = RgbaImage::new(final_img.width(), final_img.height());
+    for (x, y, pixel) in final_img.enumerate_pixels() {
+        let [r, g, b, a] = pixel.0;
+        bgra_image.put_pixel(x, y, Rgba([b, g, r, a]));
+    }
+
     let fout = File::create(output_path)?;
     let mut writer = BufWriter::new(fout);
-    final_img.write_to(&mut writer, image::ImageFormat::Png)?;
+    bgra_image.write_to(&mut writer, image::ImageFormat::Png)?;
 
     Ok(())
 }
