@@ -8,8 +8,8 @@ use nucleo::{
     Config, Nucleo,
     pattern::{CaseMatching, Normalization},
 };
-use std::sync::Arc;
 use std::{collections::HashSet, time::Duration};
+use std::{path::PathBuf, sync::Arc};
 
 use crate::{
     layout::{Layout, LayoutMode},
@@ -129,24 +129,26 @@ impl Render for LeftSidebarItem {
             .playlist_name
             .clone();
         let theme = cx.global::<Theme>();
+        let thumbnail_path = PathBuf::from(playlist.actual_path.clone()).join("thumbnail.jpg");
         div()
             .bg(theme.left_sidebar.bg)
             .border_1()
             .border_color(theme.left_sidebar.item_border)
             .hover(|this| this.bg(theme.left_sidebar.item_hover))
             .when(playlist.name == index.clone(), |this| {
-                this.bg(theme.left_sidebar.item_bg)
+                this.bg(theme.left_sidebar.item_hover)
             })
             .text_color(theme.left_sidebar.item_text)
             .text_sm()
             .font_weight(FontWeight::MEDIUM)
             .w_full()
             .rounded_lg()
-            .h_12()
+            .h(px(56.0))
             .flex()
             .items_center()
             .justify_start()
-            .px_3()
+            .px_2()
+            .child(img(thumbnail_path).size_12().rounded_md())
             .child(playlist.name.clone())
             .truncate()
             .on_mouse_down(MouseButton::Left, {
