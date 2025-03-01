@@ -233,7 +233,10 @@ fn retrieve_small_thumbnail(bytes: Box<[u8]>) -> anyhow::Result<Thumbnail> {
         height: 64,
     })
 }
-fn create_tiled_image(thumbnails: &[Thumbnail], output_path: &str) -> anyhow::Result<()> {
+pub fn create_playlist_thumbnail(
+    thumbnails: &[Thumbnail],
+    output_path: &str,
+) -> anyhow::Result<()> {
     let count = thumbnails.len();
     if count == 0 {
         return Err(anyhow::anyhow!("No thumbnails provided"));
