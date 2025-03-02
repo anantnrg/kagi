@@ -9,7 +9,7 @@ use std::{
 use gstreamer::State;
 use image::{Frame, RgbaImage, imageops::thumbnail};
 use notify::{Event, EventKind, RecursiveMode, Watcher};
-use rand::seq::SliceRandom;
+use rand::seq::{IndexedRandom, SliceRandom};
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
@@ -17,6 +17,7 @@ use std::sync::mpsc;
 
 use crate::{
     Backend,
+    gstreamer::create_playlist_thumbnail,
     playback::{Playlist, SavedPlaylist, SavedPlaylists, Track},
     theme::Theme,
 };
@@ -359,6 +360,30 @@ impl Player {
                             self.loaded = true;
                             self.playlist = Arc::new(Mutex::new(playlist.clone()));
                             self.queue = playlist.clone().tracks;
+                            let playlist_thumbnail =
+                                PathBuf::from(new_saved_playlist.clone().actual_path)
+                                    .join("thumbnail.png");
+                            if !playlist_thumbnail.exists() {
+                                let mut rng = rand::rng();
+                                let tracks = playlist.clone().tracks;
+                                let count = match tracks.len() {
+                                    0 => 0,
+                                    1 => 1,
+                                    2..=3 => 2,
+                                    _ => 4,
+                                };
+                                let tracks: Vec<Track> =
+                                    tracks.choose_multiple(&mut rng, count).cloned().collect();
+                                let thumbnails: Vec<Thumbnail> = tracks
+                                    .iter()
+                                    .map(|t| t.thumbnail.clone().unwrap().clone())
+                                    .collect();
+                                create_playlist_thumbnail(
+                                    &thumbnails,
+                                    playlist_thumbnail.to_str().unwrap(),
+                                )
+                                .expect("could not create playlist thumbnail");
+                            }
                             playlist
                                 .write_cached(cached_name)
                                 .await
@@ -369,6 +394,7 @@ impl Player {
                             self.load(&backend, 0)
                                 .await
                                 .expect("Could not load first item");
+
                             if !self
                                 .saved_playlists
                                 .playlists
