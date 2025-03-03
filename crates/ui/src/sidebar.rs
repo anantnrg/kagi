@@ -8,7 +8,7 @@ use nucleo::{
     Config, Nucleo,
     pattern::{CaseMatching, Normalization},
 };
-use std::{collections::HashSet, time::Duration};
+use std::collections::HashSet;
 use std::{path::PathBuf, sync::Arc};
 
 use crate::{
@@ -23,7 +23,7 @@ pub struct LeftSidebar {
 
 pub struct LeftSidebarItem {
     playlist: SavedPlaylist,
-    hovered: bool,
+    // hovered: bool,
 }
 
 pub struct RightSidebar {
@@ -173,7 +173,7 @@ impl LeftSidebarItem {
     pub fn new(playlist: SavedPlaylist) -> Self {
         LeftSidebarItem {
             playlist,
-            hovered: false,
+            // hovered: false,
         }
     }
 }
@@ -254,6 +254,7 @@ impl Render for RightSidebar {
                         tracks.len(),
                         move |_, range, _, cx| {
                             let theme = cx.global::<Theme>();
+                            let meta = cx.global::<PlayerContext>().metadata.clone();
 
                             range
                                 .map(|id| {
@@ -281,6 +282,9 @@ impl Render for RightSidebar {
                                                 .border_1()
                                                 .border_color(theme.right_sidebar.item_border)
                                                 .hover(|this| {
+                                                    this.bg(theme.right_sidebar.item_hover)
+                                                })
+                                                .when(meta.read(cx).title == track.title, |this| {
                                                     this.bg(theme.right_sidebar.item_hover)
                                                 })
                                                 .on_mouse_down(

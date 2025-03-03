@@ -151,10 +151,7 @@ impl Render for ControlBar {
                                         Icon::new(Icons::Rewind)
                                             .size(22.0)
                                             .color(theme.control_bar.text)
-                                            .hover(theme.control_bar.hover)
-                                            .when(state.shuffle, |this| {
-                                                this.color(theme.control_bar.hover)
-                                            }),
+                                            .hover(theme.control_bar.hover),
                                     )
                                     .on_mouse_down(MouseButton::Left, {
                                         {
@@ -228,10 +225,7 @@ impl Render for ControlBar {
                                         Icon::new(Icons::FastForward)
                                             .size(22.0)
                                             .color(theme.control_bar.text)
-                                            .hover(theme.control_bar.hover)
-                                            .when(state.shuffle, |this| {
-                                                this.color(theme.control_bar.hover)
-                                            }),
+                                            .hover(theme.control_bar.hover),
                                     )
                                     .on_mouse_down(MouseButton::Left, {
                                         {

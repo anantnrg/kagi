@@ -97,6 +97,7 @@ impl RenderOnce for Icon {
             .justify_center()
             .size(px(self.size))
             .text_color(self.color)
+            .hover(|this| this.text_color(self.hover))
             .path(self.icon.path())
     }
 }

@@ -1,4 +1,5 @@
 use std::{
+    collections::{HashMap, HashSet},
     num::NonZeroUsize,
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -366,18 +367,49 @@ impl Player {
                             if !playlist_thumbnail.exists() {
                                 let mut rng = rand::rng();
                                 let tracks = playlist.clone().tracks;
-                                let count = match tracks.len() {
+
+                                let mut album_map: HashMap<String, Vec<Track>> = HashMap::new();
+                                for track in &tracks {
+                                    let album_name = track.album.clone();
+                                    album_map.entry(album_name).or_default().push(track.clone());
+                                }
+
+                                let unique_albums: Vec<Vec<Track>> =
+                                    album_map.values().cloned().collect();
+
+                                let count = match unique_albums.len() {
                                     0 => 0,
                                     1 => 1,
                                     2..=3 => 2,
                                     _ => 4,
                                 };
-                                let tracks: Vec<Track> =
-                                    tracks.choose_multiple(&mut rng, count).cloned().collect();
-                                let thumbnails: Vec<Thumbnail> = tracks
+
+                                let mut selected_tracks = Vec::new();
+
+                                if unique_albums.len() > 1 {
+                                    let mut picked_albums: HashSet<String> = HashSet::new();
+
+                                    while selected_tracks.len() < count {
+                                        if let Some(album_tracks) = unique_albums.choose(&mut rng) {
+                                            let album_name = album_tracks[0].album.clone();
+                                            if picked_albums.insert(album_name) {
+                                                if let Some(random_track) =
+                                                    album_tracks.choose(&mut rng)
+                                                {
+                                                    selected_tracks.push(random_track.clone());
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    selected_tracks.push(tracks.choose(&mut rng).unwrap().clone());
+                                }
+
+                                let thumbnails: Vec<Thumbnail> = selected_tracks
                                     .iter()
-                                    .map(|t| t.thumbnail.clone().unwrap().clone())
+                                    .filter_map(|t| t.thumbnail.clone())
                                     .collect();
+
                                 create_playlist_thumbnail(
                                     &thumbnails,
                                     playlist_thumbnail.to_str().unwrap(),

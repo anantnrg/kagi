@@ -257,7 +257,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 saved_playlists.update(cx, |this, cx| {
                                     *this = playlists.clone();
                                     cx.notify();
-                                })
+                                });
+                                cx.refresh_windows();
                             }
                             Response::PlaylistName(name) => {
                                 let meta = cx.global_mut::<PlayerContext>().metadata.clone();
@@ -275,11 +276,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             }
                             Response::Theme(theme) => {
                                 cx.set_global::<Theme>(theme.clone().into());
-                                println!(
-                                    "{:#?}",
-                                    <Theme as From<backend::theme::Theme>>::from(theme.clone())
-                                        .clone()
-                                );
                                 cx.refresh_windows();
                             }
                             _ => {}
