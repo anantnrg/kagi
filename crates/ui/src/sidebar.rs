@@ -8,7 +8,7 @@ use nucleo::{
     Config, Nucleo,
     pattern::{CaseMatching, Normalization},
 };
-use std::{collections::HashSet, time::Duration};
+use std::collections::HashSet;
 use std::{path::PathBuf, sync::Arc};
 
 use crate::{
@@ -23,7 +23,7 @@ pub struct LeftSidebar {
 
 pub struct LeftSidebarItem {
     playlist: SavedPlaylist,
-    hovered: bool,
+    // hovered: bool,
 }
 
 pub struct RightSidebar {
@@ -173,7 +173,7 @@ impl LeftSidebarItem {
     pub fn new(playlist: SavedPlaylist) -> Self {
         LeftSidebarItem {
             playlist,
-            hovered: false,
+            // hovered: false,
         }
     }
 }
