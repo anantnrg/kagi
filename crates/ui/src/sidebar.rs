@@ -254,6 +254,7 @@ impl Render for RightSidebar {
                         tracks.len(),
                         move |_, range, _, cx| {
                             let theme = cx.global::<Theme>();
+                            let meta = cx.global::<PlayerContext>().metadata.clone();
 
                             range
                                 .map(|id| {
@@ -281,6 +282,9 @@ impl Render for RightSidebar {
                                                 .border_1()
                                                 .border_color(theme.right_sidebar.item_border)
                                                 .hover(|this| {
+                                                    this.bg(theme.right_sidebar.item_hover)
+                                                })
+                                                .when(meta.read(cx).title == track.title, |this| {
                                                     this.bg(theme.right_sidebar.item_hover)
                                                 })
                                                 .on_mouse_down(
