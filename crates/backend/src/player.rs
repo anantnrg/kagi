@@ -1,12 +1,9 @@
-use std::{
-    collections::{HashMap, HashSet},
-    num::NonZeroUsize,
-    path::PathBuf,
-    sync::{Arc, Mutex},
-    thread,
-    time::Duration,
+use crate::{
+    Backend,
+    gstreamer::create_playlist_thumbnail,
+    playback::{Playlist, SavedPlaylist, SavedPlaylists, Track},
+    theme::Theme,
 };
-
 use gstreamer::State;
 use image::{Frame, RgbaImage, imageops::thumbnail};
 use notify::{Event, EventKind, RecursiveMode, Watcher};
@@ -14,13 +11,15 @@ use rand::seq::{IndexedRandom, SliceRandom};
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
+use souvlaki::{MediaControlEvent, MediaControls, MediaMetadata, PlatformConfig};
 use std::sync::mpsc;
-
-use crate::{
-    Backend,
-    gstreamer::create_playlist_thumbnail,
-    playback::{Playlist, SavedPlaylist, SavedPlaylists, Track},
-    theme::Theme,
+use std::{
+    collections::{HashMap, HashSet},
+    num::NonZeroUsize,
+    path::PathBuf,
+    sync::{Arc, Mutex},
+    thread,
+    time::Duration,
 };
 
 pub enum Command {
@@ -75,6 +74,7 @@ pub struct Player {
     pub saved_playlists: SavedPlaylists,
     pub tx: Sender<Response>,
     pub rx: Receiver<Command>,
+    pub hwnd: u64,
 }
 
 #[derive(Debug, Clone)]
@@ -93,7 +93,11 @@ pub struct Thumbnail {
 impl gpui::Global for Controller {}
 
 impl Player {
-    pub fn new(backend: Arc<dyn Backend>, playlist: Arc<Mutex<Playlist>>) -> (Player, Controller) {
+    pub fn new(
+        backend: Arc<dyn Backend>,
+        playlist: Arc<Mutex<Playlist>>,
+        hwnd: u64,
+    ) -> (Player, Controller) {
         let (cmd_tx, cmd_rx) = ring_channel::ring_channel(NonZeroUsize::new(128).unwrap());
         let (res_tx, res_rx) = ring_channel::ring_channel(NonZeroUsize::new(128).unwrap());
         (
@@ -110,6 +114,7 @@ impl Player {
                 tx: res_tx,
                 rx: cmd_rx,
                 shuffle: false,
+                hwnd,
             },
             Controller {
                 tx: cmd_tx,
@@ -180,6 +185,8 @@ impl Player {
         watcher
             .watch(&theme_file, RecursiveMode::NonRecursive)
             .expect("Failed to watch theme file.");
+
+        // Media integration
         loop {
             while let Ok(command) = self.rx.try_recv() {
                 match command {

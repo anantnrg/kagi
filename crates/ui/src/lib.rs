@@ -73,13 +73,15 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                 ..Default::default()
             },
             |win, cx| {
-                win.window_handle().window_id().as_u64();
                 cx.new(|cx| {
                     let player_context = PlayerContext::new(cx);
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
-                    let (mut player, controller) =
-                        Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
+                    let (mut player, controller) = Player::new(
+                        backend.clone(),
+                        Arc::new(Mutex::new(Playlist::default())),
+                        win.window_handle().window_id().as_u64(),
+                    );
                     controller.load_theme();
                     let vol_slider =
                         cx.new(|_| Slider::new().min(0.0).max(1.0).step(0.005).default(0.2));
