@@ -164,6 +164,266 @@ impl Player {
         Ok(())
     }
 
+    async fn play(&mut self) {
+        let backend = self.backend.clone();
+        if !self.queue.is_empty() && !self.playing {
+            if self.loaded {
+                let tx = self.tx.clone();
+                self.tx
+                    .send(Response::StateChanged(State::Playing))
+                    .expect("Could not send message");
+                let _ = backend
+                    .play()
+                    .await
+                    .map_err(|e| tx.send(Response::Error(e.to_string())));
+                self.playing = true;
+            } else {
+                self.tx
+                    .send(Response::Error("Playlist is not loaded.".to_string()))
+                    .expect("Could not send message");
+            }
+        }
+    }
+
+    async fn pause(&mut self) {
+        let backend = self.backend.clone();
+        if self.playing {
+            self.tx
+                .send(Response::StateChanged(State::Paused))
+                .expect("Could not send message");
+            let _ = backend
+                .pause()
+                .await
+                .map_err(|e| self.tx.send(Response::Error(e.to_string())));
+            self.playing = false;
+        }
+    }
+
+    fn get_meta(&self) {
+        if self.loaded {
+            let track = self.queue[self.current_index].clone();
+            self.tx
+                .send(Response::Metadata(track))
+                .expect("Could not send message");
+        }
+    }
+
+    fn get_tracks(&self) {
+        if self.loaded {
+            self.tx
+                .send(Response::Tracks(self.queue.clone()))
+                .expect("Could not send message");
+        }
+    }
+
+    async fn set_volume(&mut self, vol: f64) {
+        let backend = self.backend.clone();
+        if self.loaded {
+            self.tx
+                .send(Response::Info(format!("Volume set to {vol}")))
+                .expect("Could not send message");
+            backend.set_volume(vol).await.expect("Could not set volume");
+            self.volume = vol;
+        }
+    }
+
+    async fn next_track(&mut self) {
+        let backend = self.backend.clone();
+        if self.loaded {
+            backend.stop().await.expect("Could not stop");
+            self.play_next(&backend)
+                .await
+                .expect("Could not play next.");
+            self.tx
+                .send(Response::StateChanged(State::Playing))
+                .expect("Could not send message");
+            backend.play().await.expect("Could not play");
+            self.playing = true;
+            backend
+                .set_volume(self.volume)
+                .await
+                .expect("Could not set volume");
+        }
+    }
+
+    async fn previous_track(&mut self) {
+        let backend = self.backend.clone();
+        if self.loaded {
+            backend.stop().await.expect("Could not stop");
+            self.play_previous(&backend)
+                .await
+                .expect("Could not play previous.");
+            self.tx
+                .send(Response::StateChanged(State::Playing))
+                .expect("Could not send message");
+            backend.play().await.expect("Could not play");
+            self.playing = true;
+            backend
+                .set_volume(self.volume)
+                .await
+                .expect("Could not set volume");
+        }
+    }
+
+    async fn play_id_cmd(&mut self, id: usize) {
+        let backend = self.backend.clone();
+        if self.loaded {
+            backend.stop().await.expect("Could not stop");
+            self.play_id(&backend, id)
+                .await
+                .expect("Could not play track");
+            self.tx
+                .send(Response::StateChanged(State::Playing))
+                .expect("Could not send message");
+            backend.play().await.expect("Could not play");
+            self.playing = true;
+            backend
+                .set_volume(self.volume)
+                .await
+                .expect("Could not set volume");
+        }
+    }
+
+    async fn load_from_folder(&mut self, saved_playlist: SavedPlaylist) {
+        let backend = self.backend.clone();
+        let playlist: Playlist;
+        if let Some(cached) = Playlist::read_cached(saved_playlist.cached_name).await {
+            playlist = cached;
+        } else {
+            playlist =
+                Playlist::from_dir(&backend, PathBuf::from(saved_playlist.actual_path)).await;
+        }
+
+        self.loaded = true;
+        self.playlist = Arc::new(Mutex::new(playlist.clone()));
+        self.queue = playlist.clone().tracks;
+
+        self.load(&backend, 0)
+            .await
+            .expect("Could not load first item");
+        self.tx
+            .send(Response::PlaylistName(playlist.name))
+            .expect("Could not send message");
+    }
+
+    async fn load_folder(&mut self) {
+        let backend = self.backend.clone();
+        if let Some(path) = rfd::AsyncFileDialog::new().pick_folder().await {
+            let path = path.path().to_owned();
+            let name = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("unknown playlist")
+                .to_string();
+            let cached_name: String = name
+                .to_lowercase()
+                .chars()
+                .filter_map(|c| {
+                    if c.is_ascii_alphabetic() {
+                        Some(c)
+                    } else if c == ' ' {
+                        Some('_')
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+            let new_saved_playlist = SavedPlaylist {
+                name,
+                actual_path: path.to_string_lossy().to_string(),
+                cached_name: cached_name.clone(),
+            };
+            let playlist = Playlist::from_dir(&backend, PathBuf::from(path.clone())).await;
+
+            self.loaded = true;
+            self.playlist = Arc::new(Mutex::new(playlist.clone()));
+            self.queue = playlist.clone().tracks;
+            playlist
+                .write_cached(cached_name)
+                .await
+                .expect("Could not write cache");
+
+            self.tx
+                .send(Response::PlaylistName(playlist.name))
+                .expect("Could not send message");
+            self.load(&backend, 0)
+                .await
+                .expect("Could not load first item");
+
+            if !self
+                .saved_playlists
+                .playlists
+                .iter()
+                .any(|p| *p == new_saved_playlist)
+            {
+                self.saved_playlists.playlists.push(new_saved_playlist);
+            }
+        }
+    }
+
+    fn load_saved_playlists(&mut self) {
+        self.saved_playlists = SavedPlaylists::load();
+        self.tx
+            .send(Response::SavedPlaylists(self.saved_playlists.clone()))
+            .expect("Could not send message");
+    }
+
+    fn retrieve_saved_playlists(&self) {
+        self.tx
+            .send(Response::SavedPlaylists(self.saved_playlists.clone()))
+            .expect("Could not send message");
+    }
+
+    fn write_saved_playlists(&self) {
+        SavedPlaylists::save_playlists(&self.saved_playlists).expect("Could not save to file");
+    }
+
+    async fn seek(&mut self, time: u64) {
+        let backend = self.backend.clone();
+        if self.playing {
+            backend.seek(time).await.expect("Could not seek");
+        }
+    }
+
+    fn shuffle_tracks(&mut self) {
+        let mut rng = rand::rng();
+        if !self.shuffle {
+            self.queue.shuffle(&mut rng);
+            self.shuffle = true;
+        } else {
+            self.queue = self
+                .playlist
+                .lock()
+                .expect("Could not lock playlist")
+                .tracks
+                .clone();
+            self.shuffle = false;
+        }
+        self.tx
+            .send(Response::Tracks(self.queue.clone()))
+            .expect("Could not send message");
+        self.tx
+            .send(Response::Shuffle(self.shuffle.clone()))
+            .expect("Could not send message");
+    }
+
+    fn load_theme(&self) {
+        let theme = Theme::load();
+        self.tx
+            .send(Response::Theme(theme))
+            .expect("Could not send message");
+    }
+
+    fn write_theme(&self, theme: Theme) {
+        Theme::write(&theme).expect("Could not write theme");
+    }
+
+    async fn monitor_backend(&mut self) {
+        if let Some(res) = self.backend.monitor().await {
+            self.tx.send(res).unwrap();
+        }
+    }
+
     pub async fn run(&mut self) {
         let theme_file = Theme::get_file().expect("Could not get theme file path.");
         if !theme_file.exists() {
