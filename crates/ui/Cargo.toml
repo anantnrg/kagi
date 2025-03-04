@@ -14,3 +14,4 @@ image.workspace = true
 smallvec.workspace = true
 nucleo.workspace = true
 rust-embed.workspace = true
+raw-window-handle.workspace = true

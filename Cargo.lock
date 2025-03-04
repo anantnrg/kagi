@@ -105,7 +105,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "52bca67b61cb81e5553babde81b8211f713cb6db79766f80168f3e5f40ea6c82"
 dependencies = [
  "ash",
- "raw-window-handle",
+ "raw-window-handle 0.6.2",
  "raw-window-metal",
 ]
 
@@ -121,7 +121,7 @@ dependencies = [
  "futures-channel",
  "futures-util",
  "rand 0.8.5",
- "raw-window-handle",
+ "raw-window-handle 0.6.2",
  "serde",
  "serde_repr",
  "url",
@@ -530,7 +530,7 @@ dependencies = [
  "objc2-metal",
  "objc2-quartz-core",
  "objc2-ui-kit",
- "raw-window-handle",
+ "raw-window-handle 0.6.2",
  "slab",
  "wasm-bindgen",
  "web-sys",
@@ -2076,7 +2076,7 @@ dependencies = [
  "postage",
  "profiling",
  "rand 0.8.5",
- "raw-window-handle",
+ "raw-window-handle 0.6.2",
  "refineable",
  "resvg",
  "schemars",
@@ -4018,6 +4018,12 @@ dependencies = [
 
 [[package]]
 name = "raw-window-handle"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f2ff9a1f06a88b01621b7ae906ef0211290d1c8a168a15542486a8f61c0833b9"
+
+[[package]]
+name = "raw-window-handle"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20675572f6f24e9e76ef639bc5552774ed45f1c30e2951e1e99c59888861c539"
@@ -4031,7 +4037,7 @@ dependencies = [
  "cocoa 0.25.0",
  "core-graphics 0.23.2",
  "objc",
- "raw-window-handle",
+ "raw-window-handle 0.6.2",
 ]
 
 [[package]]
@@ -4151,7 +4157,7 @@ dependencies = [
  "objc2-app-kit",
  "objc2-foundation",
  "pollster 0.4.0",
- "raw-window-handle",
+ "raw-window-handle 0.6.2",
  "urlencoding",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -5206,6 +5212,7 @@ dependencies = [
  "gstreamer",
  "image",
  "nucleo",
+ "raw-window-handle 0.5.2",
  "rfd",
  "rust-embed",
  "smallvec",
