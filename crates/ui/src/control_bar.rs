@@ -322,15 +322,21 @@ impl Render for ControlBar {
                                         .hover(theme.control_bar.hover)
                                 }
                             })
-                            .child(div().w_20().child(self.vol_slider.clone()))
                             .child(
                                 div()
-                                    .child(format!("{:00.0}%", state.volume * 100.0))
-                                    .text_sm()
-                                    .text_color(theme.control_bar.text)
-                                    .ml_4()
-                                    .w_10()
-                                    .overflow_hidden(),
+                                    .flex()
+                                    .h_full()
+                                    .items_center()
+                                    .child(div().w_20().child(self.vol_slider.clone()))
+                                    .child(
+                                        div()
+                                            .child(format!("{:00.0}%", state.volume * 100.0))
+                                            .text_sm()
+                                            .text_color(theme.control_bar.text)
+                                            .ml_4()
+                                            .w_10()
+                                            .overflow_hidden(),
+                                    ),
                             ),
                     ),
             )
