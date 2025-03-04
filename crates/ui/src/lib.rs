@@ -66,6 +66,10 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     appears_transparent: true,
                     ..Default::default()
                 }),
+                window_min_size: Some(Size {
+                    width: px(400.0),
+                    height: px(400.0),
+                }),
                 ..Default::default()
             },
             |_, cx| {

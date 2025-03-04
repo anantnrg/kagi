@@ -77,23 +77,17 @@ impl Render for ControlBar {
                     .flex()
                     .items_center()
                     .justify_center()
-                    .child(
-                        div()
-                            .w_full()
-                            .h_full()
-                            .when(win.bounds().size.width.0 < 600.0, |this| {
-                                this.w_auto().flex_grow()
-                            }),
-                    )
+                    .child(div().w_full().h_full())
                     .child(
                         div()
                             .flex()
                             .h_full()
-                            .w_full()
+                            .w_auto()
                             .items_center()
                             .justify_center()
                             .overflow_hidden()
                             .gap_x_4()
+                            .flex_shrink_0()
                             .child(
                                 div()
                                     .size_6()
