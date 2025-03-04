@@ -187,6 +187,12 @@ impl Player {
             .expect("Failed to watch theme file.");
 
         // Media integration
+        let config = PlatformConfig {
+            dbus_name: "kagi",
+            display_name: "Kagi",
+            hwnd: Some(self.hwnd.get() as *mut std::ffi::c_void),
+        };
+
         loop {
             while let Ok(command) = self.rx.try_recv() {
                 match command {
