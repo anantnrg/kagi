@@ -25,7 +25,7 @@ use gpui::*;
 use layout::Layout;
 use main_view::MainView;
 use player_context::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
-use raw_window_handle::HasWindowHandle;
+use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use res_handler::ResHandler;
 use sidebar::{LeftSidebar, RightSidebar};
 use std::{
@@ -78,9 +78,19 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let player_context = PlayerContext::new(cx);
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
-                    let hwnd = win.window_handle();
-                    let (mut player, controller) =
-                        Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
+                    let hwnd;
+                    let handle = win.window_handle().unwrap().as_raw();
+                    match handle {
+                        RawWindowHandle::Win32(win32) => {
+                            hwnd = win32.hwnd;
+                        }
+                        _ => {}
+                    }
+                    let (mut player, controller) = Player::new(
+                        backend.clone(),
+                        Arc::new(Mutex::new(Playlist::default())),
+                        hwnd,
+                    );
                     controller.load_theme();
                     let vol_slider =
                         cx.new(|_| Slider::new().min(0.0).max(1.0).step(0.005).default(0.2));
