@@ -12,7 +12,6 @@ use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 use souvlaki::{MediaControlEvent, MediaControls, MediaMetadata, PlatformConfig};
-use std::sync::mpsc;
 use std::{
     collections::{HashMap, HashSet},
     num::NonZeroUsize,
@@ -21,6 +20,7 @@ use std::{
     thread,
     time::Duration,
 };
+use std::{num::NonZero, sync::mpsc};
 
 pub enum Command {
     Play,
@@ -74,7 +74,7 @@ pub struct Player {
     pub saved_playlists: SavedPlaylists,
     pub tx: Sender<Response>,
     pub rx: Receiver<Command>,
-    pub hwnd: u64,
+    pub hwnd: NonZero<isize>,
 }
 
 #[derive(Debug, Clone)]
@@ -96,7 +96,7 @@ impl Player {
     pub fn new(
         backend: Arc<dyn Backend>,
         playlist: Arc<Mutex<Playlist>>,
-        hwnd: u64,
+        hwnd: NonZero<isize>,
     ) -> (Player, Controller) {
         let (cmd_tx, cmd_rx) = ring_channel::ring_channel(NonZeroUsize::new(128).unwrap());
         let (res_tx, res_rx) = ring_channel::ring_channel(NonZeroUsize::new(128).unwrap());

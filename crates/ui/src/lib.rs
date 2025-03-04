@@ -29,6 +29,7 @@ use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use res_handler::ResHandler;
 use sidebar::{LeftSidebar, RightSidebar};
 use std::{
+    num::NonZero,
     sync::{Arc, Mutex},
     time::Duration,
 };
@@ -78,7 +79,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let player_context = PlayerContext::new(cx);
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
-                    let hwnd;
+                    // fix this
+                    let mut hwnd = NonZero::new(99999_isize).unwrap();
                     let handle = win.window_handle().unwrap().as_raw();
                     match handle {
                         RawWindowHandle::Win32(win32) => {
