@@ -72,7 +72,8 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                 }),
                 ..Default::default()
             },
-            |_, cx| {
+            |win, cx| {
+                win.window_handle().window_id().as_u64();
                 cx.new(|cx| {
                     let player_context = PlayerContext::new(cx);
                     let res_handler = cx.new(|_| ResHandler {});
