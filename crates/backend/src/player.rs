@@ -74,7 +74,6 @@ pub struct Player {
     pub saved_playlists: SavedPlaylists,
     pub tx: Sender<Response>,
     pub rx: Receiver<Command>,
-    pub hwnd: NonZero<isize>,
 }
 
 #[derive(Debug, Clone)]
@@ -96,7 +95,6 @@ impl Player {
     pub fn new(
         backend: Arc<dyn Backend>,
         playlist: Arc<Mutex<Playlist>>,
-        hwnd: NonZero<isize>,
     ) -> (Player, Controller) {
         let (cmd_tx, cmd_rx) = ring_channel::ring_channel(NonZeroUsize::new(128).unwrap());
         let (res_tx, res_rx) = ring_channel::ring_channel(NonZeroUsize::new(128).unwrap());
@@ -114,7 +112,6 @@ impl Player {
                 tx: res_tx,
                 rx: cmd_rx,
                 shuffle: false,
-                hwnd,
             },
             Controller {
                 tx: cmd_tx,

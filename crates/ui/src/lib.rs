@@ -81,18 +81,17 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
                     // fix this
-                    let mut hwnd = NonZero::new(99999_isize).unwrap();
+                    let mut hwnd: Option<NonZero<isize>> = None;
                     let handle = win.window_handle().unwrap().as_raw();
                     match handle {
                         RawWindowHandle::Win32(win32) => {
-                            hwnd = win32.hwnd;
+                            hwnd = Some(win32.hwnd);
                         }
                         _ => {}
                     }
                     let (mut player, controller) = Player::new(
                         backend.clone(),
                         Arc::new(Mutex::new(Playlist::default())),
-                        hwnd,
                     );
 
                     let config = PlatformConfig {
