@@ -28,6 +28,7 @@ use player_context::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use res_handler::ResHandler;
 use sidebar::{LeftSidebar, RightSidebar};
+use souvlaki::{MediaControlEvent, MediaControls, MediaMetadata, PlatformConfig};
 use std::{
     num::NonZero,
     sync::{Arc, Mutex},
@@ -93,6 +94,27 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         Arc::new(Mutex::new(Playlist::default())),
                         hwnd,
                     );
+
+                    let config = PlatformConfig {
+                        dbus_name: "kagi",
+                        display_name: "Kagi",
+                        hwnd: Some(hwnd.get() as *mut std::ffi::c_void),
+                    };
+                    let mut controls = MediaControls::new(config).unwrap();
+
+                    controls
+                        .attach(|event: MediaControlEvent| println!("Event received: {:?}", event))
+                        .unwrap();
+
+                    // controls
+                    //     .set_metadata(MediaMetadata {
+                    //         title: Some("The Ringer"),
+                    //         artist: Some("Eminem"),
+                    //         album: Some("Kamikaze"),
+                    //         ..Default::default()
+                    //     })
+                    //     .unwrap();
+
                     controller.load_theme();
                     let vol_slider =
                         cx.new(|_| Slider::new().min(0.0).max(1.0).step(0.005).default(0.2));

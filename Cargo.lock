@@ -5210,6 +5210,7 @@ dependencies = [
  "rfd",
  "rust-embed",
  "smallvec",
+ "souvlaki",
 ]
 
 [[package]]

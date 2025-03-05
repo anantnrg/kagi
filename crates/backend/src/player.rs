@@ -446,27 +446,6 @@ impl Player {
             .watch(&theme_file, RecursiveMode::NonRecursive)
             .expect("Failed to watch theme file.");
 
-        // Media integration
-        let config = PlatformConfig {
-            dbus_name: "kagi",
-            display_name: "Kagi",
-            hwnd: Some(self.hwnd.get() as *mut std::ffi::c_void),
-        };
-        let mut controls = MediaControls::new(config).unwrap();
-
-        controls
-            .attach(|event: MediaControlEvent| println!("Event received: {:?}", event))
-            .unwrap();
-
-        controls
-            .set_metadata(MediaMetadata {
-                title: Some("The Ringer"),
-                artist: Some("Eminem"),
-                album: Some("Kamikaze"),
-                ..Default::default()
-            })
-            .unwrap();
-
         loop {
             while let Ok(command) = self.rx.try_recv() {
                 match command {
