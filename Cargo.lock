@@ -394,7 +394,6 @@ dependencies = [
  "serde",
  "smallvec",
  "smol",
- "souvlaki",
  "toml",
 ]
 

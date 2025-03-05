@@ -1,26 +1,23 @@
 use crate::{
     Backend,
-    gstreamer::create_playlist_thumbnail,
     playback::{Playlist, SavedPlaylist, SavedPlaylists, Track},
     theme::Theme,
 };
 use gstreamer::State;
 use image::{Frame, RgbaImage, imageops::thumbnail};
 use notify::{Event, EventKind, RecursiveMode, Watcher};
-use rand::seq::{IndexedRandom, SliceRandom};
+use rand::seq::SliceRandom;
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
-use souvlaki::{MediaControlEvent, MediaControls, MediaMetadata, PlatformConfig};
+use std::sync::mpsc;
 use std::{
-    collections::{HashMap, HashSet},
     num::NonZeroUsize,
     path::PathBuf,
     sync::{Arc, Mutex},
     thread,
     time::Duration,
 };
-use std::{num::NonZero, sync::mpsc};
 
 pub enum Command {
     Play,
@@ -92,10 +89,7 @@ pub struct Thumbnail {
 impl gpui::Global for Controller {}
 
 impl Player {
-    pub fn new(
-        backend: Arc<dyn Backend>,
-        playlist: Arc<Mutex<Playlist>>,
-    ) -> (Player, Controller) {
+    pub fn new(backend: Arc<dyn Backend>, playlist: Arc<Mutex<Playlist>>) -> (Player, Controller) {
         let (cmd_tx, cmd_rx) = ring_channel::ring_channel(NonZeroUsize::new(128).unwrap());
         let (res_tx, res_rx) = ring_channel::ring_channel(NonZeroUsize::new(128).unwrap());
         (

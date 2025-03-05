@@ -16,7 +16,7 @@ pub struct ControlBar {
 }
 
 impl Render for ControlBar {
-    fn render(&mut self, win: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let state_write = cx.global_mut::<PlayerContext>().state.clone();
         let theme = cx.global::<Theme>();
 

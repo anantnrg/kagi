@@ -20,4 +20,3 @@ toml.workspace = true
 bincode.workspace = true
 rand.workspace = true
 notify.workspace = true
-souvlaki.workspace = true

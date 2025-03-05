@@ -33,7 +33,6 @@ use souvlaki::{
     MediaControlEvent, MediaControls, MediaMetadata, MediaPlayback, PlatformConfig, SeekDirection,
 };
 use std::{
-    num::NonZero,
     sync::{Arc, Mutex},
     time::Duration,
 };
@@ -115,7 +114,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             player.run().await;
                         })
                         .detach();
-                    println!("{:#?}", hwnd.unwrap());
                     let config = PlatformConfig {
                         dbus_name: "kagi",
                         display_name: "Kagi",
