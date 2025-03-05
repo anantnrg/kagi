@@ -22,11 +22,16 @@ use components::{
 };
 use control_bar::ControlBar;
 use gpui::*;
+use gstreamer::State;
 use layout::Layout;
 use main_view::MainView;
 use player_context::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
+use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use res_handler::ResHandler;
 use sidebar::{LeftSidebar, RightSidebar};
+use souvlaki::{
+    MediaControlEvent, MediaControls, MediaMetadata, MediaPlayback, PlatformConfig, SeekDirection,
+};
 use std::{
     sync::{Arc, Mutex},
     time::Duration,
@@ -66,15 +71,29 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     appears_transparent: true,
                     ..Default::default()
                 }),
+                window_min_size: Some(Size {
+                    width: px(400.0),
+                    height: px(400.0),
+                }),
                 ..Default::default()
             },
-            |_, cx| {
+            |win, cx| {
                 cx.new(|cx| {
                     let player_context = PlayerContext::new(cx);
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
+                    // fix this
+                    let mut hwnd: Option<*mut std::ffi::c_void> = None;
+                    let handle = win.window_handle().unwrap().as_raw();
+                    match handle {
+                        RawWindowHandle::Win32(win32) => {
+                            hwnd = Some(win32.hwnd.get() as *mut std::ffi::c_void);
+                        }
+                        _ => {}
+                    }
                     let (mut player, controller) =
                         Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
+
                     controller.load_theme();
                     let vol_slider =
                         cx.new(|_| Slider::new().min(0.0).max(1.0).step(0.005).default(0.2));
@@ -95,6 +114,55 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             player.run().await;
                         })
                         .detach();
+                    let config = PlatformConfig {
+                        dbus_name: "kagi",
+                        display_name: "Kagi",
+                        hwnd,
+                    };
+                    let mut controls = MediaControls::new(config).unwrap();
+                    controls
+                        .attach({
+                            let controller = cx.global::<Controller>().clone();
+                            let current_pos =
+                                cx.global::<PlayerContext>().state.read(cx).position.clone();
+                            let total_duration = cx
+                                .global::<PlayerContext>()
+                                .metadata
+                                .read(cx)
+                                .duration
+                                .clone();
+                            move |event: MediaControlEvent| match event {
+                                MediaControlEvent::Play => {
+                                    controller.play();
+                                }
+                                MediaControlEvent::Pause => {
+                                    controller.pause();
+                                }
+                                MediaControlEvent::Previous => {
+                                    controller.prev();
+                                }
+                                MediaControlEvent::Next => {
+                                    controller.next();
+                                }
+                                MediaControlEvent::SeekBy(direction, duration) => {
+                                    let seek_amount = duration.as_secs() as u64;
+
+                                    let new_position = match direction {
+                                        SeekDirection::Forward => {
+                                            (current_pos + seek_amount).clamp(0, total_duration)
+                                        }
+                                        SeekDirection::Backward => {
+                                            current_pos.saturating_sub(seek_amount)
+                                        }
+                                    };
+
+                                    controller.seek(new_position);
+                                }
+                                _ => {}
+                            }
+                        })
+                        .unwrap();
+
                     cx.spawn(|_, cx: AsyncApp| async move {
                         let res_handler = arc_res.clone();
                         loop {
@@ -165,6 +233,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
 
                     let playbar_clone = playbar.clone();
+                    let controls_arc = Arc::new(Mutex::new(controls));
                     cx.subscribe(
                         &res_handler,
                         move |_: &mut Kagi, _, event: &Response, cx| match event {
@@ -196,14 +265,32 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             Response::StreamStart => cx.global::<Controller>().get_meta(),
                             Response::Metadata(track) => {
                                 let metadata = cx.global_mut::<PlayerContext>().metadata.clone();
+                                let controls = controls_arc.clone();
                                 metadata.update(cx, |meta, cx| {
                                     let track = track.clone();
-                                    meta.title = track.title.into();
-                                    meta.album = track.album.into();
-                                    meta.artists =
-                                        track.artists.iter().map(|s| s.clone().into()).collect();
-                                    meta.duration = track.duration;
+                                    meta.title = track.title.clone().into();
+                                    meta.album = track.album.clone().into();
+                                    meta.artists = track
+                                        .artists
+                                        .clone()
+                                        .iter()
+                                        .map(|s| s.clone().into())
+                                        .collect();
+                                    meta.duration = track.clone().duration;
                                     cx.notify();
+                                    controls
+                                        .lock()
+                                        .unwrap()
+                                        .set_metadata(MediaMetadata {
+                                            title: Some(track.title.to_string().as_str()),
+                                            artist: Some(
+                                                track.artists.join(", ").to_string().as_str(),
+                                            ),
+                                            album: Some(track.album.to_string().as_str()),
+                                            duration: Some(Duration::from_secs(meta.duration)),
+                                            ..Default::default()
+                                        })
+                                        .unwrap();
                                 });
                             }
                             Response::Thumbnail(thumbnail) => {
@@ -225,6 +312,16 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     state.state = new_state.clone();
                                     cx.notify();
                                 });
+                                let playback_status = match new_state {
+                                    State::Playing => MediaPlayback::Playing { progress: None },
+                                    State::Paused => MediaPlayback::Paused { progress: None },
+                                    _ => MediaPlayback::Stopped,
+                                };
+                                controls_arc
+                                    .lock()
+                                    .unwrap()
+                                    .set_playback(playback_status)
+                                    .expect("Could not set playback state");
                             }
                             Response::Tracks(new_tracks) => {
                                 let tracks = cx.global_mut::<PlayerContext>().tracks.clone();
@@ -292,6 +389,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let left_sidebar = cx.new(move |_| LeftSidebar::new(playlists.clone()));
                     cx.global::<Controller>().load_saved_playlists();
                     cx.global::<Controller>().load_theme();
+
                     Kagi {
                         titlebar,
                         res_handler,

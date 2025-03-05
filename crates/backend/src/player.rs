@@ -1,26 +1,22 @@
+use crate::{
+    Backend,
+    playback::{Playlist, SavedPlaylist, SavedPlaylists, Track},
+    theme::Theme,
+};
+use gstreamer::State;
+use image::{Frame, RgbaImage, imageops::thumbnail};
+use notify::{Event, EventKind, RecursiveMode, Watcher};
+use rand::seq::SliceRandom;
+use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
+use serde::{Deserialize, Serialize};
+use smallvec::SmallVec;
+use std::sync::mpsc;
 use std::{
-    collections::{HashMap, HashSet},
     num::NonZeroUsize,
     path::PathBuf,
     sync::{Arc, Mutex},
     thread,
     time::Duration,
-};
-
-use gstreamer::State;
-use image::{Frame, RgbaImage, imageops::thumbnail};
-use notify::{Event, EventKind, RecursiveMode, Watcher};
-use rand::seq::{IndexedRandom, SliceRandom};
-use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
-use serde::{Deserialize, Serialize};
-use smallvec::SmallVec;
-use std::sync::mpsc;
-
-use crate::{
-    Backend,
-    gstreamer::create_playlist_thumbnail,
-    playback::{Playlist, SavedPlaylist, SavedPlaylists, Track},
-    theme::Theme,
 };
 
 pub enum Command {
@@ -159,6 +155,266 @@ impl Player {
         Ok(())
     }
 
+    async fn play(&mut self) {
+        let backend = self.backend.clone();
+        if !self.queue.is_empty() && !self.playing {
+            if self.loaded {
+                let tx = self.tx.clone();
+                self.tx
+                    .send(Response::StateChanged(State::Playing))
+                    .expect("Could not send message");
+                let _ = backend
+                    .play()
+                    .await
+                    .map_err(|e| tx.send(Response::Error(e.to_string())));
+                self.playing = true;
+            } else {
+                self.tx
+                    .send(Response::Error("Playlist is not loaded.".to_string()))
+                    .expect("Could not send message");
+            }
+        }
+    }
+
+    async fn pause(&mut self) {
+        let backend = self.backend.clone();
+        if self.playing {
+            self.tx
+                .send(Response::StateChanged(State::Paused))
+                .expect("Could not send message");
+            let _ = backend
+                .pause()
+                .await
+                .map_err(|e| self.tx.send(Response::Error(e.to_string())));
+            self.playing = false;
+        }
+    }
+
+    fn get_meta(&self) {
+        if self.loaded {
+            let track = self.queue[self.current_index].clone();
+            self.tx
+                .send(Response::Metadata(track))
+                .expect("Could not send message");
+        }
+    }
+
+    fn get_tracks(&self) {
+        if self.loaded {
+            self.tx
+                .send(Response::Tracks(self.queue.clone()))
+                .expect("Could not send message");
+        }
+    }
+
+    async fn set_volume(&mut self, vol: f64) {
+        let backend = self.backend.clone();
+        if self.loaded {
+            self.tx
+                .send(Response::Info(format!("Volume set to {vol}")))
+                .expect("Could not send message");
+            backend.set_volume(vol).await.expect("Could not set volume");
+            self.volume = vol;
+        }
+    }
+
+    async fn next_track(&mut self) {
+        let backend = self.backend.clone();
+        if self.loaded {
+            backend.stop().await.expect("Could not stop");
+            self.play_next(&backend)
+                .await
+                .expect("Could not play next.");
+            self.tx
+                .send(Response::StateChanged(State::Playing))
+                .expect("Could not send message");
+            backend.play().await.expect("Could not play");
+            self.playing = true;
+            backend
+                .set_volume(self.volume)
+                .await
+                .expect("Could not set volume");
+        }
+    }
+
+    async fn previous_track(&mut self) {
+        let backend = self.backend.clone();
+        if self.loaded {
+            backend.stop().await.expect("Could not stop");
+            self.play_previous(&backend)
+                .await
+                .expect("Could not play previous.");
+            self.tx
+                .send(Response::StateChanged(State::Playing))
+                .expect("Could not send message");
+            backend.play().await.expect("Could not play");
+            self.playing = true;
+            backend
+                .set_volume(self.volume)
+                .await
+                .expect("Could not set volume");
+        }
+    }
+
+    async fn play_id_cmd(&mut self, id: usize) {
+        let backend = self.backend.clone();
+        if self.loaded {
+            backend.stop().await.expect("Could not stop");
+            self.play_id(&backend, id)
+                .await
+                .expect("Could not play track");
+            self.tx
+                .send(Response::StateChanged(State::Playing))
+                .expect("Could not send message");
+            backend.play().await.expect("Could not play");
+            self.playing = true;
+            backend
+                .set_volume(self.volume)
+                .await
+                .expect("Could not set volume");
+        }
+    }
+
+    async fn load_from_folder(&mut self, saved_playlist: SavedPlaylist) {
+        let backend = self.backend.clone();
+        let playlist: Playlist;
+        if let Some(cached) = Playlist::read_cached(saved_playlist.cached_name).await {
+            playlist = cached;
+        } else {
+            playlist =
+                Playlist::from_dir(&backend, PathBuf::from(saved_playlist.actual_path)).await;
+        }
+
+        self.loaded = true;
+        self.playlist = Arc::new(Mutex::new(playlist.clone()));
+        self.queue = playlist.clone().tracks;
+
+        self.load(&backend, 0)
+            .await
+            .expect("Could not load first item");
+        self.tx
+            .send(Response::PlaylistName(playlist.name))
+            .expect("Could not send message");
+    }
+
+    async fn load_folder(&mut self) {
+        let backend = self.backend.clone();
+        if let Some(path) = rfd::AsyncFileDialog::new().pick_folder().await {
+            let path = path.path().to_owned();
+            let name = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("unknown playlist")
+                .to_string();
+            let cached_name: String = name
+                .to_lowercase()
+                .chars()
+                .filter_map(|c| {
+                    if c.is_ascii_alphabetic() {
+                        Some(c)
+                    } else if c == ' ' {
+                        Some('_')
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+            let new_saved_playlist = SavedPlaylist {
+                name,
+                actual_path: path.to_string_lossy().to_string(),
+                cached_name: cached_name.clone(),
+            };
+            let playlist = Playlist::from_dir(&backend, PathBuf::from(path.clone())).await;
+
+            self.loaded = true;
+            self.playlist = Arc::new(Mutex::new(playlist.clone()));
+            self.queue = playlist.clone().tracks;
+            playlist
+                .write_cached(cached_name)
+                .await
+                .expect("Could not write cache");
+
+            self.tx
+                .send(Response::PlaylistName(playlist.name))
+                .expect("Could not send message");
+            self.load(&backend, 0)
+                .await
+                .expect("Could not load first item");
+
+            if !self
+                .saved_playlists
+                .playlists
+                .iter()
+                .any(|p| *p == new_saved_playlist)
+            {
+                self.saved_playlists.playlists.push(new_saved_playlist);
+            }
+        }
+    }
+
+    fn load_saved_playlists(&mut self) {
+        self.saved_playlists = SavedPlaylists::load();
+        self.tx
+            .send(Response::SavedPlaylists(self.saved_playlists.clone()))
+            .expect("Could not send message");
+    }
+
+    fn retrieve_saved_playlists(&self) {
+        self.tx
+            .send(Response::SavedPlaylists(self.saved_playlists.clone()))
+            .expect("Could not send message");
+    }
+
+    fn write_saved_playlists(&self) {
+        SavedPlaylists::save_playlists(&self.saved_playlists).expect("Could not save to file");
+    }
+
+    async fn seek(&mut self, time: u64) {
+        let backend = self.backend.clone();
+        if self.playing {
+            backend.seek(time).await.expect("Could not seek");
+        }
+    }
+
+    fn shuffle_tracks(&mut self) {
+        let mut rng = rand::rng();
+        if !self.shuffle {
+            self.queue.shuffle(&mut rng);
+            self.shuffle = true;
+        } else {
+            self.queue = self
+                .playlist
+                .lock()
+                .expect("Could not lock playlist")
+                .tracks
+                .clone();
+            self.shuffle = false;
+        }
+        self.tx
+            .send(Response::Tracks(self.queue.clone()))
+            .expect("Could not send message");
+        self.tx
+            .send(Response::Shuffle(self.shuffle.clone()))
+            .expect("Could not send message");
+    }
+
+    fn load_theme(&self) {
+        let theme = Theme::load();
+        self.tx
+            .send(Response::Theme(theme))
+            .expect("Could not send message");
+    }
+
+    fn write_theme(&self, theme: Theme) {
+        Theme::write(&theme).expect("Could not write theme");
+    }
+
+    async fn monitor_backend(&mut self) {
+        if let Some(res) = self.backend.monitor().await {
+            self.tx.send(res).unwrap();
+        }
+    }
+
     pub async fn run(&mut self) {
         let theme_file = Theme::get_file().expect("Could not get theme file path.");
         if !theme_file.exists() {
@@ -180,320 +436,33 @@ impl Player {
         watcher
             .watch(&theme_file, RecursiveMode::NonRecursive)
             .expect("Failed to watch theme file.");
+
         loop {
             while let Ok(command) = self.rx.try_recv() {
                 match command {
-                    Command::Play => {
-                        let backend = self.backend.clone();
-                        if !self.queue.is_empty() {
-                            if !self.playing {
-                                if self.loaded {
-                                    let tx = self.tx.clone();
-                                    self.tx
-                                        .send(Response::StateChanged(State::Playing))
-                                        .expect("Could not send message");
-                                    let _ = backend
-                                        .play()
-                                        .await
-                                        .map_err(|e| tx.send(Response::Error(e.to_string())));
-                                    self.playing = true;
-                                } else {
-                                    println!("Playlist is not loaded.");
-                                    self.tx
-                                        .send(Response::Error(
-                                            "Playlist is not loaded.".to_string(),
-                                        ))
-                                        .expect("Could not send message");
-                                }
-                            }
-                        }
-                    }
-                    Command::Pause => {
-                        let backend = self.backend.clone();
-                        if self.playing {
-                            self.tx
-                                .send(Response::StateChanged(State::Paused))
-                                .expect("Could not send message");
-                            let _ = backend
-                                .pause()
-                                .await
-                                .map_err(|e| self.tx.send(Response::Error(e.to_string())));
-                            self.playing = false;
-                        }
-                    }
-                    Command::GetMeta => {
-                        if self.loaded {
-                            let track = self.queue[self.current_index].clone();
-                            self.tx
-                                .send(Response::Metadata(track))
-                                .expect("Could not send message");
-                        }
-                    }
-                    Command::GetTracks => {
-                        if self.loaded {
-                            let tracks = self.queue.clone();
-                            self.tx
-                                .send(Response::Tracks(tracks))
-                                .expect("Could not send message");
-                        }
-                    }
-                    Command::Volume(vol) => {
-                        let backend = self.backend.clone();
-                        if self.loaded {
-                            self.tx
-                                .send(Response::Info(format!("Volume set to {vol}")))
-                                .expect("Could not send message");
-                            backend.set_volume(vol).await.expect("Could not set volume");
-                            println!("Volume set to {vol}");
-                            self.volume = vol;
-                        }
-                    }
-                    Command::Next => {
-                        let backend = self.backend.clone();
-                        if self.loaded {
-                            backend.stop().await.expect("Could not stop");
-                            self.play_next(&backend)
-                                .await
-                                .expect("Could not play next.");
-                            self.tx
-                                .send(Response::StateChanged(State::Playing))
-                                .expect("Could not send message");
-                            backend.play().await.expect("Could not play");
-                            self.playing = true;
-                            backend
-                                .set_volume(self.volume)
-                                .await
-                                .expect("Could not set volume");
-                        }
-                    }
-                    Command::Previous => {
-                        let backend = self.backend.clone();
-                        if self.loaded {
-                            backend.stop().await.expect("Could not stop");
-                            self.play_previous(&backend)
-                                .await
-                                .expect("Could not play previous.");
-                            self.tx
-                                .send(Response::StateChanged(State::Playing))
-                                .expect("Could not send message");
-                            backend.play().await.expect("Could not play");
-                            self.playing = true;
-                            backend
-                                .set_volume(self.volume)
-                                .await
-                                .expect("Could not set volume");
-                        }
-                    }
-                    Command::PlayId(id) => {
-                        let backend = self.backend.clone();
-                        if self.loaded {
-                            backend.stop().await.expect("Could not stop");
-                            self.play_id(&backend, id)
-                                .await
-                                .expect("Could not play track");
-                            self.tx
-                                .send(Response::StateChanged(State::Playing))
-                                .expect("Could not send message");
-                            backend.play().await.expect("Could not play");
-                            self.playing = true;
-                            backend
-                                .set_volume(self.volume)
-                                .await
-                                .expect("Could not set volume");
-                        }
-                    }
+                    Command::Play => self.play().await,
+                    Command::Pause => self.pause().await,
+                    Command::GetMeta => self.get_meta(),
+                    Command::GetTracks => self.get_tracks(),
+                    Command::Volume(vol) => self.set_volume(vol).await,
+                    Command::Next => self.next_track().await,
+                    Command::Previous => self.previous_track().await,
+                    Command::PlayId(id) => self.play_id_cmd(id).await,
                     Command::LoadFromFolder(saved_playlist) => {
-                        let backend = self.backend.clone();
-                        let playlist: Playlist;
-                        if let Some(cached) =
-                            Playlist::read_cached(saved_playlist.cached_name).await
-                        {
-                            playlist = cached;
-                        } else {
-                            playlist = Playlist::from_dir(
-                                &backend,
-                                PathBuf::from(saved_playlist.actual_path),
-                            )
-                            .await;
-                        }
-
-                        self.loaded = true;
-                        self.playlist = Arc::new(Mutex::new(playlist.clone()));
-                        self.queue = playlist.clone().tracks;
-
-                        self.load(&backend, 0)
-                            .await
-                            .expect("Could not load first item");
-                        self.tx
-                            .send(Response::PlaylistName(playlist.name))
-                            .expect("Could not send message");
+                        self.load_from_folder(saved_playlist).await
                     }
-                    Command::LoadFolder => {
-                        let backend = self.backend.clone();
-                        if let Some(path) = rfd::AsyncFileDialog::new().pick_folder().await {
-                            let path = path.path().to_owned();
-                            let name = path
-                                .file_name()
-                                .and_then(|name| name.to_str())
-                                .unwrap_or("unknown playlist")
-                                .to_string();
-                            let cached_name: String = name
-                                .to_lowercase()
-                                .chars()
-                                .filter_map(|c| {
-                                    if c.is_ascii_alphabetic() {
-                                        Some(c)
-                                    } else if c == ' ' {
-                                        Some('_')
-                                    } else {
-                                        None
-                                    }
-                                })
-                                .collect();
-                            let new_saved_playlist = SavedPlaylist {
-                                name,
-                                actual_path: path.to_string_lossy().to_string(),
-                                cached_name: cached_name.clone(),
-                            };
-                            let playlist =
-                                Playlist::from_dir(&backend, PathBuf::from(path.clone())).await;
-
-                            self.loaded = true;
-                            self.playlist = Arc::new(Mutex::new(playlist.clone()));
-                            self.queue = playlist.clone().tracks;
-                            let playlist_thumbnail =
-                                PathBuf::from(new_saved_playlist.clone().actual_path)
-                                    .join("thumbnail.png");
-                            if !playlist_thumbnail.exists() {
-                                let mut rng = rand::rng();
-                                let tracks = playlist.clone().tracks;
-
-                                let mut album_map: HashMap<String, Vec<Track>> = HashMap::new();
-                                for track in &tracks {
-                                    let album_name = track.album.clone();
-                                    album_map.entry(album_name).or_default().push(track.clone());
-                                }
-
-                                let unique_albums: Vec<Vec<Track>> =
-                                    album_map.values().cloned().collect();
-
-                                let count = match unique_albums.len() {
-                                    0 => 0,
-                                    1 => 1,
-                                    2..=3 => 2,
-                                    _ => 4,
-                                };
-
-                                let mut selected_tracks = Vec::new();
-
-                                if unique_albums.len() > 1 {
-                                    let mut picked_albums: HashSet<String> = HashSet::new();
-
-                                    while selected_tracks.len() < count {
-                                        if let Some(album_tracks) = unique_albums.choose(&mut rng) {
-                                            let album_name = album_tracks[0].album.clone();
-                                            if picked_albums.insert(album_name) {
-                                                if let Some(random_track) =
-                                                    album_tracks.choose(&mut rng)
-                                                {
-                                                    selected_tracks.push(random_track.clone());
-                                                }
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    selected_tracks.push(tracks.choose(&mut rng).unwrap().clone());
-                                }
-
-                                let thumbnails: Vec<Thumbnail> = selected_tracks
-                                    .iter()
-                                    .filter_map(|t| t.thumbnail.clone())
-                                    .collect();
-
-                                create_playlist_thumbnail(
-                                    &thumbnails,
-                                    playlist_thumbnail.to_str().unwrap(),
-                                )
-                                .expect("could not create playlist thumbnail");
-                            }
-                            playlist
-                                .write_cached(cached_name)
-                                .await
-                                .expect("Could not write cache");
-                            self.tx
-                                .send(Response::PlaylistName(playlist.name))
-                                .expect("Could not send message");
-                            self.load(&backend, 0)
-                                .await
-                                .expect("Could not load first item");
-
-                            if !self
-                                .saved_playlists
-                                .playlists
-                                .iter()
-                                .any(|p| *p == new_saved_playlist)
-                            {
-                                self.saved_playlists.playlists.push(new_saved_playlist);
-                            }
-                        }
-                    }
-                    Command::LoadSavedPlaylists => {
-                        self.saved_playlists = SavedPlaylists::load();
-                        self.tx
-                            .send(Response::SavedPlaylists(self.saved_playlists.clone()))
-                            .expect("Could not send message");
-                    }
-                    Command::RetrieveSavedPlaylists => {
-                        self.tx
-                            .send(Response::SavedPlaylists(self.saved_playlists.clone()))
-                            .expect("Could not send message");
-                    }
-                    Command::WriteSavedPlaylists => {
-                        SavedPlaylists::save_playlists(&self.saved_playlists)
-                            .expect("Could not save to file");
-                    }
-                    Command::Seek(time) => {
-                        let backend = self.backend.clone();
-                        if self.playing {
-                            backend.seek(time).await.expect("Could not seek");
-                        }
-                    }
-                    Command::Shuffle => {
-                        let mut rng = rand::rng();
-                        if !self.shuffle {
-                            self.queue.shuffle(&mut rng);
-                            self.shuffle = true;
-                        } else {
-                            self.queue = self
-                                .playlist
-                                .lock()
-                                .expect("Could not lock playlist")
-                                .tracks
-                                .clone();
-                            self.shuffle = false;
-                        }
-                        self.tx
-                            .send(Response::Tracks(self.queue.clone()))
-                            .expect("Could not send message");
-                        self.tx
-                            .send(Response::Shuffle(self.shuffle.clone()))
-                            .expect("Could not send message");
-                    }
-                    Command::LoadTheme => {
-                        let theme = Theme::load();
-                        self.tx
-                            .send(Response::Theme(theme))
-                            .expect("Could not send message");
-                    }
-                    Command::WriteTheme(theme) => {
-                        Theme::write(&theme).expect("Could not write theme");
-                    }
+                    Command::LoadFolder => self.load_folder().await,
+                    Command::LoadSavedPlaylists => self.load_saved_playlists(),
+                    Command::RetrieveSavedPlaylists => self.retrieve_saved_playlists(),
+                    Command::WriteSavedPlaylists => self.write_saved_playlists(),
+                    Command::Seek(time) => self.seek(time).await,
+                    Command::Shuffle => self.shuffle_tracks(),
+                    Command::LoadTheme => self.load_theme(),
+                    Command::WriteTheme(theme) => self.write_theme(theme),
                 }
             }
 
-            if let Some(res) = self.backend.monitor().await {
-                self.tx.send(res).unwrap();
-            }
+            self.monitor_backend().await;
 
             if watch_rx.try_recv().is_ok() {
                 let theme = Theme::load();

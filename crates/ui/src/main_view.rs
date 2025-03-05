@@ -122,23 +122,9 @@ impl Render for MainView {
                 .overflow_hidden()
                 .child(
                     div()
-                        .w(px(layout.central_width.read(cx).clone()))
-                        .max_h(px(layout.central_width.read(cx).clone()))
-                        .flex_col()
-                        .flex()
-                        .items_end()
-                        .justify_end()
-                        .flex_grow(), // .child(
-                                      //     img("logo/logo scaled.png")
-                                      //         .size_full()
-                                      //         .object_fit(ObjectFit::Contain),
-                                      // ),
-                )
-                .child(
-                    div()
-                        .text_lg()
+                        .text_xl()
                         .text_color(theme.main.title)
-                        .font_weight(FontWeight::BOLD)
+                        .font_weight(FontWeight::MEDIUM)
                         .text_center()
                         .child("No playlist loaded..."),
                 )
