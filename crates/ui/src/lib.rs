@@ -81,38 +81,16 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let res_handler = cx.new(|_| ResHandler {});
                     let arc_res = Arc::new(res_handler.clone());
                     // fix this
-                    let mut hwnd: Option<NonZero<isize>> = None;
+                    let mut hwnd: Option<*mut std::ffi::c_void> = None;
                     let handle = win.window_handle().unwrap().as_raw();
                     match handle {
                         RawWindowHandle::Win32(win32) => {
-                            hwnd = Some(win32.hwnd);
+                            hwnd = Some(win32.hwnd.get() as *mut std::ffi::c_void);
                         }
                         _ => {}
                     }
-                    let (mut player, controller) = Player::new(
-                        backend.clone(),
-                        Arc::new(Mutex::new(Playlist::default())),
-                    );
-
-                    let config = PlatformConfig {
-                        dbus_name: "kagi",
-                        display_name: "Kagi",
-                        hwnd: Some(hwnd.get() as *mut std::ffi::c_void),
-                    };
-                    let mut controls = MediaControls::new(config).unwrap();
-
-                    controls
-                        .attach(|event: MediaControlEvent| println!("Event received: {:?}", event))
-                        .unwrap();
-
-                    // controls
-                    //     .set_metadata(MediaMetadata {
-                    //         title: Some("The Ringer"),
-                    //         artist: Some("Eminem"),
-                    //         album: Some("Kamikaze"),
-                    //         ..Default::default()
-                    //     })
-                    //     .unwrap();
+                    let (mut player, controller) =
+                        Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
 
                     controller.load_theme();
                     let vol_slider =
@@ -134,6 +112,45 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             player.run().await;
                         })
                         .detach();
+                    println!("{:#?}", hwnd.unwrap());
+                    let config = PlatformConfig {
+                        dbus_name: "kagi",
+                        display_name: "Kagi",
+                        hwnd,
+                    };
+                    let mut controls = MediaControls::new(config).unwrap();
+                    controls
+                        .attach({
+                            let controller = cx.global::<Controller>().clone();
+                            move |event: MediaControlEvent| {
+                                println!("{:#?}", event);
+                                match event {
+                                    MediaControlEvent::Play => {
+                                        controller.play();
+                                    }
+                                    MediaControlEvent::Pause => {
+                                        controller.pause();
+                                    }
+                                    MediaControlEvent::Previous => {
+                                        controller.prev();
+                                    }
+                                    MediaControlEvent::Next => {
+                                        controller.next();
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        })
+                        .unwrap();
+
+                    controls
+                        .set_metadata(MediaMetadata {
+                            title: Some("Lucky You"),
+                            artist: Some("Eminem"),
+                            album: Some("Kamikaze"),
+                            ..Default::default()
+                        })
+                        .unwrap();
                     cx.spawn(|_, cx: AsyncApp| async move {
                         let res_handler = arc_res.clone();
                         loop {
@@ -331,6 +348,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let left_sidebar = cx.new(move |_| LeftSidebar::new(playlists.clone()));
                     cx.global::<Controller>().load_saved_playlists();
                     cx.global::<Controller>().load_theme();
+
                     Kagi {
                         titlebar,
                         res_handler,
