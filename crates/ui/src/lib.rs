@@ -29,7 +29,9 @@ use player_context::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use res_handler::ResHandler;
 use sidebar::{LeftSidebar, RightSidebar};
-use souvlaki::{MediaControlEvent, MediaControls, MediaMetadata, MediaPlayback, PlatformConfig};
+use souvlaki::{
+    MediaControlEvent, MediaControls, MediaMetadata, MediaPlayback, PlatformConfig, SeekDirection,
+};
 use std::{
     num::NonZero,
     sync::{Arc, Mutex},
@@ -123,6 +125,14 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     controls
                         .attach({
                             let controller = cx.global::<Controller>().clone();
+                            let current_pos =
+                                cx.global::<PlayerContext>().state.read(cx).position.clone();
+                            let total_duration = cx
+                                .global::<PlayerContext>()
+                                .metadata
+                                .read(cx)
+                                .duration
+                                .clone();
                             move |event: MediaControlEvent| match event {
                                 MediaControlEvent::Play => {
                                     controller.play();
@@ -135,6 +145,20 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 }
                                 MediaControlEvent::Next => {
                                     controller.next();
+                                }
+                                MediaControlEvent::SeekBy(direction, duration) => {
+                                    let seek_amount = duration.as_secs() as u64;
+
+                                    let new_position = match direction {
+                                        SeekDirection::Forward => {
+                                            (current_pos + seek_amount).clamp(0, total_duration)
+                                        }
+                                        SeekDirection::Backward => {
+                                            current_pos.saturating_sub(seek_amount)
+                                        }
+                                    };
+
+                                    controller.seek(new_position);
                                 }
                                 _ => {}
                             }
