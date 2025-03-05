@@ -22,13 +22,14 @@ use components::{
 };
 use control_bar::ControlBar;
 use gpui::*;
+use gstreamer::State;
 use layout::Layout;
 use main_view::MainView;
 use player_context::{PlayerContext, PlayerStateEvent, Thumbnail, Track};
 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use res_handler::ResHandler;
 use sidebar::{LeftSidebar, RightSidebar};
-use souvlaki::{MediaControlEvent, MediaControls, MediaMetadata, PlatformConfig};
+use souvlaki::{MediaControlEvent, MediaControls, MediaMetadata, MediaPlayback, PlatformConfig};
 use std::{
     num::NonZero,
     sync::{Arc, Mutex},
@@ -152,7 +153,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         })
                         .unwrap();
                     // Fix me: prevent dropping
-                    Box::leak(Box::new(controls));
+                    // Box::leak(Box::new(controls));
                     cx.spawn(|_, cx: AsyncApp| async move {
                         let res_handler = arc_res.clone();
                         loop {
@@ -223,6 +224,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
 
                     let playbar_clone = playbar.clone();
+                    let controls_arc = Arc::new(Mutex::new(controls));
                     cx.subscribe(
                         &res_handler,
                         move |_: &mut Kagi, _, event: &Response, cx| match event {
@@ -283,6 +285,16 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                     state.state = new_state.clone();
                                     cx.notify();
                                 });
+                                let playback_status = match new_state {
+                                    State::Playing => MediaPlayback::Playing { progress: None },
+                                    State::Paused => MediaPlayback::Paused { progress: None },
+                                    _ => MediaPlayback::Stopped,
+                                };
+                                controls_arc
+                                    .lock()
+                                    .unwrap()
+                                    .set_playback(playback_status)
+                                    .expect("Could not set playback state");
                             }
                             Response::Tracks(new_tracks) => {
                                 let tracks = cx.global_mut::<PlayerContext>().tracks.clone();
