@@ -165,14 +165,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         })
                         .unwrap();
 
-                    controls
-                        .set_metadata(MediaMetadata {
-                            title: Some("Lucky You"),
-                            artist: Some("Eminem"),
-                            album: Some("Kamikaze"),
-                            ..Default::default()
-                        })
-                        .unwrap();
                     cx.spawn(|_, cx: AsyncApp| async move {
                         let res_handler = arc_res.clone();
                         loop {
@@ -275,14 +267,32 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             Response::StreamStart => cx.global::<Controller>().get_meta(),
                             Response::Metadata(track) => {
                                 let metadata = cx.global_mut::<PlayerContext>().metadata.clone();
+                                let controls = controls_arc.clone();
                                 metadata.update(cx, |meta, cx| {
                                     let track = track.clone();
-                                    meta.title = track.title.into();
-                                    meta.album = track.album.into();
-                                    meta.artists =
-                                        track.artists.iter().map(|s| s.clone().into()).collect();
-                                    meta.duration = track.duration;
+                                    meta.title = track.title.clone().into();
+                                    meta.album = track.album.clone().into();
+                                    meta.artists = track
+                                        .artists
+                                        .clone()
+                                        .iter()
+                                        .map(|s| s.clone().into())
+                                        .collect();
+                                    meta.duration = track.clone().duration;
                                     cx.notify();
+                                    controls
+                                        .lock()
+                                        .unwrap()
+                                        .set_metadata(MediaMetadata {
+                                            title: Some(track.title.to_string().as_str()),
+                                            artist: Some(
+                                                track.artists.join(", ").to_string().as_str(),
+                                            ),
+                                            album: Some(track.album.to_string().as_str()),
+                                            duration: Some(Duration::from_secs(meta.duration)),
+                                            ..Default::default()
+                                        })
+                                        .unwrap();
                                 });
                             }
                             Response::Thumbnail(thumbnail) => {
