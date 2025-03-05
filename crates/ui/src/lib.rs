@@ -123,23 +123,20 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     controls
                         .attach({
                             let controller = cx.global::<Controller>().clone();
-                            move |event: MediaControlEvent| {
-                                println!("{:#?}", event);
-                                match event {
-                                    MediaControlEvent::Play => {
-                                        controller.play();
-                                    }
-                                    MediaControlEvent::Pause => {
-                                        controller.pause();
-                                    }
-                                    MediaControlEvent::Previous => {
-                                        controller.prev();
-                                    }
-                                    MediaControlEvent::Next => {
-                                        controller.next();
-                                    }
-                                    _ => {}
+                            move |event: MediaControlEvent| match event {
+                                MediaControlEvent::Play => {
+                                    controller.play();
                                 }
+                                MediaControlEvent::Pause => {
+                                    controller.pause();
+                                }
+                                MediaControlEvent::Previous => {
+                                    controller.prev();
+                                }
+                                MediaControlEvent::Next => {
+                                    controller.next();
+                                }
+                                _ => {}
                             }
                         })
                         .unwrap();
@@ -152,8 +149,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             ..Default::default()
                         })
                         .unwrap();
-                    // Fix me: prevent dropping
-                    // Box::leak(Box::new(controls));
                     cx.spawn(|_, cx: AsyncApp| async move {
                         let res_handler = arc_res.clone();
                         loop {
