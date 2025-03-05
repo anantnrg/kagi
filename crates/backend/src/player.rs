@@ -492,9 +492,7 @@ impl Player {
                 }
             }
 
-            if let Some(res) = self.backend.monitor().await {
-                self.tx.send(res).unwrap();
-            }
+            self.monitor_backend().await;
 
             if watch_rx.try_recv().is_ok() {
                 let theme = Theme::load();
