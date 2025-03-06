@@ -4,6 +4,7 @@ use crate::{
     theme::Theme,
 };
 use anyhow::Error;
+use bincode::config;
 use directories::UserDirs;
 use gstreamer::State;
 use image::{Frame, RgbaImage, imageops::thumbnail};
@@ -12,7 +13,11 @@ use rand::seq::SliceRandom;
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
-use std::sync::mpsc;
+use std::{
+    fs::{self, File},
+    io::Write,
+    sync::mpsc,
+};
 use std::{
     num::NonZeroUsize,
     path::PathBuf,
@@ -635,9 +640,11 @@ impl CurrentCache {
             fs::create_dir_all(&cache_dir).expect("Failed to create cache directory");
         }
         let queue_cache = cache_dir.clone().join("queue");
+        let playback_cache = cache_dir.clone().join("playback.toml");
 
-        let encoded = bincode::serialize(&state)?;
-        fs::write("cache/now_playing.bin", encoded)?;
+        let mut cached_file = File::create(queue_cache)?;
+        let serialized = &bincode::serde::encode_to_vec(queue, config::standard())?;
+        cached_file.write(serialized)?;
 
         Ok(())
     }
