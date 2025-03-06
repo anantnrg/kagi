@@ -431,6 +431,18 @@ impl Player {
         Theme::write(&theme).expect("Could not write theme");
     }
 
+    fn write_current_cache(&self) {
+        CurrentCache::write(
+            self.queue.clone(),
+            self.volume.clone(),
+            self.position.clone(),
+            self.current_index.clone(),
+            self.shuffle.clone(),
+            self.saved_playlists.playlists[0].clone(),
+        )
+        .expect("Could not write current cache");
+    }
+
     async fn monitor_backend(&mut self) {
         if let Some(res) = self.backend.monitor().await {
             self.tx.send(res).unwrap();
