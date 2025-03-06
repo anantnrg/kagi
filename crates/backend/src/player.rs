@@ -87,7 +87,14 @@ pub struct Thumbnail {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct CurrentCache {}
+pub struct CurrentCache {
+    pub queue: Vec<Track>,
+    pub volume: f64,
+    pub position: u64,
+    pub current_index: usize,
+    pub shuffle: bool,
+    pub playlist: SavedPlaylist,
+}
 
 impl gpui::Global for Controller {}
 
