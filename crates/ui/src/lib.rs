@@ -387,8 +387,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let main_view = cx.new(|_| MainView::new());
                     let right_sidebar = cx.new(|cx| RightSidebar::new(cx));
                     let left_sidebar = cx.new(move |_| LeftSidebar::new(playlists.clone()));
-                    cx.global::<Controller>().load_saved_playlists();
-                    cx.global::<Controller>().load_theme();
 
                     Kagi {
                         titlebar,

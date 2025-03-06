@@ -256,6 +256,7 @@ impl Player {
                 .set_volume(self.volume)
                 .await
                 .expect("Could not set volume");
+            self.write_playback_cache();
         }
     }
 
@@ -275,6 +276,7 @@ impl Player {
                 .set_volume(self.volume)
                 .await
                 .expect("Could not set volume");
+            self.write_playback_cache();
         }
     }
 
@@ -294,6 +296,7 @@ impl Player {
                 .set_volume(self.volume)
                 .await
                 .expect("Could not set volume");
+            self.write_playback_cache();
         }
     }
 
@@ -317,6 +320,7 @@ impl Player {
         self.tx
             .send(Response::PlaylistName(playlist.name))
             .expect("Could not send message");
+        self.write_current_cache();
     }
 
     async fn load_folder(&mut self) {
@@ -371,6 +375,7 @@ impl Player {
             {
                 self.saved_playlists.playlists.push(new_saved_playlist);
             }
+            self.write_current_cache();
         }
     }
 
@@ -450,20 +455,46 @@ impl Player {
         .expect("Could not write current cache");
     }
 
+    fn write_playback_cache(&self) {
+        let playlist_name = &self.playlist.lock().unwrap().name;
+        let id = self
+            .saved_playlists
+            .playlists
+            .iter()
+            .position(|p| p.name == *playlist_name)
+            .unwrap();
+        CurrentCache::write_playback(
+            self.volume.clone(),
+            self.position.clone(),
+            self.current_index.clone(),
+            self.shuffle.clone(),
+            self.saved_playlists.playlists[id].clone(),
+        )
+        .expect("Could not write current cache");
+    }
+
     async fn read_current_cache(&mut self) {
         let current_cache = CurrentCache::load();
         if let Some(cache) = current_cache {
-            let playlist = Playlist::from_dir(
-                &self.backend,
-                PathBuf::from(cache.playback.playlist.actual_path),
-            )
-            .await;
+            let backend = self.backend.clone();
+            let playlist =
+                Playlist::from_dir(&backend, PathBuf::from(cache.playback.playlist.actual_path))
+                    .await;
             self.queue = cache.queue.clone();
             self.volume = cache.playback.volume.clone();
             self.position = cache.playback.position;
             self.current_index = cache.playback.current_index;
             self.shuffle = cache.playback.shuffle;
-            self.playlist = Arc::new(Mutex::new(playlist));
+            self.playlist = Arc::new(Mutex::new(playlist.clone()));
+            self.loaded = true;
+            self.load(&backend, 0)
+                .await
+                .expect("Could not load first item");
+            self.tx
+                .send(Response::PlaylistName(playlist.name))
+                .expect("Could not send message");
+            self.load_saved_playlists();
+            self.load_theme();
         }
     }
 
@@ -494,7 +525,7 @@ impl Player {
         watcher
             .watch(&theme_file, RecursiveMode::NonRecursive)
             .expect("Failed to watch theme file.");
-
+        self.read_current_cache().await;
         loop {
             while let Ok(command) = self.rx.try_recv() {
                 match command {
