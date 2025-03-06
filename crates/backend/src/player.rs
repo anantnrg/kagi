@@ -495,6 +495,8 @@ impl Player {
                 .expect("Could not send message");
             self.load_saved_playlists();
             self.load_theme();
+            self.get_tracks();
+            self.play().await;
         }
     }
 
