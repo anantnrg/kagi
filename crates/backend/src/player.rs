@@ -3,6 +3,8 @@ use crate::{
     playback::{Playlist, SavedPlaylist, SavedPlaylists, Track},
     theme::Theme,
 };
+use anyhow::Error;
+use directories::UserDirs;
 use gstreamer::State;
 use image::{Frame, RgbaImage, imageops::thumbnail};
 use notify::{Event, EventKind, RecursiveMode, Watcher};
@@ -89,6 +91,11 @@ pub struct Thumbnail {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct CurrentCache {
     pub queue: Vec<Track>,
+    pub playback: PlaybackCache,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct PlaybackCache {
     pub volume: f64,
     pub position: u64,
     pub current_index: usize,
@@ -599,5 +606,39 @@ impl Thumbnail {
         let img = RgbaImage::from_raw(self.width, self.height, self.img.clone())
             .expect("Failed to reconstruct image from raw bytes");
         SmallVec::from_vec(vec![Frame::new(thumbnail(&img, self.width, self.height))])
+    }
+}
+
+impl CurrentCache {
+    pub fn write(
+        queue: Vec<Track>,
+        volume: f64,
+        position: u64,
+        current_index: usize,
+        shuffle: bool,
+        playlist: SavedPlaylist,
+    ) -> anyhow::Result<(), Error> {
+        let playback = PlaybackCache {
+            volume,
+            position,
+            current_index,
+            shuffle,
+            playlist,
+        };
+        let cache_dir = UserDirs::new()
+            .unwrap()
+            .audio_dir()
+            .unwrap_or(UserDirs::new().unwrap().home_dir())
+            .join("Kagi")
+            .join("cache");
+        if !cache_dir.exists() {
+            fs::create_dir_all(&cache_dir).expect("Failed to create cache directory");
+        }
+        let queue_cache = cache_dir.clone().join("queue");
+
+        let encoded = bincode::serialize(&state)?;
+        fs::write("cache/now_playing.bin", encoded)?;
+
+        Ok(())
     }
 }
