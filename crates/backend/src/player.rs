@@ -450,6 +450,17 @@ impl Player {
         .expect("Could not write current cache");
     }
 
+    fn read_current_cache(&mut self) {
+        let current_cache = CurrentCache::load();
+        if let Some(cache) = current_cache {
+            self.queue = cache.queue.clone();
+            self.volume = cache.playback.volume.clone();
+            self.position = cache.playback.position;
+            self.current_index = cache.playback.current_index;
+            self.shuffle = cache.playback.shuffle;
+        }
+    }
+
     async fn monitor_backend(&mut self) {
         if let Some(res) = self.backend.monitor().await {
             self.tx.send(res).unwrap();
