@@ -450,14 +450,20 @@ impl Player {
         .expect("Could not write current cache");
     }
 
-    fn read_current_cache(&mut self) {
+    async fn read_current_cache(&mut self) {
         let current_cache = CurrentCache::load();
         if let Some(cache) = current_cache {
+            let playlist = Playlist::from_dir(
+                &self.backend,
+                PathBuf::from(cache.playback.playlist.actual_path),
+            )
+            .await;
             self.queue = cache.queue.clone();
             self.volume = cache.playback.volume.clone();
             self.position = cache.playback.position;
             self.current_index = cache.playback.current_index;
             self.shuffle = cache.playback.shuffle;
+            self.playlist = Arc::new(Mutex::new(playlist));
         }
     }
 
