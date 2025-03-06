@@ -86,6 +86,9 @@ pub struct Thumbnail {
     pub height: u32,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CurrentCache {}
+
 impl gpui::Global for Controller {}
 
 impl Player {
