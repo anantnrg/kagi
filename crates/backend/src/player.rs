@@ -652,4 +652,30 @@ impl CurrentCache {
 
         Ok(())
     }
+    pub fn load() -> Option<CurrentCache> {
+        let cache_dir = UserDirs::new()
+            .unwrap()
+            .audio_dir()
+            .unwrap_or(UserDirs::new().unwrap().home_dir())
+            .join("Kagi")
+            .join("cache");
+        let queue_cache = cache_dir.clone().join("queue");
+        let playback_cache = cache_dir.clone().join("playback.toml");
+
+        if !queue_cache.exists() || !playback_cache.exists() {
+            return None;
+        } else {
+            let queue_cache_data = &fs::read(queue_cache).expect("Could not read file");
+            let queue: Vec<Track> =
+                bincode::serde::decode_from_slice(queue_cache_data, config::standard())
+                    .expect("Could not decode playlist")
+                    .0;
+            let playback_cache_data = &fs::read(playback_cache).expect("Could not read file");
+            let playback: PlaybackCache =
+                toml::from_str(std::str::from_utf8(playback_cache_data).unwrap())
+                    .expect("could not decode playback cache");
+
+            return Some(CurrentCache { queue, playback });
+        }
+    }
 }
