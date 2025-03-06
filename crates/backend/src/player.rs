@@ -487,7 +487,7 @@ impl Player {
             self.shuffle = cache.playback.shuffle;
             self.playlist = Arc::new(Mutex::new(playlist.clone()));
             self.loaded = true;
-            self.load(&backend, 0)
+            self.load(&backend, cache.playback.current_index)
                 .await
                 .expect("Could not load first item");
             self.tx
@@ -496,6 +496,7 @@ impl Player {
             self.load_saved_playlists();
             self.load_theme();
             self.get_tracks();
+            self.seek(cache.playback.position).await;
             self.play().await;
         }
     }
