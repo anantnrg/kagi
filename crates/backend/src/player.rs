@@ -688,6 +688,34 @@ impl CurrentCache {
 
         Ok(())
     }
+    pub fn write_playback(
+        volume: f64,
+        position: u64,
+        current_index: usize,
+        shuffle: bool,
+        playlist: SavedPlaylist,
+    ) -> anyhow::Result<(), Error> {
+        let playback = PlaybackCache {
+            volume,
+            position,
+            current_index,
+            shuffle,
+            playlist,
+        };
+        let cache_dir = UserDirs::new()
+            .unwrap()
+            .audio_dir()
+            .unwrap_or(UserDirs::new().unwrap().home_dir())
+            .join("Kagi")
+            .join("cache");
+        let playback_cache = cache_dir.clone().join("playback.toml");
+
+        let mut playback_cache_file = File::create(playback_cache)?;
+        let serialized = toml::to_string(&playback)?;
+        playback_cache_file.write(serialized.as_bytes())?;
+
+        Ok(())
+    }
     pub fn load() -> Option<CurrentCache> {
         let cache_dir = UserDirs::new()
             .unwrap()
