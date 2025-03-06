@@ -432,13 +432,20 @@ impl Player {
     }
 
     fn write_current_cache(&self) {
+        let playlist_name = &self.playlist.lock().unwrap().name;
+        let id = self
+            .saved_playlists
+            .playlists
+            .iter()
+            .position(|p| p.name == *playlist_name)
+            .unwrap();
         CurrentCache::write(
             self.queue.clone(),
             self.volume.clone(),
             self.position.clone(),
             self.current_index.clone(),
             self.shuffle.clone(),
-            self.saved_playlists.playlists[0].clone(),
+            self.saved_playlists.playlists[id].clone(),
         )
         .expect("Could not write current cache");
     }
