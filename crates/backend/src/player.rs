@@ -642,9 +642,13 @@ impl CurrentCache {
         let queue_cache = cache_dir.clone().join("queue");
         let playback_cache = cache_dir.clone().join("playback.toml");
 
-        let mut cached_file = File::create(queue_cache)?;
+        let mut queue_cache_file = File::create(queue_cache)?;
         let serialized = &bincode::serde::encode_to_vec(queue, config::standard())?;
-        cached_file.write(serialized)?;
+        queue_cache_file.write(serialized)?;
+
+        let mut playback_cache_file = File::create(playback_cache)?;
+        let serialized = toml::to_string(&playback)?;
+        playback_cache_file.write(serialized.as_bytes())?;
 
         Ok(())
     }
