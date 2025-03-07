@@ -492,6 +492,9 @@ impl Player {
             self.tx
                 .send(Response::PlaylistName(cache.playback.playlist.name))
                 .expect("Could not send message");
+            self.tx
+                .send(Response::Shuffle(cache.playback.shuffle))
+                .expect("Could not send message");
             self.load_saved_playlists();
             self.load_theme();
             self.get_tracks();
