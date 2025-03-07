@@ -477,27 +477,33 @@ impl Player {
         let current_cache = CurrentCache::load();
         if let Some(cache) = current_cache {
             let backend = self.backend.clone();
-            let playlist =
-                Playlist::from_dir(&backend, PathBuf::from(cache.playback.playlist.actual_path))
-                    .await;
+
             self.queue = cache.queue.clone();
-            self.volume = cache.playback.volume.clone();
             self.position = cache.playback.position;
             self.current_index = cache.playback.current_index;
             self.shuffle = cache.playback.shuffle;
-            self.playlist = Arc::new(Mutex::new(playlist.clone()));
             self.loaded = true;
             self.load(&backend, cache.playback.current_index)
                 .await
                 .expect("Could not load first item");
             self.tx
-                .send(Response::PlaylistName(playlist.name))
+                .send(Response::PlaylistName(cache.playback.playlist.name))
                 .expect("Could not send message");
             self.load_saved_playlists();
             self.load_theme();
             self.get_tracks();
-            self.seek(cache.playback.position).await;
+            self.get_meta();
+
             self.play().await;
+            self.set_volume(cache.playback.volume).await;
+            self.tx
+                .send(Response::StateChanged(State::Playing))
+                .expect("Could not send message");
+
+            let playlist =
+                Playlist::from_dir(&backend, PathBuf::from(cache.playback.playlist.actual_path))
+                    .await;
+            self.playlist = Arc::new(Mutex::new(playlist.clone()));
         }
     }
 
