@@ -13,30 +13,20 @@ A **lightweight, fast, and zero-bullshit** music player built in Rust. No web ga
 
 ## **Features** ⚡
 
-- **🦀 Written in Rust** – No lag, no memory leaks, no unnecessary bloat.
-
+- **🦀 Written in Rust**
 - **🧠 Low Memory & CPU Usage** – **<75MB RAM, <2% CPU**.
-
-- **🚀 Blazing Fast** – **200+ tracks load in under 3 sec** (on an HDD).
-
+- **🚀 Blazing Fast** – **200+ tracks load in under 3 sec thanks to [bincode](https://github.com/bincode-org/bincode)** (tested on a 5+yo HDD).
 - **📂 Local Folder Playback**
-
 - **🎨 Themeing with Hot-Reload**
-
-- **🔍 Fuzzy Search** – Powered by **Nucleo** (sometimes derps, working on it).
-
 - **🔄 Saves Playback State** – Pickup right where you left off.
+- **🔍 Fuzzy Search** – Powered by **Nucleo** (sometimes derps, working on it).
 
 ### **Coming Soon™**
 
 - **🎧 Crossfade between tracks**
-
 - **📥 Download playlists from YouTube**
-
 - **📝 Lyrics support**
-
 - **📜 Custom playlists without needing folders**
-
 - **⚡ More optimizations, less jank**
 
 ## **Getting Started** 🛠️
