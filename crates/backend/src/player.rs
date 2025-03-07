@@ -45,6 +45,7 @@ pub enum Command {
     Shuffle,
     LoadTheme,
     WriteTheme(Theme),
+    Exit,
 }
 
 #[derive(Clone)]
@@ -566,6 +567,7 @@ impl Player {
                     Command::Shuffle => self.shuffle_tracks(),
                     Command::LoadTheme => self.load_theme(),
                     Command::WriteTheme(theme) => self.write_theme(theme),
+                    Command::Exit => self.write_playback_cache(),
                 }
             }
 
@@ -692,6 +694,10 @@ impl Controller {
         self.tx
             .send(Command::WriteTheme(theme))
             .expect("Could not send command");
+    }
+
+    pub fn exit(&self) {
+        self.tx.send(Command::Exit).expect("Could not send command");
     }
 }
 

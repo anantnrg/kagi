@@ -392,6 +392,15 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     )
                     .detach();
 
+                    cx.on_app_quit(|_, cx| {
+                        let controller = cx.global::<Controller>().clone();
+
+                        async move {
+                            println!("exiting");
+                            controller.exit();
+                        }
+                    })
+                    .detach();
                     let titlebar = cx.new(|_| Titlebar::new());
 
                     let control_bar =
