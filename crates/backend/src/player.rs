@@ -56,6 +56,7 @@ pub enum Response {
     Eos,
     StreamStart,
     Position(u64),
+    Volume(f64),
     Thumbnail(Thumbnail),
     Tracks(Vec<Track>),
     SavedPlaylists(SavedPlaylists),
@@ -233,7 +234,7 @@ impl Player {
         let backend = self.backend.clone();
         if self.loaded {
             self.tx
-                .send(Response::Info(format!("Volume set to {vol}")))
+                .send(Response::Volume(vol))
                 .expect("Could not send message");
             backend.set_volume(vol).await.expect("Could not set volume");
             self.volume = vol;

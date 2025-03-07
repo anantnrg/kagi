@@ -233,6 +233,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
 
                     let playbar_clone = playbar.clone();
+                    let vol_slider_clone = vol_slider.clone();
                     let controls_arc = Arc::new(Mutex::new(controls));
                     cx.subscribe(
                         &res_handler,
@@ -374,6 +375,17 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                             Response::Theme(theme) => {
                                 cx.set_global::<Theme>(theme.clone().into());
                                 cx.refresh_windows();
+                            }
+                            Response::Volume(vol) => {
+                                vol_slider_clone.update(cx, |this, cx| {
+                                    this.value(*vol as f32, cx);
+                                });
+                                let state = cx.global_mut::<PlayerContext>().state.clone();
+                                state.update(cx, |state, cx| {
+                                    state.volume = vol.clone();
+                                    cx.notify();
+                                });
+                                cx.notify();
                             }
                             _ => {}
                         },
