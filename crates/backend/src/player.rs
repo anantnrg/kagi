@@ -17,6 +17,7 @@ use std::{
     fs::{self, File},
     io::Write,
     sync::mpsc,
+    time::Instant,
 };
 use std::{
     num::NonZeroUsize,
@@ -424,6 +425,7 @@ impl Player {
         self.tx
             .send(Response::Shuffle(self.shuffle.clone()))
             .expect("Could not send message");
+        self.write_current_cache();
     }
 
     fn load_theme(&self) {
@@ -494,17 +496,17 @@ impl Player {
             self.load_theme();
             self.get_tracks();
             self.get_meta();
-
-            self.play().await;
-            self.set_volume(cache.playback.volume).await;
-            self.tx
-                .send(Response::StateChanged(State::Playing))
-                .expect("Could not send message");
-
             let playlist =
                 Playlist::from_dir(&backend, PathBuf::from(cache.playback.playlist.actual_path))
                     .await;
             self.playlist = Arc::new(Mutex::new(playlist.clone()));
+            self.play().await;
+            thread::sleep(Duration::from_millis(100));
+            self.set_volume(cache.playback.volume).await;
+            self.seek(cache.playback.position).await;
+            self.tx
+                .send(Response::StateChanged(State::Playing))
+                .expect("Could not send message");
         }
     }
 
@@ -536,6 +538,9 @@ impl Player {
             .watch(&theme_file, RecursiveMode::NonRecursive)
             .expect("Failed to watch theme file.");
         self.read_current_cache().await;
+
+        let mut last_run = Instant::now();
+
         loop {
             while let Ok(command) = self.rx.try_recv() {
                 match command {
@@ -577,8 +582,12 @@ impl Player {
                     .expect("Could not send message.");
                 self.position = curr_pos;
             }
+            if last_run.elapsed() >= Duration::from_secs(3) {
+                self.write_playback_cache();
+                last_run = Instant::now();
+            }
 
-            thread::sleep(Duration::from_millis(1));
+            thread::sleep(Duration::from_millis(5));
         }
     }
 }
