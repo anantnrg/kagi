@@ -3,6 +3,9 @@ use crate::{
     playback::{Playlist, SavedPlaylist, SavedPlaylists, Track},
     theme::Theme,
 };
+use anyhow::Error;
+use bincode::config;
+use directories::UserDirs;
 use gstreamer::State;
 use image::{Frame, RgbaImage, imageops::thumbnail};
 use notify::{Event, EventKind, RecursiveMode, Watcher};
@@ -10,7 +13,12 @@ use rand::seq::SliceRandom;
 use ring_channel::{RingReceiver as Receiver, RingSender as Sender};
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
-use std::sync::mpsc;
+use std::{
+    fs::{self, File},
+    io::Write,
+    sync::mpsc,
+    time::Instant,
+};
 use std::{
     num::NonZeroUsize,
     path::PathBuf,
@@ -37,6 +45,7 @@ pub enum Command {
     Shuffle,
     LoadTheme,
     WriteTheme(Theme),
+    Exit,
 }
 
 #[derive(Clone)]
@@ -49,6 +58,7 @@ pub enum Response {
     Eos,
     StreamStart,
     Position(u64),
+    Volume(f64),
     Thumbnail(Thumbnail),
     Tracks(Vec<Track>),
     SavedPlaylists(SavedPlaylists),
@@ -84,6 +94,21 @@ pub struct Thumbnail {
     pub img: Vec<u8>,
     pub width: u32,
     pub height: u32,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CurrentCache {
+    pub queue: Vec<Track>,
+    pub playback: PlaybackCache,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct PlaybackCache {
+    pub volume: f64,
+    pub position: u64,
+    pub current_index: usize,
+    pub shuffle: bool,
+    pub playlist: SavedPlaylist,
 }
 
 impl gpui::Global for Controller {}
@@ -211,7 +236,7 @@ impl Player {
         let backend = self.backend.clone();
         if self.loaded {
             self.tx
-                .send(Response::Info(format!("Volume set to {vol}")))
+                .send(Response::Volume(vol))
                 .expect("Could not send message");
             backend.set_volume(vol).await.expect("Could not set volume");
             self.volume = vol;
@@ -234,6 +259,7 @@ impl Player {
                 .set_volume(self.volume)
                 .await
                 .expect("Could not set volume");
+            self.write_playback_cache();
         }
     }
 
@@ -253,6 +279,7 @@ impl Player {
                 .set_volume(self.volume)
                 .await
                 .expect("Could not set volume");
+            self.write_playback_cache();
         }
     }
 
@@ -272,6 +299,7 @@ impl Player {
                 .set_volume(self.volume)
                 .await
                 .expect("Could not set volume");
+            self.write_playback_cache();
         }
     }
 
@@ -295,6 +323,7 @@ impl Player {
         self.tx
             .send(Response::PlaylistName(playlist.name))
             .expect("Could not send message");
+        self.write_current_cache();
     }
 
     async fn load_folder(&mut self) {
@@ -349,6 +378,7 @@ impl Player {
             {
                 self.saved_playlists.playlists.push(new_saved_playlist);
             }
+            self.write_current_cache();
         }
     }
 
@@ -396,6 +426,7 @@ impl Player {
         self.tx
             .send(Response::Shuffle(self.shuffle.clone()))
             .expect("Could not send message");
+        self.write_current_cache();
     }
 
     fn load_theme(&self) {
@@ -407,6 +438,80 @@ impl Player {
 
     fn write_theme(&self, theme: Theme) {
         Theme::write(&theme).expect("Could not write theme");
+    }
+
+    fn write_current_cache(&self) {
+        let playlist_name = &self.playlist.lock().unwrap().name;
+        let id = self
+            .saved_playlists
+            .playlists
+            .iter()
+            .position(|p| p.name == *playlist_name)
+            .unwrap();
+        CurrentCache::write(
+            self.queue.clone(),
+            self.volume.clone(),
+            self.position.clone(),
+            self.current_index.clone(),
+            self.shuffle.clone(),
+            self.saved_playlists.playlists[id].clone(),
+        )
+        .expect("Could not write current cache");
+    }
+
+    fn write_playback_cache(&self) {
+        let playlist_name = &self.playlist.lock().unwrap().name;
+        let id = self
+            .saved_playlists
+            .playlists
+            .iter()
+            .position(|p| p.name == *playlist_name)
+            .unwrap();
+        CurrentCache::write_playback(
+            self.volume.clone(),
+            self.position.clone(),
+            self.current_index.clone(),
+            self.shuffle.clone(),
+            self.saved_playlists.playlists[id].clone(),
+        )
+        .expect("Could not write current cache");
+    }
+
+    async fn read_current_cache(&mut self) {
+        let current_cache = CurrentCache::load();
+        if let Some(cache) = current_cache {
+            let backend = self.backend.clone();
+
+            self.queue = cache.queue.clone();
+            self.position = cache.playback.position;
+            self.current_index = cache.playback.current_index;
+            self.shuffle = cache.playback.shuffle;
+            self.loaded = true;
+            self.load(&backend, cache.playback.current_index)
+                .await
+                .expect("Could not load first item");
+            self.tx
+                .send(Response::PlaylistName(cache.playback.playlist.name))
+                .expect("Could not send message");
+            self.tx
+                .send(Response::Shuffle(cache.playback.shuffle))
+                .expect("Could not send message");
+            self.load_saved_playlists();
+            self.load_theme();
+            self.get_tracks();
+            self.get_meta();
+            let playlist =
+                Playlist::from_dir(&backend, PathBuf::from(cache.playback.playlist.actual_path))
+                    .await;
+            self.playlist = Arc::new(Mutex::new(playlist.clone()));
+            self.play().await;
+            thread::sleep(Duration::from_millis(100));
+            self.set_volume(cache.playback.volume).await;
+            self.seek(cache.playback.position).await;
+            self.tx
+                .send(Response::StateChanged(State::Playing))
+                .expect("Could not send message");
+        }
     }
 
     async fn monitor_backend(&mut self) {
@@ -436,6 +541,9 @@ impl Player {
         watcher
             .watch(&theme_file, RecursiveMode::NonRecursive)
             .expect("Failed to watch theme file.");
+        self.read_current_cache().await;
+
+        let mut last_run = Instant::now();
 
         loop {
             while let Ok(command) = self.rx.try_recv() {
@@ -459,6 +567,7 @@ impl Player {
                     Command::Shuffle => self.shuffle_tracks(),
                     Command::LoadTheme => self.load_theme(),
                     Command::WriteTheme(theme) => self.write_theme(theme),
+                    Command::Exit => self.write_playback_cache(),
                 }
             }
 
@@ -478,8 +587,12 @@ impl Player {
                     .expect("Could not send message.");
                 self.position = curr_pos;
             }
+            if last_run.elapsed() >= Duration::from_secs(3) {
+                self.write_playback_cache();
+                last_run = Instant::now();
+            }
 
-            thread::sleep(Duration::from_millis(1));
+            thread::sleep(Duration::from_millis(5));
         }
     }
 }
@@ -582,6 +695,10 @@ impl Controller {
             .send(Command::WriteTheme(theme))
             .expect("Could not send command");
     }
+
+    pub fn exit(&self) {
+        self.tx.send(Command::Exit).expect("Could not send command");
+    }
 }
 
 impl Thumbnail {
@@ -589,5 +706,99 @@ impl Thumbnail {
         let img = RgbaImage::from_raw(self.width, self.height, self.img.clone())
             .expect("Failed to reconstruct image from raw bytes");
         SmallVec::from_vec(vec![Frame::new(thumbnail(&img, self.width, self.height))])
+    }
+}
+
+impl CurrentCache {
+    pub fn write(
+        queue: Vec<Track>,
+        volume: f64,
+        position: u64,
+        current_index: usize,
+        shuffle: bool,
+        playlist: SavedPlaylist,
+    ) -> anyhow::Result<(), Error> {
+        let playback = PlaybackCache {
+            volume,
+            position,
+            current_index,
+            shuffle,
+            playlist,
+        };
+        let cache_dir = UserDirs::new()
+            .unwrap()
+            .audio_dir()
+            .unwrap_or(UserDirs::new().unwrap().home_dir())
+            .join("Kagi")
+            .join("cache");
+        if !cache_dir.exists() {
+            fs::create_dir_all(&cache_dir).expect("Failed to create cache directory");
+        }
+        let queue_cache = cache_dir.clone().join("queue");
+        let playback_cache = cache_dir.clone().join("playback.toml");
+
+        let mut queue_cache_file = File::create(queue_cache)?;
+        let serialized = &bincode::serde::encode_to_vec(queue, config::standard())?;
+        queue_cache_file.write(serialized)?;
+
+        let mut playback_cache_file = File::create(playback_cache)?;
+        let serialized = toml::to_string(&playback)?;
+        playback_cache_file.write(serialized.as_bytes())?;
+
+        Ok(())
+    }
+    pub fn write_playback(
+        volume: f64,
+        position: u64,
+        current_index: usize,
+        shuffle: bool,
+        playlist: SavedPlaylist,
+    ) -> anyhow::Result<(), Error> {
+        let playback = PlaybackCache {
+            volume,
+            position,
+            current_index,
+            shuffle,
+            playlist,
+        };
+        let cache_dir = UserDirs::new()
+            .unwrap()
+            .audio_dir()
+            .unwrap_or(UserDirs::new().unwrap().home_dir())
+            .join("Kagi")
+            .join("cache");
+        let playback_cache = cache_dir.clone().join("playback.toml");
+
+        let mut playback_cache_file = File::create(playback_cache)?;
+        let serialized = toml::to_string(&playback)?;
+        playback_cache_file.write(serialized.as_bytes())?;
+
+        Ok(())
+    }
+    pub fn load() -> Option<CurrentCache> {
+        let cache_dir = UserDirs::new()
+            .unwrap()
+            .audio_dir()
+            .unwrap_or(UserDirs::new().unwrap().home_dir())
+            .join("Kagi")
+            .join("cache");
+        let queue_cache = cache_dir.clone().join("queue");
+        let playback_cache = cache_dir.clone().join("playback.toml");
+
+        if !queue_cache.exists() || !playback_cache.exists() {
+            return None;
+        } else {
+            let queue_cache_data = &fs::read(queue_cache).expect("Could not read file");
+            let queue: Vec<Track> =
+                bincode::serde::decode_from_slice(queue_cache_data, config::standard())
+                    .expect("Could not decode playlist")
+                    .0;
+            let playback_cache_data = &fs::read(playback_cache).expect("Could not read file");
+            let playback: PlaybackCache =
+                toml::from_str(std::str::from_utf8(playback_cache_data).unwrap())
+                    .expect("could not decode playback cache");
+
+            return Some(CurrentCache { queue, playback });
+        }
     }
 }

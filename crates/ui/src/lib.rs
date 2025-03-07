@@ -233,6 +233,7 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     .detach();
 
                     let playbar_clone = playbar.clone();
+                    let vol_slider_clone = vol_slider.clone();
                     let controls_arc = Arc::new(Mutex::new(controls));
                     cx.subscribe(
                         &res_handler,
@@ -375,11 +376,31 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                                 cx.set_global::<Theme>(theme.clone().into());
                                 cx.refresh_windows();
                             }
+                            Response::Volume(vol) => {
+                                vol_slider_clone.update(cx, |this, cx| {
+                                    this.value(*vol as f32, cx);
+                                });
+                                let state = cx.global_mut::<PlayerContext>().state.clone();
+                                state.update(cx, |state, cx| {
+                                    state.volume = vol.clone();
+                                    cx.notify();
+                                });
+                                cx.notify();
+                            }
                             _ => {}
                         },
                     )
                     .detach();
 
+                    cx.on_app_quit(|_, cx| {
+                        let controller = cx.global::<Controller>().clone();
+
+                        async move {
+                            println!("exiting");
+                            controller.exit();
+                        }
+                    })
+                    .detach();
                     let titlebar = cx.new(|_| Titlebar::new());
 
                     let control_bar =
@@ -387,8 +408,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                     let main_view = cx.new(|_| MainView::new());
                     let right_sidebar = cx.new(|cx| RightSidebar::new(cx));
                     let left_sidebar = cx.new(move |_| LeftSidebar::new(playlists.clone()));
-                    cx.global::<Controller>().load_saved_playlists();
-                    cx.global::<Controller>().load_theme();
 
                     Kagi {
                         titlebar,
