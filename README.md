@@ -11,7 +11,7 @@
 A **lightweight, fast, and zero-bullshit** music player built in Rust. No web garbage, no Electron bloat—just **pure, native SPEEEEEDDDD**.
 
 <p align=center>
-    <img src="https://github.com/anantnrg/kagi/blob/docs/readme/assets/showcase.png" />
+    <img src="https://github.com/anantnrg/kagi/blob/main/assets/showcase.png" />
 </p>
 
 ## **Features** ⚡
