@@ -23,6 +23,7 @@ pub enum Icons {
     VolLow,
     VolMid,
     VolHigh,
+    Settings,
 }
 
 impl Icons {
@@ -50,6 +51,7 @@ impl Icons {
             Self::VolLow => "icons/vol_low.svg",
             Self::VolMid => "icons/vol_mid.svg",
             Self::VolHigh => "icons/vol_high.svg",
+            Self::Settings => "icons/settings.svg",
         }
         .into()
     }
