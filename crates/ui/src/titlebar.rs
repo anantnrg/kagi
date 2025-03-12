@@ -37,7 +37,7 @@ impl Render for Titlebar {
                             .justify_center()
                             .rounded_md()
                             .child(
-                                Icon::new(Icons::Settings)
+                                Icon::new(Icons::LeftSidebar)
                                     .size(18.0)
                                     .color(theme.titlebar.icon.into())
                                     .hover(theme.titlebar.hover.into()),
@@ -130,30 +130,6 @@ impl Render for Titlebar {
                     .justify_end()
                     .w_full()
                     .h_full()
-                    .child(
-                        div()
-                            .w_6()
-                            .h_6()
-                            .flex()
-                            .items_center()
-                            .justify_center()
-                            .rounded_md()
-                            .child(
-                                Icon::new(Icons::LeftSidebar)
-                                    .size(18.0)
-                                    .color(theme.titlebar.icon.into())
-                                    .hover(theme.titlebar.hover.into()),
-                            )
-                            .on_mouse_down(MouseButton::Left, {
-                                move |_, _, cx| {
-                                    let layout = cx.global_mut::<Layout>().clone();
-                                    layout.left_sidebar.update(cx, |this, cx| {
-                                        this.should_show = !this.should_show.clone();
-                                        cx.notify();
-                                    });
-                                }
-                            }),
-                    )
                     .child(
                         div()
                             .w_6()
