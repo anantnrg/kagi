@@ -459,23 +459,23 @@ impl Player {
         .expect("Could not write current cache");
     }
 
-    // fn write_playback_cache(&self) {
-    //     let playlist_name = &self.playlist.lock().unwrap().name;
-    //     let id = self
-    //         .saved_playlists
-    //         .playlists
-    //         .iter()
-    //         .position(|p| p.name == *playlist_name)
-    //         .unwrap();
-    //     CurrentCache::write_playback(
-    //         self.volume.clone(),
-    //         self.position.clone(),
-    //         self.current_index.clone(),
-    //         self.shuffle.clone(),
-    //         self.saved_playlists.playlists[id].clone(),
-    //     )
-    //     .expect("Could not write current cache");
-    // }
+    fn write_playback_cache(&self) {
+        let playlist_name = &self.playlist.lock().unwrap().name;
+        let id = self
+            .saved_playlists
+            .playlists
+            .iter()
+            .position(|p| p.name == *playlist_name)
+            .unwrap();
+        CurrentCache::write_playback(
+            self.volume.clone(),
+            self.position.clone(),
+            self.current_index.clone(),
+            self.shuffle.clone(),
+            self.saved_playlists.playlists[id].clone(),
+        )
+        .expect("Could not write current cache");
+    }
 
     async fn read_current_cache(&mut self) {
         let current_cache = CurrentCache::load();
