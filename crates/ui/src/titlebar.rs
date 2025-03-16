@@ -25,7 +25,7 @@ impl Render for Titlebar {
                     .flex()
                     .w_full()
                     .h_full()
-                    .pl(px(6.0))
+                    .pl(px(12.0))
                     .items_center()
                     .justify_start()
                     .child(
