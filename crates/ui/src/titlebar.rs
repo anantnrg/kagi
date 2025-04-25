@@ -66,8 +66,9 @@ impl Render for Titlebar {
                         let window_width = win.window_bounds().get_bounds().size.width.0;
 
                         let truncate = |text: &str, limit: usize| -> String {
-                            if text.len() > limit {
-                                format!("{}...", &text[..limit])
+                            if text.chars().count() > limit {
+                                let truncated: String = text.chars().take(limit).collect();
+                                format!("{}...", truncated)
                             } else {
                                 text.to_string()
                             }
