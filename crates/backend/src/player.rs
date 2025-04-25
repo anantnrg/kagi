@@ -81,6 +81,7 @@ pub struct Player {
     pub saved_playlists: SavedPlaylists,
     pub tx: Sender<Response>,
     pub rx: Receiver<Command>,
+    pub current_cache_written: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -131,6 +132,7 @@ impl Player {
                 tx: res_tx,
                 rx: cmd_rx,
                 shuffle: false,
+                current_cache_written: false,
             },
             Controller {
                 tx: cmd_tx,
@@ -460,28 +462,30 @@ impl Player {
     }
 
     fn write_playback_cache(&self) {
-        let playlist_name = &self.playlist.lock().unwrap().name;
-        let id = self
-            .saved_playlists
-            .playlists
-            .iter()
-            .position(|p| p.name == *playlist_name)
-            .unwrap();
-        CurrentCache::write_playback(
-            self.volume.clone(),
-            self.position.clone(),
-            self.current_index.clone(),
-            self.shuffle.clone(),
-            self.saved_playlists.playlists[id].clone(),
-        )
-        .expect("Could not write current cache");
+        if self.current_cache_written {
+            let playlist_name = &self.playlist.lock().unwrap().name;
+            let id = self
+                .saved_playlists
+                .playlists
+                .iter()
+                .position(|p| p.name == *playlist_name)
+                .unwrap();
+            CurrentCache::write_playback(
+                self.volume.clone(),
+                self.position.clone(),
+                self.current_index.clone(),
+                self.shuffle.clone(),
+                self.saved_playlists.playlists[id].clone(),
+            )
+            .expect("Could not write current cache");
+        }
     }
 
     async fn read_current_cache(&mut self) {
         let current_cache = CurrentCache::load();
         if let Some(cache) = current_cache {
             let backend = self.backend.clone();
-
+            self.current_cache_written = true;
             self.queue = cache.queue.clone();
             self.position = cache.playback.position;
             self.current_index = cache.playback.current_index;
