@@ -29,8 +29,8 @@ impl Slider {
             value: 0.0,
             bounds: Bounds::default(),
             bg: rgb(0x1e1e2d),
-            fill: rgb(0xcba6f7),
-            thumb_bg: rgb(0xcba6f7),
+            fill: rgb(0xc5c9c7),
+            thumb_bg: rgb(0xc5c9c7),
         }
     }
 
@@ -57,6 +57,21 @@ impl Slider {
     pub fn value(&mut self, value: f32, cx: &mut Context<Self>) {
         self.value = value;
         cx.notify();
+    }
+
+    pub fn bg(mut self, bg: Rgba) -> Self {
+        self.bg = bg;
+        self
+    }
+
+    pub fn fill(mut self, fill: Rgba) -> Self {
+        self.fill = fill;
+        self
+    }
+
+    pub fn thumb_bg(mut self, thumb_bg: Rgba) -> Self {
+        self.thumb_bg = thumb_bg;
+        self
     }
 
     fn relative_value(&self) -> f32 {

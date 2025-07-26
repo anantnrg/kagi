@@ -88,7 +88,7 @@ impl Default for LeftSidebarTheme {
             item_text: rgba(0xcdd6f4ff),
             item_border: rgba(0x272747ff),
             item_bg: rgba(0x11111bff),
-            item_hover: rgba(0x272747ff),
+            item_hover: rgba(0xe46876ff),
         }
     }
 }
@@ -129,13 +129,13 @@ impl Default for ControlBarTheme {
         Self {
             bg: rgba(0x161622ff),
             playbar_bg: rgba(0x272747ff),
-            playbar_fill: rgba(0xcba6f7ff),
-            playbar_thumb: rgba(0xcba6f7ff),
+            playbar_fill: rgba(0xe46876ff),
+            playbar_thumb: rgba(0xe46876ff),
             text: rgba(0xcdd6f4ff),
             icons: rgba(0xcdd6f4ff),
             volume_bg: rgba(0x272747ff),
-            volume_fill: rgba(0xcba6f7ff),
-            volume_thumb: rgba(0xcba6f7ff),
+            volume_fill: rgba(0xe46876ff),
+            volume_thumb: rgba(0xe46876ff),
             hover: rgba(0xcba6f7ff),
         }
     }
