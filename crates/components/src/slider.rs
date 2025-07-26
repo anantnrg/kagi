@@ -29,8 +29,8 @@ impl Slider {
             value: 0.0,
             bounds: Bounds::default(),
             bg: rgb(0x1e1e2d),
-            fill: rgb(0xcba6f7),
-            thumb_bg: rgb(0xcba6f7),
+            fill: rgb(0xc5c9c7),
+            thumb_bg: rgb(0xc5c9c7),
         }
     }
 
