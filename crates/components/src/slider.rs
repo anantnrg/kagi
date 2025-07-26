@@ -59,6 +59,21 @@ impl Slider {
         cx.notify();
     }
 
+    pub fn bg(mut self, bg: Rgba) -> Self {
+        self.bg = bg;
+        self
+    }
+
+    pub fn fill(mut self, fill: Rgba) -> Self {
+        self.fill = fill;
+        self
+    }
+
+    pub fn thumb_bg(mut self, thumb_bg: Rgba) -> Self {
+        self.thumb_bg = thumb_bg;
+        self
+    }
+
     fn relative_value(&self) -> f32 {
         let step = self.step;
         let value = self.value;
