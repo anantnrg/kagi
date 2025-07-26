@@ -38,20 +38,23 @@ use std::{
 };
 use titlebar::Titlebar;
 
-actions!(text_input, [
-    Backspace,
-    Delete,
-    Left,
-    Right,
-    SelectLeft,
-    SelectRight,
-    SelectAll,
-    Home,
-    End,
-    Paste,
-    Cut,
-    Copy,
-]);
+actions!(
+    text_input,
+    [
+        Backspace,
+        Delete,
+        Left,
+        Right,
+        SelectLeft,
+        SelectRight,
+        SelectAll,
+        Home,
+        End,
+        Paste,
+        Cut,
+        Copy,
+    ]
+);
 
 pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
     let assets = Assets {};
@@ -95,10 +98,30 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
                         Player::new(backend.clone(), Arc::new(Mutex::new(Playlist::default())));
 
                     controller.load_theme();
-                    let vol_slider =
-                        cx.new(|_| Slider::new().min(0.0).max(1.0).step(0.005).default(0.2));
-                    let playbar =
-                        cx.new(|_| Slider::new().min(0.0).max(1.0).step(0.005).default(0.0));
+                    cx.set_global(Theme::default());
+
+                    let theme = cx.global::<Theme>().clone();
+
+                    let vol_slider = cx.new(|_| {
+                        Slider::new()
+                            .min(0.0)
+                            .max(1.0)
+                            .step(0.005)
+                            .default(0.2)
+                            .bg(theme.control_bar.volume_bg)
+                            .fill(theme.control_bar.volume_fill)
+                            .thumb_bg(theme.control_bar.volume_thumb)
+                    });
+                    let playbar = cx.new(|_| {
+                        Slider::new()
+                            .min(0.0)
+                            .max(1.0)
+                            .step(0.005)
+                            .default(0.0)
+                            .bg(theme.control_bar.playbar_bg)
+                            .fill(theme.control_bar.playbar_fill)
+                            .thumb_bg(theme.control_bar.playbar_thumb)
+                    });
                     let layout = Layout::new(cx);
                     let recv_controller = controller.clone();
                     let saved_playlists = cx.new(|_| SavedPlaylists::default());
@@ -106,7 +129,6 @@ pub fn run_app(backend: Arc<dyn Backend>) -> anyhow::Result<()> {
 
                     keybinds::register(cx);
                     cx.set_global(controller);
-                    cx.set_global(Theme::default());
                     cx.set_global(player_context.clone());
                     cx.set_global(layout);
                     cx.background_executor()
