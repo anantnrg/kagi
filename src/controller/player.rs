@@ -1,3 +1,7 @@
+use crossbeam_channel::Sender;
+use std::path::PathBuf;
+use std::time::Duration;
+
 pub struct Controller {
     audio_tx: Sender<AudioCommand>,
     state: PlayerState,
@@ -13,8 +17,7 @@ pub enum AudioCommand {
     Load(String),
     Play,
     Pause,
-    GetVolume,
-    SetVolume,
-    Seek,
+    Volume(f64),
+    Seek(u64),
     Stop,
 }

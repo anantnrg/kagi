@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 crossbeam = "0.8.4"
+crossbeam-channel = "0.5.15"
 rodio = { version = "0.21.1", features = ["symphonia-all"] }
