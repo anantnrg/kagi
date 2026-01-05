@@ -8,10 +8,12 @@ pub struct Controller {
     state: PlayerState,
 }
 
+#[derive(Default)]
 pub struct PlayerState {
     pub current: Option<PathBuf>,
     pub state: PlaybackState,
     pub position: u64,
+    pub volume: f32,
 }
 
 pub enum AudioCommand {
@@ -28,4 +30,8 @@ pub enum AudioEvent {
     Position(u64),
     StateChanged(PlaybackState),
     TrackEnded,
+}
+
+impl Controller {
+    pub fn new(audio_tx: Sender<AudioCommand>, state: PlaybackState) {}
 }

@@ -1,18 +1,17 @@
-use crate::controller::player::AudioCommand;
+use crate::controller::player::{AudioCommand, PlayerState};
 use crossbeam_channel::Receiver;
 use rodio::{Decoder, OutputStream, OutputStreamBuilder, Sink};
 use std::{fs::File, io::BufReader, path::PathBuf, time::Duration};
 
 pub struct AudioEngine {
     sink: Sink,
-    state: PlaybackState,
-    volume: f32,
     stream_handle: OutputStream,
-    current_path: Option<PathBuf>,
+    player_state: PlayerState,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub enum PlaybackState {
+    #[default]
     Stopped,
     Playing,
     Paused,
@@ -25,10 +24,8 @@ impl AudioEngine {
 
         let mut engine = AudioEngine {
             sink,
-            state: PlaybackState::Stopped,
-            volume: 1.0,
             stream_handle,
-            current_path: None,
+            player_state: PlayerState::default(),
         };
 
         engine.event_loop(rx);
@@ -51,39 +48,39 @@ impl AudioEngine {
     fn load(&mut self, path: PathBuf) {
         self.sink.stop();
         self.sink = Sink::connect_new(self.stream_handle.mixer());
-        self.current_path = Some(path.clone());
+        self.player_state.current = Some(path.clone());
 
         let file = File::open(path).unwrap();
         let source = Decoder::new(BufReader::new(file)).unwrap();
 
-        self.sink.set_volume(self.volume);
+        self.sink.set_volume(self.player_state.volume);
         self.sink.append(source);
 
-        self.state = PlaybackState::Paused;
+        self.player_state.state = PlaybackState::Paused;
     }
 
     fn play(&mut self) {
-        if self.state != PlaybackState::Playing {
+        if self.player_state.state != PlaybackState::Playing {
             self.sink.play();
-            self.state = PlaybackState::Playing;
+            self.player_state.state = PlaybackState::Playing;
         }
     }
 
     fn pause(&mut self) {
-        if self.state == PlaybackState::Playing {
+        if self.player_state.state == PlaybackState::Playing {
             self.sink.pause();
-            self.state = PlaybackState::Paused;
+            self.player_state.state = PlaybackState::Paused;
         }
     }
 
     fn stop(&mut self) {
         self.sink.stop();
-        self.state = PlaybackState::Stopped;
+        self.player_state.state = PlaybackState::Stopped;
     }
 
     fn set_volume(&mut self, volume: f32) {
-        self.volume = volume.clamp(0.0, 1.0);
-        self.sink.set_volume(self.volume);
+        self.player_state.volume = volume.clamp(0.0, 1.0);
+        self.sink.set_volume(self.player_state.volume);
     }
 
     fn position(&self) -> Duration {
