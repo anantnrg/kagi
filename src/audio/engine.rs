@@ -36,11 +36,10 @@ impl AudioEngine {
         while let Ok(cmd) = rx.recv() {
             match cmd {
                 AudioCommand::Load(path) => self.load(PathBuf::from(path)),
-                AudioCommand::Play => self.sink.play(),
-                AudioCommand::Pause => self.sink.pause(),
-                // AudioCommand::Stop => self.stop(),
-                // AudioCommand::Seek(pos) => self.seek(pos),
-                // AudioCommand::Shutdown => break,
+                AudioCommand::Play => self.play(),
+                AudioCommand::Pause => self.pause(),
+                AudioCommand::Stop => self.stop(),
+                AudioCommand::Volume(vol) => self.set_volume(vol),
                 _ => {}
             }
         }
