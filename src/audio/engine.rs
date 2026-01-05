@@ -12,7 +12,7 @@ pub struct AudioEngine {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-enum PlaybackState {
+pub enum PlaybackState {
     Stopped,
     Playing,
     Paused,

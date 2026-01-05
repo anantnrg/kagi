@@ -1,3 +1,4 @@
+use crate::audio::engine::PlaybackState;
 use crossbeam_channel::Sender;
 use std::path::PathBuf;
 use std::time::Duration;
@@ -9,8 +10,8 @@ pub struct Controller {
 
 pub struct PlayerState {
     pub current: Option<PathBuf>,
-    pub playing: bool,
-    pub position: Duration,
+    pub state: PlaybackState,
+    pub position: u64,
 }
 
 pub enum AudioCommand {
@@ -20,4 +21,11 @@ pub enum AudioCommand {
     Volume(f32),
     Seek(u64),
     Stop,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum AudioEvent {
+    Position(u64),
+    StateChanged(PlaybackState),
+    TrackEnded,
 }
