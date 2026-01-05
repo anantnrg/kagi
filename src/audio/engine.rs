@@ -1,13 +1,14 @@
 use crate::controller::player::AudioCommand;
 use crossbeam_channel::Receiver;
 use rodio::{Decoder, OutputStream, OutputStreamBuilder, Sink};
-use std::{fs::File, io::BufReader, path::PathBuf};
+use std::{fs::File, io::BufReader, path::PathBuf, time::Duration};
 
 pub struct AudioEngine {
     sink: Sink,
     state: PlaybackState,
     volume: f32,
     stream_handle: OutputStream,
+    current_path: Option<PathBuf>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -27,6 +28,7 @@ impl AudioEngine {
             state: PlaybackState::Stopped,
             volume: 1.0,
             stream_handle,
+            current_path: None,
         };
 
         engine.event_loop(rx);
@@ -40,6 +42,7 @@ impl AudioEngine {
                 AudioCommand::Pause => self.pause(),
                 AudioCommand::Stop => self.stop(),
                 AudioCommand::Volume(vol) => self.set_volume(vol),
+                AudioCommand::Seek(pos) => self.seek(pos),
                 _ => {}
             }
         }
@@ -48,6 +51,7 @@ impl AudioEngine {
     fn load(&mut self, path: PathBuf) {
         self.sink.stop();
         self.sink = Sink::connect_new(self.stream_handle.mixer());
+        self.current_path = Some(path.clone());
 
         let file = File::open(path).unwrap();
         let source = Decoder::new(BufReader::new(file)).unwrap();
@@ -80,5 +84,13 @@ impl AudioEngine {
     fn set_volume(&mut self, volume: f32) {
         self.volume = volume.clamp(0.0, 1.0);
         self.sink.set_volume(self.volume);
+    }
+
+    fn position(&self) -> Duration {
+        self.sink.get_pos()
+    }
+
+    fn seek(&mut self, pos: u64) {
+        self.sink.try_seek(Duration::from_secs(pos)).unwrap();
     }
 }

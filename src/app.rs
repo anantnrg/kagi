@@ -29,7 +29,10 @@ pub fn run() {
     sleep(6);
 
     tx.send(AudioCommand::Volume(1.0)).unwrap();
-    sleep(2);
+    sleep(5);
+
+    tx.send(AudioCommand::Seek(40)).unwrap();
+    sleep(5);
 
     tx.send(AudioCommand::Stop).unwrap();
     sleep(2);
