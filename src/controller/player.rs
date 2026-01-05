@@ -17,7 +17,7 @@ pub enum AudioCommand {
     Load(String),
     Play,
     Pause,
-    Volume(f64),
+    Volume(f32),
     Seek(u64),
     Stop,
 }

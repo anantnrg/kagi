@@ -1,10 +1,20 @@
 use crate::controller::player::AudioCommand;
 use crossbeam_channel::Receiver;
-use rodio::{Decoder, OutputStreamBuilder, Sink};
+use rodio::{Decoder, OutputStream, OutputStreamBuilder, Sink};
 use std::{fs::File, io::BufReader, path::PathBuf};
 
 pub struct AudioEngine {
     sink: Sink,
+    state: PlaybackState,
+    volume: f32,
+    stream_handle: OutputStream,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum PlaybackState {
+    Stopped,
+    Playing,
+    Paused,
 }
 
 impl AudioEngine {
@@ -12,7 +22,12 @@ impl AudioEngine {
         let stream_handle = OutputStreamBuilder::open_default_stream().unwrap();
         let sink = Sink::connect_new(&stream_handle.mixer());
 
-        let mut engine = AudioEngine { sink };
+        let mut engine = AudioEngine {
+            sink,
+            state: PlaybackState::Stopped,
+            volume: 1.0,
+            stream_handle,
+        };
 
         engine.event_loop(rx);
     }
@@ -33,10 +48,38 @@ impl AudioEngine {
 
     fn load(&mut self, path: PathBuf) {
         self.sink.stop();
+        self.sink = Sink::connect_new(self.stream_handle.mixer());
 
         let file = File::open(path).unwrap();
         let source = Decoder::new(BufReader::new(file)).unwrap();
 
+        self.sink.set_volume(self.volume);
         self.sink.append(source);
+
+        self.state = PlaybackState::Paused;
+    }
+
+    fn play(&mut self) {
+        if self.state != PlaybackState::Playing {
+            self.sink.play();
+            self.state = PlaybackState::Playing;
+        }
+    }
+
+    fn pause(&mut self) {
+        if self.state == PlaybackState::Playing {
+            self.sink.pause();
+            self.state = PlaybackState::Paused;
+        }
+    }
+
+    fn stop(&mut self) {
+        self.sink.stop();
+        self.state = PlaybackState::Stopped;
+    }
+
+    fn set_volume(&mut self, volume: f32) {
+        self.volume = volume.clamp(0.0, 1.0);
+        self.sink.set_volume(self.volume);
     }
 }
