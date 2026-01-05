@@ -1,5 +1,5 @@
-use crate::controller::player::{AudioCommand, PlayerState};
-use crossbeam_channel::Receiver;
+use crate::controller::player::{AudioCommand, AudioEvent, PlayerState};
+use crossbeam_channel::{Receiver, Sender};
 use rodio::{Decoder, OutputStream, OutputStreamBuilder, Sink};
 use std::{fs::File, io::BufReader, path::PathBuf, time::Duration};
 
@@ -7,6 +7,8 @@ pub struct AudioEngine {
     sink: Sink,
     stream_handle: OutputStream,
     player_state: PlayerState,
+    audio_rx: Receiver<AudioCommand>,
+    events_tx: Sender<AudioEvent>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -18,7 +20,7 @@ pub enum PlaybackState {
 }
 
 impl AudioEngine {
-    pub fn run(rx: Receiver<AudioCommand>) {
+    pub fn run(audio_rx: Receiver<AudioCommand>, events_tx: Sender<AudioEvent>) {
         let stream_handle = OutputStreamBuilder::open_default_stream().unwrap();
         let sink = Sink::connect_new(&stream_handle.mixer());
 
@@ -26,13 +28,15 @@ impl AudioEngine {
             sink,
             stream_handle,
             player_state: PlayerState::default(),
+            audio_rx,
+            events_tx,
         };
 
-        engine.event_loop(rx);
+        engine.event_loop();
     }
 
-    fn event_loop(&mut self, rx: Receiver<AudioCommand>) {
-        while let Ok(cmd) = rx.recv() {
+    fn event_loop(&mut self) {
+        while let Ok(cmd) = self.audio_rx.recv() {
             match cmd {
                 AudioCommand::Load(path) => self.load(PathBuf::from(path)),
                 AudioCommand::Play => self.play(),

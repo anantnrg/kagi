@@ -1,10 +1,11 @@
 use crate::audio::engine::PlaybackState;
-use crossbeam_channel::Sender;
+use crossbeam_channel::{Receiver, Sender};
 use std::path::PathBuf;
 use std::time::Duration;
 
 pub struct Controller {
     audio_tx: Sender<AudioCommand>,
+    event_rx: Receiver<AudioEvent>,
     state: PlayerState,
 }
 
@@ -33,5 +34,15 @@ pub enum AudioEvent {
 }
 
 impl Controller {
-    pub fn new(audio_tx: Sender<AudioCommand>, state: PlaybackState) {}
+    pub fn new(
+        audio_tx: Sender<AudioCommand>,
+        event_rx: Receiver<AudioEvent>,
+        state: PlayerState,
+    ) -> Controller {
+        Controller {
+            audio_tx,
+            event_rx,
+            state,
+        }
+    }
 }
