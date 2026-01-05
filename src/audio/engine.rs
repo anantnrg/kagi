@@ -8,7 +8,7 @@ pub struct AudioEngine {
     stream_handle: OutputStream,
     player_state: PlayerState,
     audio_rx: Receiver<AudioCommand>,
-    events_tx: Sender<AudioEvent>,
+    event_rx: Sender<AudioEvent>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -20,7 +20,7 @@ pub enum PlaybackState {
 }
 
 impl AudioEngine {
-    pub fn run(audio_rx: Receiver<AudioCommand>, events_tx: Sender<AudioEvent>) {
+    pub fn run(audio_rx: Receiver<AudioCommand>, event_rx: Sender<AudioEvent>) {
         let stream_handle = OutputStreamBuilder::open_default_stream().unwrap();
         let sink = Sink::connect_new(&stream_handle.mixer());
 
@@ -29,7 +29,7 @@ impl AudioEngine {
             stream_handle,
             player_state: PlayerState::default(),
             audio_rx,
-            events_tx,
+            event_rx,
         };
 
         engine.event_loop();
