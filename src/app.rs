@@ -1,4 +1,5 @@
 use crossbeam_channel::unbounded;
+use gpui_component::slider::{SliderEvent, SliderState};
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::{thread, time::Duration};
@@ -26,8 +27,10 @@ pub fn run() {
 
         cx.spawn(async move |cx| {
             cx.open_window(WindowOptions::default(), |window, cx| {
-                let view = cx.new(|_| Wiremann);
                 let controller_evt_clone = controller.clone();
+
+                let view = cx.new(|cx| Wiremann::new(cx));
+
                 cx.set_global(controller);
 
                 cx.new(|cx| {

@@ -59,6 +59,10 @@ impl Controller {
     pub fn load(&self, path: String) {
         let _ = self.audio_tx.send(AudioCommand::Load(path));
     }
+
+    pub fn volume(&self, volume: f32) {
+        let _ = self.audio_tx.send(AudioCommand::Volume(volume / 100.0));
+    }
 }
 
 impl gpui::Global for Controller {}

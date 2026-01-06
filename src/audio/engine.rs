@@ -75,12 +75,19 @@ impl AudioEngine {
         self.sink.append(source);
 
         self.player_state.state = PlaybackState::Playing;
+
+        let _ = self
+            .event_tx
+            .send(AudioEvent::StateChanged(self.player_state.clone()));
     }
 
     fn play(&mut self) {
         if self.player_state.state != PlaybackState::Playing {
             self.sink.play();
             self.player_state.state = PlaybackState::Playing;
+            let _ = self
+                .event_tx
+                .send(AudioEvent::StateChanged(self.player_state.clone()));
         }
     }
 
@@ -88,17 +95,26 @@ impl AudioEngine {
         if self.player_state.state == PlaybackState::Playing {
             self.sink.pause();
             self.player_state.state = PlaybackState::Paused;
+            let _ = self
+                .event_tx
+                .send(AudioEvent::StateChanged(self.player_state.clone()));
         }
     }
 
     fn stop(&mut self) {
         self.sink.stop();
         self.player_state.state = PlaybackState::Stopped;
+        let _ = self
+            .event_tx
+            .send(AudioEvent::StateChanged(self.player_state.clone()));
     }
 
     fn set_volume(&mut self, volume: f32) {
         self.player_state.volume = volume.clamp(0.0, 1.0);
         self.sink.set_volume(self.player_state.volume);
+        let _ = self
+            .event_tx
+            .send(AudioEvent::StateChanged(self.player_state.clone()));
     }
 
     fn emit_position(&mut self) {
