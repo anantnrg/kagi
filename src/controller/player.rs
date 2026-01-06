@@ -1,15 +1,18 @@
 use crate::audio::engine::PlaybackState;
 use crossbeam_channel::{Receiver, Sender};
+use gpui::*;
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::time::Duration;
 
+#[derive(Debug, Clone)]
 pub struct Controller {
-    audio_tx: Sender<AudioCommand>,
-    event_rx: Receiver<AudioEvent>,
-    state: PlayerState,
+    pub audio_tx: Sender<AudioCommand>,
+    pub event_rx: Receiver<AudioEvent>,
+    pub state: PlayerState,
 }
 
-#[derive(Default)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct PlayerState {
     pub current: Option<PathBuf>,
     pub state: PlaybackState,
@@ -26,10 +29,9 @@ pub enum AudioCommand {
     Stop,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum AudioEvent {
-    Position(u64),
-    StateChanged(PlaybackState),
+    StateChanged(PlayerState),
     TrackEnded,
 }
 
@@ -45,4 +47,41 @@ impl Controller {
             state,
         }
     }
+
+    pub fn play(&self) {
+        let _ = self.audio_tx.send(AudioCommand::Play);
+    }
+
+    pub fn pause(&self) {
+        let _ = self.audio_tx.send(AudioCommand::Pause);
+    }
+
+    pub fn load(&self, path: String) {
+        let _ = self.audio_tx.send(AudioCommand::Load(path));
+    }
 }
+
+impl gpui::Global for Controller {}
+
+impl Default for PlayerState {
+    fn default() -> Self {
+        Self {
+            current: None,
+            state: PlaybackState::Stopped,
+            position: 0,
+            volume: 1.0,
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct ResHandler {}
+
+impl ResHandler {
+    pub fn handle(&mut self, cx: &mut Context<Self>, event: AudioEvent) {
+        cx.emit(event);
+        cx.notify();
+    }
+}
+
+impl EventEmitter<AudioEvent> for ResHandler {}

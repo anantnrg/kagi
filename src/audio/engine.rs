@@ -1,5 +1,5 @@
 use crate::controller::player::{AudioCommand, AudioEvent, PlayerState};
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender, select, tick};
 use rodio::{Decoder, OutputStream, OutputStreamBuilder, Sink};
 use std::{fs::File, io::BufReader, path::PathBuf, time::Duration};
 
@@ -8,7 +8,7 @@ pub struct AudioEngine {
     stream_handle: OutputStream,
     player_state: PlayerState,
     audio_rx: Receiver<AudioCommand>,
-    event_rx: Sender<AudioEvent>,
+    event_tx: Sender<AudioEvent>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -20,7 +20,7 @@ pub enum PlaybackState {
 }
 
 impl AudioEngine {
-    pub fn run(audio_rx: Receiver<AudioCommand>, event_rx: Sender<AudioEvent>) {
+    pub fn run(audio_rx: Receiver<AudioCommand>, event_tx: Sender<AudioEvent>) {
         let stream_handle = OutputStreamBuilder::open_default_stream().unwrap();
         let sink = Sink::connect_new(&stream_handle.mixer());
 
@@ -29,22 +29,36 @@ impl AudioEngine {
             stream_handle,
             player_state: PlayerState::default(),
             audio_rx,
-            event_rx,
+            event_tx,
         };
 
         engine.event_loop();
     }
 
     fn event_loop(&mut self) {
-        while let Ok(cmd) = self.audio_rx.recv() {
-            match cmd {
-                AudioCommand::Load(path) => self.load(PathBuf::from(path)),
-                AudioCommand::Play => self.play(),
-                AudioCommand::Pause => self.pause(),
-                AudioCommand::Stop => self.stop(),
-                AudioCommand::Volume(vol) => self.set_volume(vol),
-                AudioCommand::Seek(pos) => self.seek(pos),
-                _ => {}
+        let ticker = tick(Duration::from_millis(500));
+
+        loop {
+            select! {
+                recv(self.audio_rx) -> msg => {
+                    let cmd = match msg {
+                        Ok(c) => c,
+                        Err(_) => break,
+                    };
+
+                    match cmd {
+                        AudioCommand::Load(path) => self.load(PathBuf::from(path)),
+                        AudioCommand::Play => self.play(),
+                        AudioCommand::Pause => self.pause(),
+                        AudioCommand::Stop => self.stop(),
+                        AudioCommand::Volume(vol) => self.set_volume(vol),
+                        AudioCommand::Seek(pos) => self.seek(pos),
+                    }
+                }
+
+                recv(ticker) -> _ => {
+                    self.emit_position();
+                }
             }
         }
     }
@@ -60,7 +74,7 @@ impl AudioEngine {
         self.sink.set_volume(self.player_state.volume);
         self.sink.append(source);
 
-        self.player_state.state = PlaybackState::Paused;
+        self.player_state.state = PlaybackState::Playing;
     }
 
     fn play(&mut self) {
@@ -87,8 +101,14 @@ impl AudioEngine {
         self.sink.set_volume(self.player_state.volume);
     }
 
-    fn position(&self) -> Duration {
-        self.sink.get_pos()
+    fn emit_position(&mut self) {
+        if self.player_state.state == PlaybackState::Playing {
+            self.player_state.position = self.sink.get_pos().as_secs();
+
+            let _ = self
+                .event_tx
+                .send(AudioEvent::StateChanged(self.player_state.clone()));
+        }
     }
 
     fn seek(&mut self, pos: u64) {
