@@ -75,6 +75,7 @@ impl AudioEngine {
         self.sink.append(source);
 
         self.player_state.state = PlaybackState::Playing;
+        // self.player_state.duration = self.sink
 
         let _ = self
             .event_tx

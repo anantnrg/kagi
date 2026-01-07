@@ -18,6 +18,7 @@ pub struct PlayerState {
     pub state: PlaybackState,
     pub position: u64,
     pub volume: f32,
+    pub duration: u64,
 }
 
 pub enum AudioCommand {
@@ -63,6 +64,10 @@ impl Controller {
     pub fn volume(&self, volume: f32) {
         let _ = self.audio_tx.send(AudioCommand::Volume(volume / 100.0));
     }
+
+    pub fn seek(&self, secs: u64) {
+        let _ = self.audio_tx.send(AudioCommand::Seek(secs));
+    }
 }
 
 impl gpui::Global for Controller {}
@@ -74,6 +79,7 @@ impl Default for PlayerState {
             state: PlaybackState::Stopped,
             position: 0,
             volume: 1.0,
+            duration: 0,
         }
     }
 }
