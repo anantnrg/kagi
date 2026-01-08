@@ -83,7 +83,7 @@ impl Render for Wiremann {
                             .label("Load")
                             .on_click(|_, _, cx| {
                                 cx.global::<Controller>().load(
-                                    "E:\\music\\violence ft. doomguy\\463 - NF - PAID MY DUES.mp3"
+                                    "E:\\music\\violence ft. doomguy\\454 - Bad and Boujee.mp3"
                                         .to_string(),
                                 )
                             }),

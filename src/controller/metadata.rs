@@ -33,7 +33,7 @@ impl Metadata {
             .unwrap_or("None")
             .to_string();
         let artists: Vec<String> = tag
-            .get_strings(&ItemKey::TrackArtists)
+            .get_strings(&ItemKey::TrackArtist)
             .map(|s| s.to_owned())
             .collect();
         let album = tag
@@ -48,6 +48,7 @@ impl Metadata {
         let duration = tagged_file.properties().duration().as_secs();
         let writer = tag
             .get_string(&ItemKey::Writer)
+            .or_else(|| tag.get_string(&ItemKey::Composer))
             .unwrap_or("None")
             .to_string();
         let producer = tag
@@ -62,6 +63,10 @@ impl Metadata {
             .get_string(&ItemKey::Label)
             .unwrap_or("None")
             .to_string();
+
+        for item in tag.items() {
+            println!("{:?} = {:?}", item.key(), item.value());
+        }
 
         Ok(Metadata {
             title,

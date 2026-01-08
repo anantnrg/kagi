@@ -68,11 +68,13 @@ impl AudioEngine {
         self.sink = Sink::connect_new(self.stream_handle.mixer());
         self.player_state.current = Some(path.clone());
 
-        let file = File::open(path).unwrap();
+        let file = File::open(path.clone()).unwrap();
         let source = Decoder::new(BufReader::new(file)).unwrap();
 
         self.sink.set_volume(self.player_state.volume);
         self.sink.append(source);
+
+        let _ = self.event_tx.send(AudioEvent::TrackLoaded(path));
 
         self.player_state.state = PlaybackState::Playing;
         // self.player_state.duration = self.sink

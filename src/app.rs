@@ -5,6 +5,7 @@ use std::sync::Arc;
 use std::{thread, time::Duration};
 
 use crate::audio::engine::AudioEngine;
+use crate::controller::metadata::Metadata;
 use crate::controller::player::{AudioCommand, AudioEvent, Controller, PlayerState, ResHandler};
 use crate::ui::wiremann::Wiremann;
 use gpui::*;
@@ -59,6 +60,10 @@ pub fn run() {
                             AudioEvent::StateChanged(state) => {
                                 cx.global_mut::<Controller>().state = state.clone();
                                 cx.notify();
+                            }
+                            AudioEvent::TrackLoaded(path) => {
+                                let meta = Metadata::read(path.clone());
+                                println!("{:#?}", meta);
                             }
                             _ => (),
                         },

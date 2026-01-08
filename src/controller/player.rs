@@ -2,8 +2,6 @@ use crate::audio::engine::PlaybackState;
 use crossbeam_channel::{Receiver, Sender};
 use gpui::*;
 use std::path::PathBuf;
-use std::sync::Arc;
-use std::time::Duration;
 
 #[derive(Debug, Clone)]
 pub struct Controller {
@@ -33,6 +31,7 @@ pub enum AudioCommand {
 #[derive(Debug, Clone, PartialEq)]
 pub enum AudioEvent {
     StateChanged(PlayerState),
+    TrackLoaded(PathBuf),
     TrackEnded,
 }
 
