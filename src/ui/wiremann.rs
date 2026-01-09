@@ -44,24 +44,6 @@ impl Wiremann {
         )
         .detach();
 
-        let player_state = cx.new(|cx| cx.global::<Controller>().state.clone());
-
-        // cx.subscribe(
-        //     &player_state,
-        //     |this, _, event: &PlayerStateEvent, cx| match event {
-        //         PlayerStateEvent::Position(pos) => {
-        //             println!("{}", pos.clone());
-        //             this.playback_slider_state.update(cx, |this, cx| {
-        //                 this.set_value(
-        //                     secs_to_slider(*pos, cx.global::<Controller>().state.position),
-        //                     cx,
-        //                 );
-        //             });
-        //         }
-        //     },
-        // )
-        // .detach();
-
         cx.subscribe(
             &playback_slider_state,
             |_, _, event: &SliderEvent, cx| match event {
