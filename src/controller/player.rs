@@ -1,3 +1,4 @@
+use super::metadata::Metadata;
 use crate::audio::engine::PlaybackState;
 use crossbeam_channel::{Receiver, Sender};
 use gpui::*;
@@ -17,6 +18,7 @@ pub struct PlayerState {
     pub position: u64,
     pub volume: f32,
     pub duration: u64,
+    pub meta: Option<Metadata>,
 }
 
 pub enum AudioCommand {
@@ -26,6 +28,7 @@ pub enum AudioCommand {
     Volume(f32),
     Seek(u64),
     Stop,
+    Meta(Metadata),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -67,6 +70,10 @@ impl Controller {
     pub fn seek(&self, secs: u64) {
         let _ = self.audio_tx.send(AudioCommand::Seek(secs));
     }
+
+    pub fn set_meta_in_engine(&self, meta: Metadata) {
+        let _ = self.audio_tx.send(AudioCommand::Meta(meta));
+    }
 }
 
 impl gpui::Global for Controller {}
@@ -79,6 +86,7 @@ impl Default for PlayerState {
             position: 0,
             volume: 1.0,
             duration: 0,
+            meta: None,
         }
     }
 }
@@ -93,4 +101,9 @@ impl ResHandler {
     }
 }
 
+pub enum PlayerStateEvent {
+    Position(u64),
+}
+
 impl EventEmitter<AudioEvent> for ResHandler {}
+impl EventEmitter<PlayerStateEvent> for PlayerState {}

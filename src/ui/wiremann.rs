@@ -5,7 +5,10 @@ use gpui_component::{
     *,
 };
 
-use crate::{audio::engine::PlaybackState, controller::player::Controller};
+use crate::{
+    audio::engine::PlaybackState,
+    controller::player::{Controller, PlayerStateEvent},
+};
 
 pub struct Wiremann {
     pub vol_slider_state: Entity<SliderState>,
@@ -26,7 +29,7 @@ impl Wiremann {
             SliderState::new()
                 .min(0.0)
                 .max(100.0)
-                .default_value(100.0)
+                .default_value(0.0)
                 .step(1.0)
         });
 
@@ -41,13 +44,33 @@ impl Wiremann {
         )
         .detach();
 
+        let player_state = cx.new(|cx| cx.global::<Controller>().state.clone());
+
+        // cx.subscribe(
+        //     &player_state,
+        //     |this, _, event: &PlayerStateEvent, cx| match event {
+        //         PlayerStateEvent::Position(pos) => {
+        //             println!("{}", pos.clone());
+        //             this.playback_slider_state.update(cx, |this, cx| {
+        //                 this.set_value(
+        //                     secs_to_slider(*pos, cx.global::<Controller>().state.position),
+        //                     cx,
+        //                 );
+        //             });
+        //         }
+        //     },
+        // )
+        // .detach();
+
         cx.subscribe(
             &playback_slider_state,
             |_, _, event: &SliderEvent, cx| match event {
                 SliderEvent::Change(value) => {
                     let controller = cx.global::<Controller>();
                     if controller.state.state == PlaybackState::Playing {
-                        controller.seek(slider_to_secs(value.start(), controller.state.position));
+                        if let Some(meta) = controller.state.clone().meta {
+                            controller.seek(slider_to_secs(value.start(), meta.duration));
+                        }
                     }
 
                     cx.notify();
@@ -103,19 +126,12 @@ impl Render for Wiremann {
                     .child(text::Text::String(SharedString::from(
                         cx.global::<Controller>().state.position.to_string(),
                     )))
-                    .child(div().w_20().child(Slider::new(&self.vol_slider_state))),
+                    .child(div().w_24().child(Slider::new(&self.vol_slider_state)))
+                    .child(div().w_48().child(Slider::new(&self.playback_slider_state))),
             )
     }
 }
 
 fn slider_to_secs(slider: f32, duration_secs: u64) -> u64 {
     ((slider.clamp(0.0, 100.0) / 100.0) * duration_secs as f32) as u64
-}
-
-fn secs_to_slider(pos: u64, duration: u64) -> f32 {
-    if duration == 0 {
-        0.0
-    } else {
-        (pos as f32 / duration as f32) * 100.0
-    }
 }

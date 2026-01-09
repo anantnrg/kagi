@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::{thread, time::Duration};
 
-use crate::audio::engine::AudioEngine;
+use crate::audio::engine::{AudioEngine, PlaybackState};
 use crate::controller::metadata::Metadata;
 use crate::controller::player::{AudioCommand, AudioEvent, Controller, PlayerState, ResHandler};
 use crate::ui::wiremann::Wiremann;
@@ -30,9 +30,9 @@ pub fn run() {
             cx.open_window(WindowOptions::default(), |window, cx| {
                 let controller_evt_clone = controller.clone();
 
-                let view = cx.new(|cx| Wiremann::new(cx));
-
                 cx.set_global(controller);
+
+                let view = cx.new(|cx| Wiremann::new(cx));
 
                 cx.new(|cx| {
                     let res_handler = cx.new(|_| ResHandler {});
@@ -41,11 +41,9 @@ pub fn run() {
                         let res_handler = arc_res.clone();
                         loop {
                             while let Ok(event) = controller_evt_clone.event_rx.try_recv() {
-                                res_handler
-                                    .update(&mut cx.clone(), |res_handler, cx| {
-                                        res_handler.handle(cx, event);
-                                    })
-                                    .expect("Could not update");
+                                res_handler.update(&mut cx.clone(), |res_handler, cx| {
+                                    res_handler.handle(cx, event);
+                                });
                             }
                             cx.background_executor()
                                 .timer(Duration::from_millis(100))
@@ -54,16 +52,35 @@ pub fn run() {
                     })
                     .detach();
 
+                    let playbar_view = view.clone();
+
                     cx.subscribe(
                         &res_handler,
                         move |_, _, event: &AudioEvent, cx| match event {
                             AudioEvent::StateChanged(state) => {
                                 cx.global_mut::<Controller>().state = state.clone();
+
+                                if state.state == PlaybackState::Playing {
+                                    playbar_view.update(cx, |this, cx| {
+                                        this.playback_slider_state.update(cx, |this, cx| {
+                                            if let Some(meta) =
+                                                cx.global::<Controller>().state.meta.clone()
+                                            {
+                                                this.set_value(
+                                                    secs_to_slider(state.position, meta.duration),
+                                                    cx,
+                                                );
+                                            }
+                                            cx.notify();
+                                        });
+                                    })
+                                }
                                 cx.notify();
                             }
                             AudioEvent::TrackLoaded(path) => {
-                                let meta = Metadata::read(path.clone());
-                                println!("{:#?}", meta);
+                                let meta = Metadata::read(path.clone()).expect("No metadata");
+                                cx.global_mut::<Controller>().set_meta_in_engine(meta);
+                                cx.notify();
                             }
                             _ => (),
                         },
@@ -78,4 +95,12 @@ pub fn run() {
         })
         .detach();
     });
+}
+
+fn secs_to_slider(pos: u64, duration: u64) -> f32 {
+    if duration == 0 {
+        0.0
+    } else {
+        (pos as f32 / duration as f32) * 100.0
+    }
 }

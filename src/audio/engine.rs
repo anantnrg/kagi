@@ -1,4 +1,7 @@
-use crate::controller::player::{AudioCommand, AudioEvent, PlayerState};
+use crate::controller::{
+    metadata::Metadata,
+    player::{AudioCommand, AudioEvent, PlayerState},
+};
 use crossbeam_channel::{Receiver, Sender, select, tick};
 use rodio::{Decoder, OutputStream, OutputStreamBuilder, Sink};
 use std::{fs::File, io::BufReader, path::PathBuf, time::Duration};
@@ -53,6 +56,7 @@ impl AudioEngine {
                         AudioCommand::Stop => self.stop(),
                         AudioCommand::Volume(vol) => self.set_volume(vol),
                         AudioCommand::Seek(pos) => self.seek(pos),
+                        AudioCommand::Meta(meta) => self.meta(meta)
                     }
                 }
 
@@ -77,11 +81,15 @@ impl AudioEngine {
         let _ = self.event_tx.send(AudioEvent::TrackLoaded(path));
 
         self.player_state.state = PlaybackState::Playing;
-        // self.player_state.duration = self.sink
 
         let _ = self
             .event_tx
             .send(AudioEvent::StateChanged(self.player_state.clone()));
+    }
+
+    fn meta(&mut self, meta: Metadata) {
+        self.player_state.meta = Some(meta);
+        self.send_player_state();
     }
 
     fn play(&mut self) {
@@ -120,13 +128,16 @@ impl AudioEngine {
             .send(AudioEvent::StateChanged(self.player_state.clone()));
     }
 
+    fn send_player_state(&mut self) {
+        let _ = self
+            .event_tx
+            .send(AudioEvent::StateChanged(self.player_state.clone()));
+    }
+
     fn emit_position(&mut self) {
         if self.player_state.state == PlaybackState::Playing {
             self.player_state.position = self.sink.get_pos().as_secs();
-
-            let _ = self
-                .event_tx
-                .send(AudioEvent::StateChanged(self.player_state.clone()));
+            self.send_player_state();
         }
     }
 

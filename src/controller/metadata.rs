@@ -9,7 +9,6 @@ pub struct Metadata {
     pub artists: Vec<String>,
     pub album: String,
     pub genre: String,
-    pub uri: PathBuf,
     pub duration: u64,
     pub writer: String,
     pub producer: String,
@@ -44,7 +43,6 @@ impl Metadata {
             .get_string(&ItemKey::Genre)
             .unwrap_or("None")
             .to_string();
-        let uri = path.clone();
         let duration = tagged_file.properties().duration().as_secs();
         let writer = tag
             .get_string(&ItemKey::Writer)
@@ -64,16 +62,11 @@ impl Metadata {
             .unwrap_or("None")
             .to_string();
 
-        for item in tag.items() {
-            println!("{:?} = {:?}", item.key(), item.value());
-        }
-
         Ok(Metadata {
             title,
             artists,
             album,
             genre,
-            uri,
             duration,
             writer,
             producer,
