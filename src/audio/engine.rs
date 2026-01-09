@@ -3,7 +3,7 @@ use crate::controller::{
     player::{AudioCommand, AudioEvent, PlayerState},
 };
 use crossbeam_channel::{Receiver, Sender, select, tick};
-use rodio::{Decoder, OutputStream, OutputStreamBuilder, Sink};
+use rodio::{Decoder, OutputStream, OutputStreamBuilder, Sink, Source, decoder::DecoderBuilder};
 use std::{fs::File, io::BufReader, path::PathBuf, time::Duration};
 
 pub struct AudioEngine {
@@ -73,7 +73,13 @@ impl AudioEngine {
         self.player_state.current = Some(path.clone());
 
         let file = File::open(path.clone()).unwrap();
-        let source = Decoder::new(BufReader::new(file)).unwrap();
+        let len = file.metadata().unwrap().len();
+        let source = DecoderBuilder::new()
+            .with_data(file)
+            .with_byte_len(len)
+            .with_seekable(true)
+            .build()
+            .unwrap();
 
         self.sink.set_volume(self.player_state.volume);
         self.sink.append(source);
