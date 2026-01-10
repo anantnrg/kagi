@@ -1,15 +1,15 @@
-use super::theme::Theme;
+use super::{theme::Theme, titlebar::Titlebar};
 use crate::{audio::engine::PlaybackState, controller::player::Controller};
 use gpui::*;
 use gpui_component::{
     button::*,
     slider::{Slider, SliderEvent, SliderState},
-    *,
 };
 
 pub struct Wiremann {
     pub vol_slider_state: Entity<SliderState>,
     pub playback_slider_state: Entity<SliderState>,
+    pub titlebar: Entity<Titlebar>,
 }
 
 impl Wiremann {
@@ -58,65 +58,27 @@ impl Wiremann {
         )
         .detach();
 
+        cx.set_global(Theme::default());
+
+        let titlebar = cx.new(|_| Titlebar::new());
+
         Self {
             vol_slider_state,
             playback_slider_state,
+            titlebar,
         }
     }
 }
 
 impl Render for Wiremann {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        div()
-            .v_flex()
-            .size_full()
-            .items_center()
-            .justify_center()
-            .child(
-                div()
-                    .w_full()
-                    .h_10()
-                    .h_flex()
-                    .items_center()
-                    .justify_between()
-                    .child("Last.fm Disconnected")
-                    .child("Wiremann"), // .child(),
-            )
-        // .child(
-        //     div()
-        //         .gap_2()
-        //         .w_full()
-        //         .items_center()
-        //         .justify_center()
-        //         .child(
-        //             Button::new("load")
-        //                 .primary()
-        //                 .label("Load")
-        //                 .on_click(|_, _, cx| {
-        //                     cx.global::<Controller>().load(
-        //                         "E:\\music\\violence ft. doomguy\\454 - Bad and Boujee.mp3"
-        //                             .to_string(),
-        //                     )
-        //                 }),
-        //         )
-        //         .child(
-        //             Button::new("play")
-        //                 .primary()
-        //                 .label("Play")
-        //                 .on_click(|_, _, cx| cx.global::<Controller>().play()),
-        //         )
-        //         .child(
-        //             Button::new("pause")
-        //                 .primary()
-        //                 .label("Pause")
-        //                 .on_click(|_, _, cx| cx.global::<Controller>().pause()),
-        //         )
-        //         .child(text::Text::String(SharedString::from(
-        //             cx.global::<Controller>().state.position.to_string(),
-        //         )))
-        //         .child(div().w_24().child(Slider::new(&self.vol_slider_state)))
-        //         .child(div().w_48().child(Slider::new(&self.playback_slider_state))),
-        // )
+        let theme = cx.global::<Theme>();
+        div().bg(theme.bg).size_full().child(
+            div()
+                .size_10()
+                .bg(theme.panel)
+                .hover(|this| this.bg(theme.accent)),
+        )
     }
 }
 

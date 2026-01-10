@@ -9,7 +9,8 @@ use crate::controller::metadata::Metadata;
 use crate::controller::player::{AudioCommand, AudioEvent, Controller, PlayerState, ResHandler};
 use crate::ui::wiremann::Wiremann;
 use gpui::*;
-use gpui_component::{button::*, *};
+use gpui_component::*;
+use gpui_component_assets::Assets;
 
 pub fn run() {
     let (audio_tx, audio_rx) = unbounded::<AudioCommand>();
@@ -21,7 +22,7 @@ pub fn run() {
 
     let controller = Controller::new(audio_tx, event_rx, PlayerState::default());
 
-    let app = Application::new();
+    let app = Application::new().with_assets(Assets);
 
     app.run(move |cx| {
         gpui_component::init(cx);
@@ -35,7 +36,7 @@ pub fn run() {
                     focus: true,
                     titlebar: Some(TitlebarOptions {
                         title: None,
-                        appears_transparent: true,
+                        appears_transparent: false,
                         ..Default::default()
                     }),
                     window_min_size: Some(gpui::Size {

@@ -9,6 +9,7 @@ crossbeam = "0.8.4"
 crossbeam-channel = "0.5.15"
 gpui = { git = "https://github.com/zed-industries/zed" }
 gpui-component = { git = "https://github.com/anantnrg/gpui-component" }
+gpui-component-assets = { git = "https://github.com/anantnrg/gpui-component" }
 lofty = "0.22.4"
 rodio = { version = "0.21.1", features = ["symphonia-all"] }
 serde = "1.0.228"
