@@ -1,10 +1,7 @@
 use super::{theme::Theme, titlebar::Titlebar};
 use crate::{audio::engine::PlaybackState, controller::player::Controller};
 use gpui::*;
-use gpui_component::{
-    button::*,
-    slider::{Slider, SliderEvent, SliderState},
-};
+use gpui_component::slider::{SliderEvent, SliderState};
 
 pub struct Wiremann {
     pub vol_slider_state: Entity<SliderState>,
@@ -73,12 +70,14 @@ impl Wiremann {
 impl Render for Wiremann {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = cx.global::<Theme>();
-        div().bg(theme.bg).size_full().child(
-            div()
-                .size_10()
-                .bg(theme.panel)
-                .hover(|this| this.bg(theme.accent)),
-        )
+        div()
+            .id("main_container")
+            .size_full()
+            .flex()
+            .flex_col()
+            .justify_center()
+            .items_center()
+            .bg(theme.bg)
     }
 }
 

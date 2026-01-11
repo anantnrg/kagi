@@ -1,6 +1,4 @@
 use crossbeam_channel::unbounded;
-use gpui_component::slider::{SliderEvent, SliderState};
-use std::path::PathBuf;
 use std::sync::Arc;
 use std::{thread, time::Duration};
 
