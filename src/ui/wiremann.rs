@@ -78,6 +78,8 @@ impl Render for Wiremann {
             .justify_center()
             .items_center()
             .bg(theme.bg)
+            .child(self.titlebar.clone())
+            .child(div().w_full().h_full())
     }
 }
 

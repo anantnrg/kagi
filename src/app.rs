@@ -24,7 +24,7 @@ pub fn run() {
 
     app.run(move |cx| {
         gpui_component::init(cx);
-        let bounds = Bounds::centered(None, size(px(1400.0), px(900.0)), cx);
+        let bounds = Bounds::centered(None, size(px(1280.0), px(760.0)), cx);
 
         cx.spawn(async move |cx| {
             cx.open_window(
@@ -34,7 +34,7 @@ pub fn run() {
                     focus: true,
                     titlebar: Some(TitlebarOptions {
                         title: None,
-                        appears_transparent: false,
+                        appears_transparent: true,
                         ..Default::default()
                     }),
                     window_min_size: Some(gpui::Size {

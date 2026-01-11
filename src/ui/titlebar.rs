@@ -11,9 +11,13 @@ impl Render for Titlebar {
         let theme = cx.global::<Theme>();
         div().bg(theme.bg).size_full().child(
             div()
-                .size_10()
+                .id("titlebar")
+                .h_10()
+                .w_full()
+                .border_b_1()
+                .border_color(theme.border)
                 .bg(theme.panel)
-                .hover(|this| this.bg(theme.accent)),
+                .window_control_area(WindowControlArea::Drag),
         )
     }
 }
