@@ -1,7 +1,7 @@
-use super::theme::Theme;
+use crate::ui::theme::Theme;
 
 use gpui::*;
-use gpui_component::{Icon, IconName, button::Button};
+use gpui_component::{Icon, IconName};
 
 #[derive(Clone)]
 pub struct Titlebar;
@@ -19,7 +19,7 @@ impl Render for Titlebar {
             .border_b_1()
             .border_color(theme.border)
             .bg(theme.panel)
-            .child(div().flex().flex_1().h_full().w_auto().flex())
+            .child(div().flex().flex_shrink_0().h_full().w_auto().flex())
             .child(
                 div()
                     .flex()
@@ -30,25 +30,7 @@ impl Render for Titlebar {
             .child(
                 div()
                     .h_full()
-                    .w_auto()
-                    .flex()
-                    .flex_1()
-                    .items_center()
-                    .justify_center()
-                    .child("Wiremann")
-                    .window_control_area(WindowControlArea::Drag),
-            )
-            .child(
-                div()
-                    .flex()
-                    .h_full()
-                    .flex_1()
-                    .window_control_area(WindowControlArea::Drag),
-            )
-            .child(
-                div()
-                    .h_full()
-                    .flex_1()
+                    .flex_shrink_0()
                     .flex()
                     .justify_end()
                     .child(

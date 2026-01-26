@@ -1,4 +1,7 @@
-use super::{theme::Theme, titlebar::Titlebar};
+use super::{
+    components::{navbar::NavBar, titlebar::Titlebar},
+    theme::Theme,
+};
 use crate::{audio::engine::PlaybackState, controller::player::Controller};
 use gpui::*;
 use gpui_component::slider::{SliderEvent, SliderState};
@@ -7,6 +10,7 @@ pub struct Wiremann {
     pub vol_slider_state: Entity<SliderState>,
     pub playback_slider_state: Entity<SliderState>,
     pub titlebar: Entity<Titlebar>,
+    pub navbar: Entity<NavBar>,
 }
 
 impl Wiremann {
@@ -58,11 +62,13 @@ impl Wiremann {
         cx.set_global(Theme::default());
 
         let titlebar = cx.new(|_| Titlebar::new());
+        let navbar = cx.new(|_| NavBar::new());
 
         Self {
             vol_slider_state,
             playback_slider_state,
             titlebar,
+            navbar,
         }
     }
 }
