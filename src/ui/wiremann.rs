@@ -85,7 +85,14 @@ impl Render for Wiremann {
             .items_center()
             .bg(theme.bg)
             .child(self.titlebar.clone())
-            .child(div().w_full().h_full())
+            .child(
+                div()
+                    .w_full()
+                    .h_full()
+                    .flex()
+                    .child(self.navbar.clone())
+                    .child(div().h_full().w_full()),
+            )
     }
 }
 
