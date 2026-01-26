@@ -5,10 +5,10 @@ use std::{thread, time::Duration};
 use crate::audio::engine::{AudioEngine, PlaybackState};
 use crate::controller::metadata::Metadata;
 use crate::controller::player::{AudioCommand, AudioEvent, Controller, PlayerState, ResHandler};
+use crate::ui::assets::Assets;
 use crate::ui::wiremann::Wiremann;
 use gpui::*;
 use gpui_component::*;
-use gpui_component_assets::Assets;
 
 pub fn run() {
     let (audio_tx, audio_rx) = unbounded::<AudioCommand>();

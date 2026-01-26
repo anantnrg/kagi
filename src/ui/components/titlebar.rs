@@ -1,7 +1,7 @@
 use crate::ui::theme::Theme;
 
+use crate::ui::icons::Icons;
 use gpui::*;
-use gpui_component::{Icon, IconName};
 
 #[derive(Clone)]
 pub struct Titlebar;
@@ -41,7 +41,7 @@ impl Render for Titlebar {
                             .flex()
                             .items_center()
                             .justify_center()
-                            .child(Icon::new(IconName::WindowMinimize))
+                            .child(Icons::WinMin)
                             .hover(|this| this.bg(theme.highlighted))
                             .window_control_area(WindowControlArea::Min),
                     )
@@ -55,9 +55,9 @@ impl Render for Titlebar {
                             .justify_center()
                             .hover(|this| this.bg(theme.highlighted))
                             .child(if win.is_maximized() {
-                                Icon::new(IconName::WindowRestore)
+                                Icons::WinRes
                             } else {
-                                Icon::new(IconName::WindowMaximize)
+                                Icons::WinMax
                             })
                             .window_control_area(WindowControlArea::Max),
                     )
@@ -69,7 +69,7 @@ impl Render for Titlebar {
                             .items_center()
                             .justify_center()
                             .hover(|this| this.bg(rgb(0xe81123)))
-                            .child(Icon::new(IconName::WindowClose))
+                            .child(Icons::WinClose)
                             .window_control_area(WindowControlArea::Close),
                     ),
             )

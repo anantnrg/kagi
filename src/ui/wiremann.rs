@@ -2,7 +2,7 @@ use super::{
     components::{navbar::NavBar, titlebar::Titlebar},
     theme::Theme,
 };
-use crate::{audio::engine::PlaybackState, controller::player::Controller};
+use crate::{audio::engine::PlaybackState, controller::player::Controller, ui::components::Page};
 use gpui::*;
 use gpui_component::slider::{SliderEvent, SliderState};
 
@@ -60,6 +60,7 @@ impl Wiremann {
         .detach();
 
         cx.set_global(Theme::default());
+        cx.set_global(Page::Home);
 
         let titlebar = cx.new(|_| Titlebar::new());
         let navbar = cx.new(|_| NavBar::new());
