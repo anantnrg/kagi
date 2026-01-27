@@ -42,11 +42,27 @@ impl Render for ControlBar {
                     .w_full()
                     .h_1_2()
                     .flex()
+                    .gap_4()
                     .px_16()
                     .items_center()
                     .justify_center()
-                    .child(format!("{}:{}", state.position / 60, state.position % 60))
-                    .child(format!("{}:{}", state.duration / 60, state.duration % 60)),
+                    .child(div().flex().flex_shrink_0().child(format!(
+                        "{:02}:{:02}",
+                        state.position / 60,
+                        state.position % 60
+                    )))
+                    .child(
+                        div()
+                            .flex()
+                            .w_full()
+                            .flex_1()
+                            .child(Slider::new(&self.vol_slider_state)),
+                    )
+                    .child(div().flex().flex_shrink_0().child(format!(
+                        "{:02}:{:02}",
+                        state.duration / 60,
+                        state.duration % 60
+                    ))),
             )
     }
 }
