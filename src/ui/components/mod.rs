@@ -1,3 +1,4 @@
+pub mod controlbar;
 pub mod navbar;
 pub mod titlebar;
 

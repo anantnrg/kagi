@@ -26,6 +26,7 @@ impl Render for NavBar {
             .flex_col()
             .flex_shrink_0()
             .items_center()
+            .bg(theme.panel)
             .py_2()
             .gap_2()
             .border_r_1()
@@ -52,7 +53,7 @@ impl Render for NavBar {
                         }
                     })
                     .on_click(|_, _, cx| *cx.global_mut::<Page>() = Page::Home)
-                    .child(Icon::new(Icons::Music).size_6()),
+                    .child(Icon::new(Icons::Music).size_6().text_color(theme.text)),
             )
             .child(
                 div()
@@ -76,7 +77,7 @@ impl Render for NavBar {
                         }
                     })
                     .on_click(|_, _, cx| *cx.global_mut::<Page>() = Page::Playlists)
-                    .child(Icon::new(Icons::MusicList).size_6()),
+                    .child(Icon::new(Icons::MusicList).size_6().text_color(theme.text)),
             )
             .child(
                 div()
@@ -107,7 +108,7 @@ impl Render for NavBar {
                         }
                     })
                     .on_click(|_, _, cx| *cx.global_mut::<Page>() = Page::Settings)
-                    .child(Icon::new(Icons::Settings).size_6()),
+                    .child(Icon::new(Icons::Settings).size_6().text_color(theme.text)),
             )
     }
 }

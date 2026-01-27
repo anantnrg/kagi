@@ -1,5 +1,5 @@
 use super::{
-    components::{navbar::NavBar, titlebar::Titlebar},
+    components::{controlbar::ControlBar, navbar::NavBar, titlebar::Titlebar},
     theme::Theme,
 };
 use crate::{audio::engine::PlaybackState, controller::player::Controller, ui::components::Page};
@@ -11,6 +11,7 @@ pub struct Wiremann {
     pub playback_slider_state: Entity<SliderState>,
     pub titlebar: Entity<Titlebar>,
     pub navbar: Entity<NavBar>,
+    pub controlbar: Entity<ControlBar>,
 }
 
 impl Wiremann {
@@ -64,12 +65,14 @@ impl Wiremann {
 
         let titlebar = cx.new(|_| Titlebar::new());
         let navbar = cx.new(|_| NavBar::new());
+        let controlbar = cx.new(|_| ControlBar::new());
 
         Self {
             vol_slider_state,
             playback_slider_state,
             titlebar,
             navbar,
+            controlbar,
         }
     }
 }
@@ -92,7 +95,15 @@ impl Render for Wiremann {
                     .h_full()
                     .flex()
                     .child(self.navbar.clone())
-                    .child(div().h_full().w_full()),
+                    .child(
+                        div()
+                            .h_full()
+                            .w_full()
+                            .flex()
+                            .flex_col()
+                            .child(div().w_full().h_full().flex())
+                            .child(self.controlbar.clone()),
+                    ),
             )
     }
 }
