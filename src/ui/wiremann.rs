@@ -7,8 +7,6 @@ use gpui::*;
 use gpui_component::slider::{SliderEvent, SliderState};
 
 pub struct Wiremann {
-    pub vol_slider_state: Entity<SliderState>,
-    pub playback_slider_state: Entity<SliderState>,
     pub titlebar: Entity<Titlebar>,
     pub navbar: Entity<NavBar>,
     pub controlbar: Entity<ControlBar>,
@@ -65,11 +63,9 @@ impl Wiremann {
 
         let titlebar = cx.new(|_| Titlebar::new());
         let navbar = cx.new(|_| NavBar::new());
-        let controlbar = cx.new(|_| ControlBar::new());
+        let controlbar = cx.new(|_| ControlBar::new(playback_slider_state, vol_slider_state));
 
         Self {
-            vol_slider_state,
-            playback_slider_state,
             titlebar,
             navbar,
             controlbar,

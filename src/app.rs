@@ -78,20 +78,28 @@ pub fn run() {
 
                                     if state.state == PlaybackState::Playing {
                                         playbar_view.update(cx, |this, cx| {
-                                            this.playback_slider_state.update(cx, |this, cx| {
-                                                if let Some(meta) =
-                                                    cx.global::<Controller>().state.meta.clone()
-                                                {
-                                                    this.set_value(
-                                                        secs_to_slider(
-                                                            state.position,
-                                                            meta.duration,
-                                                        ),
-                                                        cx,
-                                                    );
-                                                }
-                                                cx.notify();
-                                            });
+                                            this.controlbar.update(cx, |this, cx| {
+                                                this.playback_slider_state.update(
+                                                    cx,
+                                                    |this, cx| {
+                                                        if let Some(meta) = cx
+                                                            .global::<Controller>()
+                                                            .state
+                                                            .meta
+                                                            .clone()
+                                                        {
+                                                            this.set_value(
+                                                                secs_to_slider(
+                                                                    state.position,
+                                                                    meta.duration,
+                                                                ),
+                                                                cx,
+                                                            );
+                                                        }
+                                                        cx.notify();
+                                                    },
+                                                );
+                                            })
                                         })
                                     }
                                     cx.notify();
